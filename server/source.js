@@ -5,6 +5,10 @@ class Source extends manager.WithDescriptor {
     return this._parent.client;
   }
 
+  get nodeType() {
+    return 'source';
+  }
+
   get columnManager() {
     if (!this._columnManager) {
       this._columnManager = new (this.columnManagerClass)(this);
@@ -69,6 +73,10 @@ class Source extends manager.WithDescriptor {
 class SourceManager extends manager.Manager {
   get db() {
     return this.schema.db;
+  }
+
+  get nodeType() {
+    return 'sourceManager';
   }
 
   get schema() {

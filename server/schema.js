@@ -13,6 +13,10 @@ class Schema extends manager.WithDescriptor {
     return this._name;
   }
 
+  get nodeType() {
+    return 'schema';
+  }
+
   get sourceManager() {
     if (!this._sourceManager) {
       this._sourceManager = new (this.sourceManagerClass)(this);
@@ -49,6 +53,10 @@ class Schema extends manager.WithDescriptor {
 //
 
 class SchemaManager extends manager.Manager {
+  get nodeType() {
+    return 'schemaManager';
+  }
+
   get schemaClass() {
     throw new Error('Schema reference is not defined');
   }

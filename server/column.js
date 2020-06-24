@@ -13,6 +13,10 @@ class Column extends manager.WithDescriptor {
     return this._name;
   }
 
+  get nodeType() {
+    return 'column';
+  }
+
   get table() {
     return this._parent.parent;
   }
@@ -41,16 +45,20 @@ class Column extends manager.WithDescriptor {
 //
 
 class ColumnManager extends manager.Manager {
+  get columns() {
+    return this._entities;
+  }
+
   get db() {
     return this.table.db;
   }
 
-  get table() {
-    return this._parent;
+  get nodeType() {
+    return 'columnManager';
   }
 
-  get columns() {
-    return this._entities;
+  get table() {
+    return this._parent;
   }
 
   toJSON() {

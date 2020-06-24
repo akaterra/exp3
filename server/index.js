@@ -13,6 +13,10 @@ class Index extends manager.WithDescriptor {
     return this._name;
   }
 
+  get nodeType() {
+    return 'index';
+  }
+
   get table() {
     return this._parent.parent;
   }
@@ -41,8 +45,12 @@ class Index extends manager.WithDescriptor {
 //
 
 class IndexManager extends manager.Manager {
-  get tables() {
+  get indexes() {
     return this._entities;
+  }
+
+  get nodeType() {
+    return 'indexManager';
   }
 
   toJSON() {

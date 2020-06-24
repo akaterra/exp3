@@ -22,6 +22,10 @@ class Db extends manager.WithDescriptor {
     return this._name;
   }
 
+  get nodeType() {
+    return 'db';
+  }
+
   get schemaManager() {
     if (!this._schemaManager) {
       this._schemaManager = new (this.schemaManagerClass)(this);
@@ -88,6 +92,10 @@ class DbManager extends manager.Manager {
 
   get dbs() {
     return this._entities;
+  }
+
+  get nodeType() {
+    return 'dbManager';
   }
 
   setCredentials(credentials) {
