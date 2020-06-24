@@ -1,13 +1,17 @@
-class ConnectionManager {
+const manager = require('./manager');
+
+class ConnectionManager extends manager.Manager {
   constructor() {
-    this._connections = new Map();
+    super();
+
+    this._connectionId = 1;
     this._drivers = new Map();
   }
 
   async connect(connectionName, credentials) {
-    if (!this.isExists(connectionName)) {
+    if (!this.has(connectionName)) {
       if (!credentials.driver) {
-        throw new Error(`Driver alias required`);
+        throw new Error(`Driver name required`);
       }
 
       if (!this.isDriverExists(credentials.driver)) {
@@ -17,14 +21,18 @@ class ConnectionManager {
       const connection = new (this._drivers.get(credentials.driver))(connectionName);
       await connection.dbManager.setCredentials(credentials).connect();
 
-      this._connections.set(connectionName, connection);
+      this.set(connectionName, connection);
     }
 
-    return this._connections.get(connectionName);
+    return this.get(connectionName);
+  }
+
+  async connectWithAutoId(credentials) {
+    return await this.connect(`connection-${this._connectionId ++}`, credentials);
   }
 
   async disconnect(connectionName) {
-    if (this.isExists(connectionName)) {
+    if (this.has(connectionName)) {
       await this.get(connectionName).dbManager.disconnect();
     }
 
@@ -35,14 +43,16 @@ class ConnectionManager {
     return this._drivers.has(driver);
   }
 
-  isExists(connectionName) {
-    return this._connections.has(connectionName);
-  }
-
   registerDriver(driver) {
-    this._drivers.set(driver.alias, driver);
+    this._drivers.set(driver.name, driver);
 
     return this;
+  }
+
+  toJSON() {
+    return {
+      drivers: [...this._drivers.values()].map((driver) => driver.name),
+    }
   }
 }
 

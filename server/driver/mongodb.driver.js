@@ -147,7 +147,7 @@ class IndexManager extends _.IndexManager {
 }
 
 class Driver extends _.Driver {
-  static get alias() {
+  static get name() {
     return 'mongodb';
   }
 

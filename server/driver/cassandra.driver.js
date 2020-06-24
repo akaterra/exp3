@@ -1,7 +1,7 @@
 const driver = require('../driver');
 
 class Driver extends driver.Driver {
-  static get alias() {
+  static get name() {
     return 'cassandra';
   }
 

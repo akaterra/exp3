@@ -105,7 +105,7 @@ class DbManager extends manager.Manager {
   }
 
   async connect(credentials) {
-    this._credentials = credentials || this._credentials;
+    credentials = credentials || this.credentials;
 
     if (!this.has(ROOT)) { // default db
       this.set(ROOT, new (this.dbClass)(ROOT, this.parent));

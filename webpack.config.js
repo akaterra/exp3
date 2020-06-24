@@ -15,19 +15,17 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
+        use: { loader: "babel-loader" },
       },
       {
         test: /\.html$/,
-        use: [
-          {
-            loader: "html-loader"
-          }
-        ]
-      }
-    ]
+        use: { loader: "html-loader" },
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
+    ],
   },
   plugins: [
     new HtmlWebPackPlugin({
@@ -49,7 +47,7 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, 'client/dist'),
     compress: true,
-    port: 9000,
+    port: 9080,
     historyApiFallback: true,
   },
 }

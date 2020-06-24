@@ -1,1 +1,1 @@
-module.exports = {};
+export { default as Session } from './session';

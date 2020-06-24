@@ -1,10 +1,10 @@
 class Driver {
-  static get alias() {
-    throw new 'Alias is not defined';
-  }
-
   static get features() {
     return {};
+  }
+
+  static get name() {
+    throw new 'Name is not defined';
   }
 
   get dbManager() {
@@ -31,6 +31,11 @@ class Driver {
     return {
       dbs: Object.fromEntries(this.dbManager.dbs),
       descriptor: this._descriptor,
+      driver: {
+        features: this.features,
+        name: this.name,
+      },
+      name: this._descriptor.connectionName,
     };
   }
 }
