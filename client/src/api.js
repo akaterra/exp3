@@ -72,6 +72,20 @@ class ConnectionManager {
 
     return connection;
   }
+
+  async selectDrivers() {
+    return this.get('/driver');
+  }
+
+  get(path) {
+    return fetch(`http://127.0.0.1:9009${path}`, {
+      method: 'GET',
+      // body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    }).then((res) => res.json());
+  }
 }
 
 export const connectionManager = new ConnectionManager();

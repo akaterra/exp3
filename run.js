@@ -62,21 +62,21 @@ const server = require('./server/server');
   await connClickhouse.dbManager.get('system').schemaManager.get().sourceManager.get('aggregate_function_combinators').columnManager.select();
   console.log(JSON.stringify(await connClickhouse));
 
-  const connOracle = await cm.connect('oracle1', {
-    driver: 'oracle',
+  // const connOracle = await cm.connect('oracle1', {
+  //   driver: 'oracle',
 
-    password: 'qweR!1', username: 'TEST',
-  });
+  //   password: 'qweR!1', username: 'TEST',
+  // });
 
-  await connOracle.dbManager.select();
-  // await connOracle.dbManager.get('db8').schemaManager.select();
-  // await connOracle.dbManager.get('db8').schemaManager.get().sourceManager.select();
-  console.log(JSON.stringify(await connOracle));
+  // await connOracle.dbManager.select();
+  // // await connOracle.dbManager.get('db8').schemaManager.select();
+  // // await connOracle.dbManager.get('db8').schemaManager.get().sourceManager.select();
+  // console.log(JSON.stringify(await connOracle));
 
-  await new Promise((r) => setTimeout(r, 2000));
-  process.exit(0);
+  // await new Promise((r) => setTimeout(r, 2000));
+  // process.exit(0);
 
-  // server.run();
+  server.run();
 })().catch((e) => {
   console.error(e);
   process.exit(1);

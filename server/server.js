@@ -1,4 +1,5 @@
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const express = require('express');
 const cm = require('./connection_manager').connectionManager;
 
@@ -6,6 +7,7 @@ function run(port) {
   const app = express();
 
   app.use(bodyParser.json());
+  app.use(cors());
 
   app.get('/driver', (req, res) => {
     res.json(cm.toJSON().drivers);

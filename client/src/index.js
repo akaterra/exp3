@@ -2,9 +2,9 @@ import '@babel/polyfill';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import { Connection } from './page';
+import { Layout } from './organism';
 
 ReactDOM.render(
-  <Connection name='test'></Connection>,
-  document.getElementById('container')
+  <Layout name='test'></Layout>,
+  document.getElementById('container'),
 )

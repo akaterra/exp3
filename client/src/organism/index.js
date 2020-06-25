@@ -1,1 +1,2 @@
-export { default as Session } from './session';
+export { default as Connection } from './connection';
+export { default as Layout } from './layout';
