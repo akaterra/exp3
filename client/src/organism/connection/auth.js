@@ -1,6 +1,5 @@
 import React from "react";
 import { Form, Submit } from '../../atom';
-import { useLoader } from '../../effect';
 import { Input, Password, Select } from '../../molecule';
 import { Session } from '.';
 

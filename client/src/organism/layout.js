@@ -6,9 +6,11 @@ import { withApi } from '../hoc';
 const AuthWithApi = withApi(Auth);
 
 export default (props) => {
-  const [items, setItems] = React.useState(() => {
+  let [items, setItems] = React.useState(() => {
     function add(Component, props) {
-      setItems(items.unshift(<Component key={ items.length } onAdd={ add } { ...props }/>)[0]);
+      items = items.unshift(<Component key={ items.length } onAdd={ add } { ...props } />)[0];
+  
+      setItems(items);
     }
 
     return Arr([<AuthWithApi key={ 0 } onAdd={ add }></AuthWithApi>]);

@@ -1,17 +1,43 @@
 import React from "react";
 
-export default (fn, isLoadedValue) => {
-  const [isLoaded, setIsLoaded] = React.useState(false);
+export default (source, onLoading, onLoaded, onError, isLoadedValue) => {
+  const [_, setIsLoaded] = React.useState(false);
 
   if (isLoadedValue !== undefined) {
     setIsLoaded(isLoadedValue);
   }
 
   React.useEffect(() => {
-    fn().then((result) => {
+    if (onLoading) {
+      onLoading();
+    }
+
+    const result = source();
+
+    if (result instanceof Promise) {
+      result.then((result) => {
+        setIsLoaded(true);
+  
+        if (onLoaded) {
+          onLoaded();
+        }
+  
+        return result;
+      }).catch((e) => {
+        setIsLoaded(true);
+  
+        if (onError) {
+          onError();
+        }
+  
+        return Promise.reject(e);
+      });
+    } else {
       setIsLoaded(true);
 
-      return result;
-    });
+      if (onLoaded) {
+        onLoaded();
+      }
+    }
   }, [true]);
 };

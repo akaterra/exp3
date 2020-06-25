@@ -9,37 +9,43 @@ function run(port) {
   app.use(bodyParser.json());
   app.use(cors());
 
-  app.get('/driver', (req, res) => {
-    res.json(cm.toJSON().drivers);
-  });
+  function error(fn) {
+    return async (req, res) => {
+      try {
+        res.json(await fn(req, res));
+      } catch (e) {
+        console.error(e);
 
-  app.post('/connection', async (req, res) => {
-    res.json(await cm.connectWithAutoId(req.body));
-  });
+        res.status(e.status || 500).json({ error: e });
+      }
+    }
+  }
 
-  app.get('/connection/:connectionName/db', async (req, res) => {
+  app.get('/driver', error((req, res) => {
+    return cm.toJSON().drivers;
+  }));
+
+  app.post('/connection', error(async (req, res) => {
+    return await cm.connectWithAutoId(req.body);
+  }));
+
+  app.get('/connection/:connectionName/db', error(async (req, res) => {
     const dbManager = cm.get(req.params.connectionName).dbManager;
 
-    await dbManager.select();
+    return await dbManager.select();
+  }));
 
-    res.json(dbManager);
-  });
-
-  app.get('/connection/:connectionName/db/:dbName/schema', async (req, res) => {
+  app.get('/connection/:connectionName/db/:dbName/schema', error(async (req, res) => {
     const schemaManager = cm.get(req.params.connectionName).dbManager.get(req.params.dbName).schemaManager;
 
-    await schemaManager.select();
+    return await schemaManager.select();
+  }));
 
-    res.json(schemaManager);
-  });
-
-  app.get('/connection/:connectionName/db/:dbName/schema/:schemaName/source', async (req, res) => {
+  app.get('/connection/:connectionName/db/:dbName/schema/:schemaName/source', error(async (req, res) => {
     const sourceManager = cm.get(req.params.connectionName).dbManager.get(req.params.dbName).schemaManager.get(req.params.schemaName).sourceManager;
 
-    await sourceManager.select();
-
-    res.json(sourceManager);
-  });
+    return await sourceManager.select();
+  }));
 
   app.listen(port || 9009, () => {
 

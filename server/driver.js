@@ -32,8 +32,8 @@ class Driver {
       dbs: Object.fromEntries(this.dbManager.dbs),
       descriptor: this._descriptor,
       driver: {
-        features: this.features,
-        name: this.name,
+        features: Object.getPrototypeOf(this).constructor.features,
+        name: Object.getPrototypeOf(this).constructor.name,
       },
       name: this._descriptor.connectionName,
     };

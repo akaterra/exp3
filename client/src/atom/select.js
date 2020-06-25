@@ -13,7 +13,7 @@ export default (props) => {
       }
 
       return items;
-    }).then(setItems));
+    }).then(setItems), props.onLoading, props.onLoaded, props.onError);
 
     currentItems = items;
   } else {

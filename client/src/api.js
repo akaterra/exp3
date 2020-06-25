@@ -38,7 +38,7 @@ class Connection {
       headers: {
         'Content-Type': 'application/json'
       },
-    }).then((res) => res.json());
+    }).then((res) => res.status >= 200 && res.status < 300 ? res.json() : Promise.reject(res.status));
   }
 
   post(path, data) {
@@ -48,7 +48,7 @@ class Connection {
       headers: {
         'Content-Type': 'application/json'
       },
-    }).then((res) => res.json());
+    }).then((res) => res.status >= 200 && res.status < 300 ? res.json() : Promise.reject(res.status));
   }
 }
 
@@ -84,7 +84,7 @@ class ConnectionManager {
       headers: {
         'Content-Type': 'application/json'
       },
-    }).then((res) => res.json());
+    }).then((res) => res.status >= 200 && res.status < 300 ? res.json() : Promise.reject(res.status));
   }
 }
 
