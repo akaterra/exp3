@@ -68,7 +68,7 @@ class ConnectionManager {
   async connect(credentials) {
     const connection = await new Connection().connect(credentials);
 
-    this._connections.set(connection.session.name, connection);
+    this._connections.set(connection.name, connection);
 
     return connection;
   }
