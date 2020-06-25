@@ -19,6 +19,9 @@ export default (props) => {
           }
         }
       }),
+      onError: () => console.log('error'),
+      onLoad: () => console.log('load'),
+      onSubmit: props.onSubmit && (() => props.onSubmit(params)),
     },
   ));
 

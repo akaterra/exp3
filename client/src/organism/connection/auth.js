@@ -6,7 +6,10 @@ import { Session } from '.';
 
 export default (props) => {
   return <div className='container'>
-    <Form onChange={ (v) => console.log(v) }>
+    <Form
+      onChange={ (v) => console.log(v) }
+      onSubmit={ (p) => props.api.connect(p) }
+    >
       <Select.WithLabel label='Driver:' source={ props.api && (() => props.api.selectDrivers()) } />
       <Input.WithLabel label='Username:' field='username' />
       <Password.WithLabel label='Password:' field='password' />

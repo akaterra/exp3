@@ -7,11 +7,11 @@ export default (Component) => {
 
     if (label) {
       return <div>
-        { label ? <Label label={ label }/> : null }
-        <Component { ...restProps }/>
+        { label ? <Label>{ label }</Label> : null }
+        <Component { ...restProps } />
       </div>
     };
 
-    return <Component { ...restProps }/>;
+    return <Component { ...restProps } />;
   };
 };

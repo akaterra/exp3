@@ -5,9 +5,13 @@ export default (props) => {
   let currentItems;
 
   if (props.source) {
-    const [items, setItems] = React.useState([]);
+    const [items, setItems] = React.useState(props.items || []);
 
-    useLoader(() => props.source().then(setItems));
+    useLoader(() => props.source().then(setItems).then(() => {
+      if (props.onChange) {
+        props.onChange(items[0]);
+      }
+    }));
 
     currentItems = items;
   } else {
