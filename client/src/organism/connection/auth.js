@@ -1,19 +1,27 @@
 import React from "react";
-import { Form, Submit } from '../../atom';
+import { Form, Stream, Submit } from '../../atom';
+import { withApi } from '../../hoc';
 import { Input, Password, Select } from '../../molecule';
-import { Session } from '.';
 
 export default (props) => {
   const api = props.api;
 
   return <div className='container'>
     <Form
-      onChange={ (v) => console.log(v) }
-      onSubmit={ (p) => props.api.connect(p).then(() => props.onAdd(Session) ) }
+      state={ { username: 'test' } }
+      onChange={ (p) => console.log(p) }
+      onSubmit={ api && ((params) => {
+        api.connect(params).then((connection) => props.onAdd(
+          withApi(props.component, connection.session.name),
+          {
+            connection,
+          },
+        ))
+      }) }
     >
-      <Select.WithLabel label='Driver:' field='driver' source={ api && (() => api.selectDrivers()) } />
-      <Input.WithLabel label='Username:' field='username' />
-      <Password.WithLabel label='Password:' field='password' />
+      <Stream source={ api && (() => api.selectDrivers()) } to='items' field='driver'><Select.WithLabel label='Driver:' /></Stream>
+      <Input.WithLabel label='Username:' field='username' nullable />
+      <Password.WithLabel label='Password:' field='password' nullable />
       <Submit>Connect</Submit>
     </Form>
   </div>;

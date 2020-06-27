@@ -2,22 +2,18 @@ import React from "react";
 import { useLoader } from '../effect';
 
 export default (props) => {
-  let currentItems;
+  let items = props.items;
 
-  if (props.source) {
-    const [items, setItems] = React.useState(props.items || []);
+  if (items) {
+    const mapper = props.mapper;
 
-    useLoader(() => props.source().then((items) => {
-      if (props.onChange) {
-        props.onChange(items[0]);
-      }
-
-      return items;
-    }).then(setItems), props.onLoading, props.onLoaded, props.onError);
-
-    currentItems = items;
-  } else {
-    currentItems = props.items;
+    if (Array.isArray(items)) {
+      items = items
+        .map((item, i) => <option key={ i }>{ mapper ? mapper(item) : item }</option>);
+    } else if (typeof items === 'object') {
+      items = Object.entries(items)
+        .map(([key, item]) => <option key={ key }>{ mapper ? mapper(item) : item }</option>);
+    }
   }
 
   return <select
@@ -25,6 +21,6 @@ export default (props) => {
       props.onChange(e.currentTarget.options[e.currentTarget.selectedIndex].value);
     }) }
   >
-    { currentItems && currentItems.map((item, i) => <option key={ i }>{ item }</option>) }
+    { items }
   </select>;
 };

@@ -6,6 +6,10 @@ const oracleDriver = require('./server/driver/oracle.driver');
 const postgresDriver = require('./server/driver/postgresql.driver');
 const redisDriver = require('./server/driver/redis.driver');
 
+Map.prototype.toJSON = function () {
+  return Object.fromEntries(this);
+}
+
 const server = require('./server/server');
 
 (async () => {

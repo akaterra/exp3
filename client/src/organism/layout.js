@@ -1,9 +1,9 @@
 import { Arr } from 'invary';
 import React from 'react';
-import { Auth } from './connection';
+import { Auth, Session } from './connection';
 import { withApi } from '../hoc';
 
-const AuthWithApi = withApi(Auth);
+Auth.WithApi = withApi(Auth);
 
 export default (props) => {
   let [items, setItems] = React.useState(() => {
@@ -13,7 +13,7 @@ export default (props) => {
       setItems(items);
     }
 
-    return Arr([<AuthWithApi key={ 0 } onAdd={ add }></AuthWithApi>]);
+    return Arr([<Auth.WithApi key={ 0 } onAdd={ add } component={ Session } />]);
   });
 
   return <div className='container'>{ items }</div>;
