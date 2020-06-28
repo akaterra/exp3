@@ -1,4 +1,5 @@
 const _ = require('..');
+const ROOT = '__ROOT__';
 
 class Db extends _.Db {
   get schemaManagerClass() {
@@ -19,6 +20,7 @@ class Db extends _.Db {
     const { Client } = require('pg');
 
     const client = new Client({
+      // connectionString: credentials.host || 'localhost:5432',
       host: credentials.host || 'localhost',
       port: credentials.port || 5432,
 
@@ -57,7 +59,7 @@ class DbManager extends _.DbManager {
       const name = row.datname;
 
       if (!this.has(name)) {
-        this.set(name, new Db(name, this));
+        this.set(name, new Db(name, this).setCredentials({ ...this.credentials, db: name }));
       }
     });
 
@@ -79,6 +81,10 @@ class SchemaManager extends _.SchemaManager {
   async select() {
     const client = await this.client;
     const res = await client.query(`SELECT nspname FROM pg_catalog.pg_namespace;`);
+
+    if (!this.has(ROOT)) { // default schema
+      this.set(ROOT, new Schema(ROOT, this));
+    }
 
     res.rows.forEach((row) => {
       const name = row.nspname;
@@ -106,6 +112,10 @@ class SourceManager extends _.SourceManager {
   async select() {
     const client = await this.client;
     const res = await client.query(`SELECT *, pg_relation_size(quote_ident(table_name)) FROM information_schema.tables WHERE table_schema = $1;`, [this.schema.name]);
+
+    if (!this.has(ROOT)) { // default source
+      this.set(ROOT, new Source(ROOT, this));
+    }
 
     res.rows.forEach((row) => {
       const name = row.table_name;

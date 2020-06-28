@@ -28,9 +28,9 @@ const server = require('./server/server');
   // });
 
   // await conn.dbManager.select();
-  // await conn.dbManager.get('deliveries').schemaManager.select();
-  // await conn.dbManager.get('deliveries').schemaManager.get('public').sourceManager.select();
-  // console.log(JSON.stringify(await conn));
+  // await conn.dbManager.get('finance').schemaManager.select();
+  // await conn.dbManager.get('finance').schemaManager.get('public').sourceManager.select();
+  // console.log(JSON.stringify(await conn), await conn.dbManager.get('finance'));
 
 //   const connMongo = await cm.connect('mongo1', {
 //     driver: 'mongodb',
@@ -54,17 +54,17 @@ const server = require('./server/server');
 //   await connRedis.dbManager.get('db8').schemaManager.get().sourceManager.select();
 //   console.log(JSON.stringify(await connRedis));
 
-  const connClickhouse = await cm.connect('clickhouse1', {
-    driver: 'clickhouse',
+//   const connClickhouse = await cm.connect('clickhouse1', {
+//     driver: 'clickhouse',
 
-//    password: 'Mg12345!',
-  });
+// //    password: 'Mg12345!',
+//   });
 
-  await connClickhouse.dbManager.select();
-  await connClickhouse.dbManager.get('system').schemaManager.select();
-  await connClickhouse.dbManager.get('system').schemaManager.get().sourceManager.select();
-  await connClickhouse.dbManager.get('system').schemaManager.get().sourceManager.get('aggregate_function_combinators').columnManager.select();
-  console.log(JSON.stringify(await connClickhouse));
+//   await connClickhouse.dbManager.select();
+//   await connClickhouse.dbManager.get('system').schemaManager.select();
+//   await connClickhouse.dbManager.get('system').schemaManager.get().sourceManager.select();
+//   await connClickhouse.dbManager.get('system').schemaManager.get().sourceManager.get('aggregate_function_combinators').columnManager.select();
+//   console.log(JSON.stringify(await connClickhouse));
 
   // const connOracle = await cm.connect('oracle1', {
   //   driver: 'oracle',

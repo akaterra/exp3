@@ -14,16 +14,16 @@ export default (props) => {
         field: props.field && child.props.field ? `${props.field}.${child.props.field}` : child.props.field,
         value: child.props.field ? params[child.props.field] : undefined,
         onChange: child.props.field && ((value) => {
-          const newParams = set(params, child.props.field, value);
+          if (child.props.onChange) {
+            child.props.onChange(value);
+          }
 
-          if (newParams !== params) {
-            params = newParams;
+          params = set(params, child.props.field, value);
 
-            setParams(newParams);
+          setParams(params);
 
-            if (props.onChange) {
-              props.onChange(newParams);
-            }
+          if (props.onChange) {
+            props.onChange(params);
           }
         }),
         onError: () => setL(l - 1),

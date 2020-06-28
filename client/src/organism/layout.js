@@ -1,19 +1,24 @@
 import { Arr } from 'invary';
 import React from 'react';
-import { Auth, Session } from './connection';
-import { withApi } from '../hoc';
+import { Auth, default as Connection } from './connection';
+import { withApi, withStateMachine } from '../hoc';
+import { ConnectionStateMachine } from '../state_machine';
 
 Auth.WithApi = withApi(Auth);
+Connection.WithStateMachine = withStateMachine(Connection, ConnectionStateMachine);
 
 export default (props) => {
   let [items, setItems] = React.useState(() => {
-    function add(Component, props) {
-      items = items.unshift(<Component key={ items.length } onAdd={ add } { ...props } />)[0];
+    function auth(connection) {
+      items = items.unshift(<Connection.WithStateMachine
+        key={ items.length }
+        connection={ connection }
+      />)[0];
   
       setItems(items);
     }
 
-    return Arr([<Auth.WithApi key={ 0 } onAdd={ add } component={ Session } />]);
+    return Arr([<Auth.WithApi key={ 0 } onAuth={ auth } />]);
   });
 
   return <div className='container'>{ items }</div>;

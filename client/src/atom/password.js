@@ -1,18 +1,28 @@
 import React from "react";
-import { useLoader } from '../effect';
 
 export default (props) => {
-  return <input
-    value={ props.value }
-    type='password'
-    onBlur={ props.onChange && ((e) => {
-      const value = e.currentTarget.value;
+  const [value, setValue] = React.useState(props.value);
 
+  React.useEffect(() => {
+    setValue(props.value);
+
+    if (props.onChange) {
+      props.onChange(props.value);
+    }
+  }, [props.value]);
+
+  return <input
+    value={ value }
+    type={ 'password' }
+    onBlur={ props.onChange && ((e) => {
       if (!value && props.nullable) {
         return;
       }
 
       props.onChange(value);
     }) }
+    onChange={ (e) => {
+      setValue(e.currentTarget.value);
+    } }
   />;
 };

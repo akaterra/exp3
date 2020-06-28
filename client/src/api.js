@@ -1,5 +1,27 @@
 import { Observable, Subject } from 'rxjs';
 
+class SubjectWithCache extends Subject {
+  setCache(data) {
+    this._data = data;
+
+    for (const observer of this.observers) {
+      observer.next(data);
+    }
+
+    return this;
+  }
+
+  subscribe(...args) {
+    const subscription = super.subscribe(...args);
+
+    if (this._data) {
+      subscription.next(this._data);
+    }
+
+    return subscription;
+  }
+}
+
 class Streamable {
   constructor() {
     this._streams = new Map();
@@ -7,7 +29,7 @@ class Streamable {
 
   getStream(name) {
     if (!this._streams.has(name)) {
-      this._streams.set(name, new Subject());
+      this._streams.set(name, new SubjectWithCache());
     }
 
     return this._streams.get(name);
@@ -39,20 +61,37 @@ class Connection extends Streamable {
 
   }
 
-  selectDbs() {
+  selectDbs(refresh) {
+    const stream = this.getStream('db');
+
     return wrapToStream(
       this.execGet(`/connection/${this._session.name}/db`),
-      this.getStream('db'),
+      stream,
       'db:list',
+      refresh,
     );
   }
 
-  async selectSchemas(dbName) {
-    return this.execGet(`/connection/${this._session.name}/db/${dbName}/schema`);
+  selectSchemas(dbName, refresh) {
+    const stream = this.getStream(`db/${dbName}/schema`);
+
+    return wrapToStream(
+      this.execGet(`/connection/${this._session.name}/db/${dbName}/schema`),
+      stream,
+      'schema:list',
+      refresh,
+    );
   }
 
-  async selectSources(dbName, schemaName) {
-    return this.execGet(`/connection/${this._session.name}/db/${dbName}/schema/${schemaName}/source`);
+  selectSources(dbName, schemaName, refresh) {
+    const stream = this.getStream(`db/${dbName}/schema/${schemaName}/source`);
+
+    return wrapToStream(
+      this.execGet(`/connection/${this._session.name}/db/${dbName}/schema/${schemaName}/source`),
+      stream,
+      'source:list',
+      refresh,
+    );
   }
 
   execGet(path) {
@@ -131,7 +170,15 @@ class ConnectionManager extends Streamable {
 }
 
 function wrapToStream(promise, stream, event) {
-  promise.then((data) => stream.next({ event, data }));
+  promise.then((data) => {
+    if (stream instanceof SubjectWithCache) {
+      stream.setCache({ event, data });
+    } else {
+      stream.next({ event, data });
+    }
+
+    return data;
+  });
 
   return stream;
 }

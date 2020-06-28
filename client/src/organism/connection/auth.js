@@ -8,18 +8,13 @@ export default (props) => {
 
   return <div className='container'>
     <Form
-      state={ { username: 'test' } }
       onChange={ (p) => console.log(p) }
       onSubmit={ api && ((params) => {
-        api.connect(params).then((connection) => props.onAdd(
-          withApi(props.component, connection.session.name),
-          {
-            connection,
-          },
-        ))
+        api.connect(params).then(props.onAuth)
       }) }
     >
       <Stream source={ api && (() => api.selectDrivers()) } to='items' field='driver'><Select.WithLabel label='Driver:' /></Stream>
+      <Input.WithLabel label='Host:' field='host' nullable />
       <Input.WithLabel label='Username:' field='username' nullable />
       <Password.WithLabel label='Password:' field='password' nullable />
       <Submit>Connect</Submit>
