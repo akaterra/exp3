@@ -26,7 +26,7 @@ export default (props) => {
       const initialChildren = children;
       const initialChildrenProps = children.map((child, index) => ({ key: index, ...restProps, ...child.props }));
 
-      function applyProp(prop, data) {
+      function applyPropToChildren(prop, data) {
         children = initialChildren.map((child, index) => {
           const props = initialChildrenProps[index] = set(initialChildrenProps[index], prop, data);
 
@@ -38,7 +38,7 @@ export default (props) => {
 
       const streams = [];
 
-      for (const [source, to, selector] of sources) {
+      for (const [source, prop, selector] of sources) {
         const stream = typeof source === 'function' ? source() : source;
 
         stream.subscribe(({ event, data }) => {
@@ -46,7 +46,7 @@ export default (props) => {
             data = selector(data);
           }
 
-          applyProp(to, data);
+          applyPropToChildren(prop, data);
         });
 
         streams.push(stream);

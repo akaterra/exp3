@@ -1,4 +1,5 @@
 import { Observable, Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 class SubjectWithCache extends Subject {
   setCache(data) {
@@ -14,11 +15,19 @@ class SubjectWithCache extends Subject {
   subscribe(...args) {
     const subscription = super.subscribe(...args);
 
-    if (this._data) {
+    if (this._data !== undefined) {
       subscription.next(this._data);
     }
 
     return subscription;
+  }
+
+  toImmediatePromise(resolveCached) {
+    if (resolveCached && this._data !== undefined) {
+      return Promise.resolve(this._data);
+    }
+
+    return this.pipe(take(1)).toPromise();
   }
 }
 
@@ -176,8 +185,6 @@ function wrapToStream(promise, stream, event) {
     } else {
       stream.next({ event, data });
     }
-
-    return data;
   });
 
   return stream;

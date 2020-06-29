@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionList, Form, Stream, Submit, ViewSwitcher } from '../../atom';
+import { ActionList, Form, Source, Submit, ViewSwitcher } from '../../atom';
 import { Input, Password, Select } from '../../molecule';
 
 export default (props) => {
@@ -10,34 +10,64 @@ export default (props) => {
     <div className='f1'>Menu</div>
     <div className='f5'>Content</div>
     <Form>
-      <Stream source={ () => api.dbs() } to='items' field='db' onChange={ (db) => {
-        api.selectCurrentSchemasFor(db);
-      } }>
-        <Select.WithLabel label='db' mapper={ _ => _.name } />
-      </Stream>
-      <Stream source={ api.currentSchemas } to='items' field='schema' onChange={ (schema) => {
-        api.selectCurrentSourcesFor(schema);
-      } }>
-        <Select.WithLabel label='schema' mapper={ _ => _.name } />
-      </Stream>
-      <Stream source={ api.currentSources } to='items' field='source' onChange={ (schema) => {
-        // api.selectCurrentSourcesFor(schema);
-      } }>
-        <Select.WithLabel label='source' mapper={ _ => _.name } />
-      </Stream>
-      <Stream source={ api.scope } to='selected'>
+      <Source
+        source={ api.currentDbsNames }
+        to='items' 
+        field='db'
+        onChange={ (db) => {
+          api.selectCurrentSchemasFor(db);
+        } }
+      >
+        <Select.WithLabel label='db' />
+      </Source>
+      <Source
+        source={ api.currentSchemasNames }
+        to='items'
+        field='schema'
+        onChange={ (schema) => {
+          api.selectCurrentSourcesFor(schema);
+        } }
+      >
+        <Select.WithLabel label='schema' />
+      </Source>
+      <Source
+        source={ api.currentSourcesNames }
+        to='items'
+        field='source'
+        onChange={ (schema) => {
+          // api.selectCurrentSourcesFor(schema);
+        } }
+      >
+        <Select.WithLabel label='source' />
+      </Source>
+      <Source source={ api.scope } to='selected'>
         <ViewSwitcher>
-          <Stream
+          <Source
             sources={ [
-              [api.currentDbs, 'items'],
+              [api.currentDbsNames, 'items', _ => _.map(_ => [_, _])],
             ] }
             view='db:list'
           >
-            <ActionList></ActionList>hello
-          </Stream>
-          <div/>
+            <ActionList></ActionList>
+          </Source>
+          <Source
+            sources={ [
+              [api.currentSchemasNames, 'items', _ => _.map(_ => [_, _])],
+            ] }
+            view='schema:list'
+          >
+            <ActionList></ActionList>
+          </Source>
+          <Source
+            sources={ [
+              [api.currentSourcesNames, 'items', _ => _.map(_ => [_, _])],
+            ] }
+            view='source:list'
+          >
+            <ActionList></ActionList>
+          </Source>
         </ViewSwitcher>
-      </Stream>
+      </Source>
       {/* <Stream source={ () => api.currentSources } to='items' field='source'>
 
       </Stream> */}

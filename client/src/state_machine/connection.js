@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map, take } from 'rxjs/operators';
 
 export class SubjectWithCache extends Subject {
   get data() {
@@ -24,6 +24,14 @@ export class SubjectWithCache extends Subject {
     }
 
     return subscription;
+  }
+
+  toImmediatePromise(resolveCached) {
+    if (resolveCached && this._data !== undefined) {
+      return Promise.resolve(this._data);
+    }
+
+    return this.pipe(take(1)).toPromise();
   }
 }
 
@@ -82,6 +90,10 @@ export default class ConnectionStateMachine extends StateMachine {
     return this.getStream('db:current:list');
   }
 
+  get currentDbsNames() {
+    return this.currentDbs.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name) })));
+  }
+
   get currentSchema() {
     return this.getStream('schema:current');
   }
@@ -92,6 +104,10 @@ export default class ConnectionStateMachine extends StateMachine {
 
   get currentSchemas() {
     return this.getStream('schema:current:list');
+  }
+
+  get currentSchemasNames() {
+    return this.currentSchemas.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name) })));
   }
 
   get currentSource() {
@@ -106,6 +122,10 @@ export default class ConnectionStateMachine extends StateMachine {
     return this.getStream('source:current:list');
   }
 
+  get currentSourcesNames() {
+    return this.currentSources.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name) })));
+  }
+
   get scope() {
     return this.getStream('scope');
   }
@@ -118,7 +138,7 @@ export default class ConnectionStateMachine extends StateMachine {
 
   async run() {
     await this.sleep(3000);
-    await this.selectDbs().toPromise();
+    await this.selectCurrentDbs().toImmediatePromise();
 
     this.scope.next({ data: 'db:list' });
   }
@@ -127,6 +147,22 @@ export default class ConnectionStateMachine extends StateMachine {
 
   dbs() {
     return this._api.getStream('db');
+  }
+
+  selectCurrentDbs(refresh) {
+    this._api.selectDbs(refresh).pipe(first()).subscribe((data) => {
+      this.currentDb = '__ROOT__';
+      this.currentDbs.setData(data);
+      this.selectCurrentSchemasFor('__ROOT__');
+    });
+
+    return this.currentDbs;
+  }
+
+  selectCurrentDbsFor(refresh) {
+    // this.currentDb = dbName;
+
+    return this.selectCurrentDbs(refresh);
   }
 
   selectDbs() {
@@ -140,11 +176,13 @@ export default class ConnectionStateMachine extends StateMachine {
   }
 
   selectCurrentSchemas(refresh) {
-    return this._api.selectSchemas(this.currentDb.data, refresh).pipe(first()).subscribe((data) => {
+    this._api.selectSchemas(this.currentDb.data, refresh).pipe(first()).subscribe((data) => {
       this.currentSchema = '__ROOT__';
       this.currentSchemas.setData(data);
       this.selectCurrentSourcesFor('__ROOT__');
     });
+
+    return this.currentSchemas;
   }
 
   selectCurrentSchemasFor(dbName, refresh) {
@@ -164,11 +202,13 @@ export default class ConnectionStateMachine extends StateMachine {
   }
 
   selectCurrentSources(refresh) {
-    return this._api.selectSources(this.currentDb.data, this.currentSchema.data, refresh).pipe(first()).subscribe((data) => {
+    this._api.selectSources(this.currentDb.data, this.currentSchema.data, refresh).pipe(first()).subscribe((data) => {
       this.currentSource = '__ROOT__';
       this.currentSources.setData(data);
       // this.selectCurrentSourcesFor('__ROOT__');
     });
+
+    return this.currentSources;
   }
 
   selectCurrentSourcesFor(schemaName, refresh) {
