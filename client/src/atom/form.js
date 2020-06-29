@@ -7,6 +7,10 @@ export default (props) => {
   let [children, setChildren] = React.useState(null);
 
   if (!children) {
+    if (!props.children) {
+      throw new Error('At lease one child must be provided');
+    }
+
     children = (Array.isArray(props.children) ? props.children : [props.children]).map((child, i) => React.cloneElement(
       child,
       {

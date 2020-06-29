@@ -1,42 +1,58 @@
-import React from "react";
+import { set } from 'invary';
+import React, { Children } from "react";
 
 export default (props) => {
   let [children, setChildren] = React.useState(null);
-  let [stream, setStream] = React.useState(null);
+  let [streams, setStreams] = React.useState(null);
 
-  if (!stream) {
-    const { source, to, ...restProps } = props;
+  if (!streams) {
+    let { source, sources, to, selector, ...restProps } = props;
 
-    if (source) {
-      if (typeof source === 'function') {
-        stream = source();
-      } else {
-        stream = source;
+    if (!sources && source && to) {
+      sources = [[source, to, selector]];
+    }
+
+    if (sources) {
+      if (!props.children) {
+        throw new Error('At least one child must be provided');
       }
 
-      if (stream instanceof Promise) {
-        setStream(true);
+      children = props.children;
 
-        stream.then((data) => {
-          children = React.cloneElement(props.children, {
-            [to || 'data']: props.mapper ? props.mapper(data) : data,
-            ...restProps,
-          });
+      if (!Array.isArray(children)) {
+        children = [React.cloneElement(children, { key: 0, ...restProps, ...children.props })];
+      }
 
-          setChildren(children);
-        })
-      } else {
-        setStream(stream);
+      const initialChildren = children;
+      const initialChildrenProps = children.map((child, index) => ({ key: index, ...restProps, ...child.props }));
+
+      function applyProp(prop, data) {
+        children = initialChildren.map((child, index) => {
+          const props = initialChildrenProps[index] = set(initialChildrenProps[index], prop, data);
+
+          return React.cloneElement(child, props);
+        });
+
+        setChildren(children);
+      }
+
+      const streams = [];
+
+      for (const [source, to, selector] of sources) {
+        const stream = typeof source === 'function' ? source() : source;
 
         stream.subscribe(({ event, data }) => {
-          children = React.cloneElement(props.children, {
-            [to || 'data']: props.mapper ? props.mapper(data) : data,
-            ...restProps,
-          });
+          if (selector) {
+            data = selector(data);
+          }
 
-          setChildren(children);
+          applyProp(to, data);
         });
+
+        streams.push(stream);
       }
+
+      setStreams(streams);
     }
   }
 

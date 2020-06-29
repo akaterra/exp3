@@ -19,7 +19,7 @@ export class SubjectWithCache extends Subject {
   subscribe(...args) {
     const subscription = super.subscribe(...args);
 
-    if (this._data) {
+    if (this._data !== undefined) {
       subscription.next(this._data);
     }
 
@@ -79,7 +79,7 @@ export default class ConnectionStateMachine extends StateMachine {
   }
 
   get currentDbs() {
-    return this.getStream('db:currentlist');
+    return this.getStream('db:current:list');
   }
 
   get currentSchema() {
@@ -106,6 +106,10 @@ export default class ConnectionStateMachine extends StateMachine {
     return this.getStream('source:current:list');
   }
 
+  get scope() {
+    return this.getStream('scope');
+  }
+
   constructor(api) {
     super();
 
@@ -115,6 +119,8 @@ export default class ConnectionStateMachine extends StateMachine {
   async run() {
     await this.sleep(3000);
     await this.selectDbs().toPromise();
+
+    this.scope.next({ data: 'db:list' });
   }
 
   // db
@@ -134,7 +140,11 @@ export default class ConnectionStateMachine extends StateMachine {
   }
 
   selectCurrentSchemas(refresh) {
-    return this._api.selectSchemas(this.currentDb.data, refresh).pipe(first()).subscribe((data) => this.currentSchemas.setData(data));
+    return this._api.selectSchemas(this.currentDb.data, refresh).pipe(first()).subscribe((data) => {
+      this.currentSchema = '__ROOT__';
+      this.currentSchemas.setData(data);
+      this.selectCurrentSourcesFor('__ROOT__');
+    });
   }
 
   selectCurrentSchemasFor(dbName, refresh) {
@@ -154,7 +164,11 @@ export default class ConnectionStateMachine extends StateMachine {
   }
 
   selectCurrentSources(refresh) {
-    return this._api.selectSources(this.currentDb.data, this.currentSchema.data, refresh).pipe(first()).subscribe((data) => this.currentSources.setData(data));
+    return this._api.selectSources(this.currentDb.data, this.currentSchema.data, refresh).pipe(first()).subscribe((data) => {
+      this.currentSource = '__ROOT__';
+      this.currentSources.setData(data);
+      // this.selectCurrentSourcesFor('__ROOT__');
+    });
   }
 
   selectCurrentSourcesFor(schemaName, refresh) {
