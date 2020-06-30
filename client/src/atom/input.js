@@ -16,10 +16,10 @@ export default (props) => {
     type={ props.type || 'input' }
     onBlur={ props.onChange && ((e) => {
       if (!value && props.nullable) {
-        return;
+        props.onChange(undefined);
+      } else {
+        props.onChange(value);
       }
-
-      props.onChange(value);
     }) }
     onChange={ (e) => {
       setValue(e.currentTarget.value);

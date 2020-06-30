@@ -178,12 +178,12 @@ class ConnectionManager extends Streamable {
   }
 }
 
-function wrapToStream(promise, stream, event) {
+function wrapToStream(promise, stream, action) {
   promise.then((data) => {
     if (stream instanceof SubjectWithCache) {
-      stream.setCache({ event, data });
+      stream.setCache({ action, data });
     } else {
-      stream.next({ event, data });
+      stream.next({ action, data });
     }
   });
 

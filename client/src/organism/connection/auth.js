@@ -8,6 +8,11 @@ export default (props) => {
 
   return <div className='container'>
     <Form
+      state={ {
+        driver: 'postgresql',
+        username: 'postgres',
+        password: 'Mg12345!',
+      } }
       onChange={ (p) => console.log(p) }
       onSubmit={ api && ((params) => {
         api.connect(params).then(props.onAuth)

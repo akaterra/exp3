@@ -1,4 +1,5 @@
 const manager = require('./manager');
+const ROOT = require('./const').__ROOT__;
 
 class Source extends manager.WithDescriptor {
   get client() {
@@ -83,8 +84,20 @@ class SourceManager extends manager.Manager {
     return this._parent;
   }
 
+  get sourceClass() {
+    throw new Error('Source reference is not defined');
+  }
+
   get sources() {
     return this._entities;
+  }
+
+  constructor(parent) {
+    super(parent);
+
+    if (!this.has(ROOT)) {
+      this.set(ROOT, new (this.sourceClass)(ROOT, this));
+    }
   }
 
   describe() {

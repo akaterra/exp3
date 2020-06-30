@@ -53,6 +53,10 @@ class DbManager extends _.DbManager {
     const client = await this.client;
     const res = await client.query('SHOW DATABASES;').toPromise();
 
+    if (!this.has(_.ROOT)) {
+      this.set(_.ROOT, new Source(_.ROOT, this));
+    }
+
     res.forEach((row) => {
       const name = row.name;
 
@@ -77,10 +81,6 @@ class SchemaManager extends _.SchemaManager {
   }
 
   async select() {
-    if (!this.has(_.ROOT)) {
-      this.set(_.ROOT, new Schema(_.ROOT, this));
-    }
-
     return this._entities;
   }
 }
@@ -96,22 +96,28 @@ class Source extends _.Source {
 }
 
 class SourceManager extends _.SourceManager {
+  get sourceClass() {
+    return Source;
+  }
+
   async select() {
-    const client = await this.client;
-    const res = await client.query(`SHOW TABLES FROM ${this.db.name};`).toPromise();
+    if (!this.db.name !== _.ROOT) {
+      const client = await this.client;
+      const res = await client.query(`SHOW TABLES FROM ${this.db.name};`).toPromise();
 
-    res.forEach((row) => {
-      const name = row.name;
+      res.forEach((row) => {
+        const name = row.name;
 
-      if (!this.has(name)) {
-        this.set(name, new Source(name, this));
-      }
+        if (!this.has(name)) {
+          this.set(name, new (this.sourceClass)(name, this));
+        }
 
-      this.get(name).assign({
-        size: 0,
-        type: row.table_type === 'VIEW' ? 'view' : 'table',
+        this.get(name).assign({
+          size: 0,
+          type: row.table_type === 'VIEW' ? 'view' : 'table',
+        });
       });
-    });
+    }
 
     return this._entities;
   }

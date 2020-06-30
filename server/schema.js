@@ -1,4 +1,5 @@
 const manager = require('./manager');
+const ROOT = require('./const').__ROOT__;
 
 class Schema extends manager.WithDescriptor {
   get client() {
@@ -63,6 +64,14 @@ class SchemaManager extends manager.Manager {
 
   get schemas() {
     return this._entities;
+  }
+
+  constructor(parent) {
+    super(parent);
+
+    if (!this.has(ROOT)) {
+      this.set(ROOT, new (this.schemaClass)(ROOT, this));
+    }
   }
 
   toJSON() {

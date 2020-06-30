@@ -80,10 +80,6 @@ class SchemaManager extends _.SchemaManager {
   }
 
   async select() {
-    if (!this.has(_.ROOT)) {
-      this.set(_.ROOT, new Schema(_.ROOT, this));
-    }
-
     return this._entities;
   }
 }
@@ -99,22 +95,28 @@ class Source extends _.Source {
 }
 
 class SourceManager extends _.SourceManager {
+  get sourceClass() {
+    return Source;
+  }
+
   async select() {
-    const client = await this.client;
-    const res = await client.db(this.schema.db.name).listCollections().toArray();
-
-    res.forEach((row) => {
-      const name = row.name;
-
-      if (!this.has(name)) {
-        this.set(name, new Source(name, this));
-      }
+    if (!this.db.name !== _.ROOT) {
+      const client = await this.client;
+      const res = await client.db(this.db.name).listCollections().toArray();
   
-      this.get(name).assign({
-        size: row.sizeOnDisk ?? null,
-        type: 'schemaless',
+      res.forEach((row) => {
+        const name = row.name;
+  
+        if (!this.has(name)) {
+          this.set(name, new Source(name, this));
+        }
+    
+        this.get(name).assign({
+          size: row.sizeOnDisk ?? null,
+          type: 'schemaless',
+        });
       });
-    })
+    }
 
     return this._entities;
   }

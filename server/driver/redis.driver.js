@@ -75,10 +75,6 @@ class SchemaManager extends _.SchemaManager {
   }
 
   async select() {
-    if (!this.has(_.ROOT)) {
-      this.set(_.ROOT, new Schema(_.ROOT, this));
-    }
-
     return this._entities;
   }
 }
@@ -94,11 +90,11 @@ class Source extends _.Source {
 }
 
 class SourceManager extends _.SourceManager {
+  get sourceClass() {
+    return Source;
+  }
+  
   async select() {
-    if (!this.has(_.ROOT)) {
-      this.set(_.ROOT, new Source(_.ROOT, this));
-    }
-
     this.get(_.ROOT).assign({
       records: 0,
       type: 'kv',

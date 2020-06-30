@@ -7,64 +7,68 @@ export default (props) => {
 
   return <div className='container'>
     <div>{ props.connection.name }</div>
-    <div className='f1'>Menu</div>
-    <div className='f5'>Content</div>
-    <Form>
+    <Form className='f1'>
       <Source
-        source={ api.currentDbsNames }
-        to='items' 
+        props={ {
+          items: api.currentDbsNames,
+          value: api.currentDb,
+        } }
         field='db'
-        onChange={ (db) => {
-          api.selectCurrentSchemasFor(db);
+        onChange={ (name) => {
+          api.actSelectCurrentDb(name);
         } }
       >
         <Select.WithLabel label='db' />
       </Source>
       <Source
-        source={ api.currentSchemasNames }
-        to='items'
+        props={ {
+          items: api.currentSchemasNames,
+          value: api.currentSchema,
+        } }
         field='schema'
-        onChange={ (schema) => {
-          api.selectCurrentSourcesFor(schema);
+        onChange={ (name) => {
+          api.actSelectCurrentSchema(name);
         } }
       >
         <Select.WithLabel label='schema' />
       </Source>
       <Source
-        source={ api.currentSourcesNames }
-        to='items'
+        props={ {
+          items: api.currentSourcesNames,
+          value: api.currentSource,
+        } }
         field='source'
-        onChange={ (schema) => {
-          // api.selectCurrentSourcesFor(schema);
+        onChange={ (name) => {
+          // api.actSelectCurrentSource(name);
         } }
       >
         <Select.WithLabel label='source' />
       </Source>
-      <Source source={ api.scope } to='selected'>
+      <Source source={ api } to='selected'>
         <ViewSwitcher>
           <Source
-            sources={ [
+            props={ [
               [api.currentDbsNames, 'items', _ => _.map(_ => [_, _])],
             ] }
             view='db:list'
           >
-            <ActionList></ActionList>
+            <ActionList onSubmit={ (name) => api.actSelectCurrentDb(name) }></ActionList>
           </Source>
           <Source
-            sources={ [
+            props={ [
               [api.currentSchemasNames, 'items', _ => _.map(_ => [_, _])],
             ] }
             view='schema:list'
           >
-            <ActionList></ActionList>
+            <ActionList onSubmit={ (name) => api.actSelectCurrentSchema(name) }></ActionList>
           </Source>
           <Source
-            sources={ [
+            props={ [
               [api.currentSourcesNames, 'items', _ => _.map(_ => [_, _])],
             ] }
             view='source:list'
           >
-            <ActionList></ActionList>
+            <ActionList onSubmit={ (name) => api.actSelectCurrentSource(name) }></ActionList>
           </Source>
         </ViewSwitcher>
       </Source>

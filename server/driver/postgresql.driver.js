@@ -82,10 +82,6 @@ class SchemaManager extends _.SchemaManager {
     const client = await this.client;
     const res = await client.query(`SELECT nspname FROM pg_catalog.pg_namespace;`);
 
-    if (!this.has(ROOT)) { // default schema
-      this.set(ROOT, new Schema(ROOT, this));
-    }
-
     res.rows.forEach((row) => {
       const name = row.nspname;
 
@@ -109,13 +105,13 @@ class Source extends _.Source {
 }
 
 class SourceManager extends _.SourceManager {
+  get sourceClass() {
+    return Source;
+  }
+
   async select() {
     const client = await this.client;
     const res = await client.query(`SELECT *, pg_relation_size(quote_ident(table_name)) FROM information_schema.tables WHERE table_schema = $1;`, [this.schema.name]);
-
-    if (!this.has(ROOT)) { // default source
-      this.set(ROOT, new Source(ROOT, this));
-    }
 
     res.rows.forEach((row) => {
       const name = row.table_name;

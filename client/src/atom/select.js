@@ -3,13 +3,13 @@ import React from "react";
 export default (props) => {
   const [value, setValue] = React.useState(props.value);
 
-  // React.useEffect(() => {
-  //   setValue(props.value);
+  React.useEffect(() => {
+    setValue(props.value);
 
-  //   if (props.onChange) {
-  //     props.onChange(props.value);
-  //   }
-  // }, [props.value]);
+    // if (props.onChange) {
+    //   props.onChange(props.value);
+    // }
+  }, [props.value]);
 
   let items = props.items;
 

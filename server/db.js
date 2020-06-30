@@ -1,5 +1,5 @@
 const manager = require('./manager');
-const ROOT = '__ROOT__';
+const ROOT = require('./const').__ROOT__;
 
 class Db extends manager.WithDescriptor {
   get client() {

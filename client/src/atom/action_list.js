@@ -4,7 +4,7 @@ import React, { Children } from "react";
 export default (props) => {
   return props.items
     ? props.items.map(([name, action]) => {
-      return <a style={ { display: 'block' } } href='#' onClick={ props.onSumbit && (() => props.onSumbit(action)) }>{ name }</a>;
+      return <a style={ { display: 'block' } } href='#' onClick={ props.onSubmit && (() => props.onSubmit(action)) }>{ name }</a>;
     })
     : null;
 };
