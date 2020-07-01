@@ -7,42 +7,24 @@ export default (props) => {
 
   return <div className='container'>
     <div>{ props.connection.name }</div>
-    <Form className='f1'>
-      <Source
-        props={ {
-          items: api.currentDbsNames,
-          value: api.currentDb,
-        } }
-        field='db'
-        onChange={ (name) => {
-          api.actSelectCurrentDb(name);
-        } }
-      >
-        <Select.WithLabel label='db' />
+    <div className='f1'>
+      <Source props={ {
+        items: api.currentDbsNames,
+        value: api.currentDb,
+      } }>
+        <Select.WithLabel label='db' onChange={ (name) => api.actSelectCurrentDb(name) } />
       </Source>
-      <Source
-        props={ {
-          items: api.currentSchemasNames,
-          value: api.currentSchema,
-        } }
-        field='schema'
-        onChange={ (name) => {
-          api.actSelectCurrentSchema(name);
-        } }
-      >
-        <Select.WithLabel label='schema' />
+      <Source props={ {
+        items: api.currentSchemasNames,
+        value: api.currentSchema,
+      } }>
+        <Select.WithLabel label='schema' onChange={ (name) => api.actSelectCurrentSchema(name) } />
       </Source>
-      <Source
-        props={ {
-          items: api.currentSourcesNames,
-          value: api.currentSource,
-        } }
-        field='source'
-        onChange={ (name) => {
-          // api.actSelectCurrentSource(name);
-        } }
-      >
-        <Select.WithLabel label='source' />
+      <Source props={ {
+        items: api.currentSourcesNames,
+        value: api.currentSource,
+      } }>
+        <Select.WithLabel label='source' onChange={ (name) => {} }/>
       </Source>
       <Source source={ api } to='selected'>
         <ViewSwitcher>
@@ -75,7 +57,7 @@ export default (props) => {
       {/* <Stream source={ () => api.currentSources } to='items' field='source'>
 
       </Stream> */}
-    </Form>
+    </div>
   </div>;
 };
 
