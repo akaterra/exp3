@@ -36,7 +36,7 @@ export class SubjectWithCache extends Subject {
       return Promise.resolve(this._data);
     }
 
-    return this.pipe(take(1)).toPromise();
+    return toPromise(this);
   }
 }
 
@@ -63,6 +63,12 @@ export class StateMachine extends Subject {
     return this;
   }
 
+  emitAction(action, data) {
+    this._outgoing.next({ action, data });
+
+    return this;
+  }
+
   next(data) {
     this._incoming.next(data);
 
@@ -82,11 +88,11 @@ export class StateMachine extends Subject {
   }
 
   wait() {
-    return this._incoming.pipe(first()).toPromise();
+    return toPromise(this._incoming);
   }
 
   waitFor(...actions) {
-    return this._incoming.pipe(filter(({ action: incomingEvent }) => actions.includes(incomingEvent)), first()).toPromise();
+    return toPromise(this._incoming.pipe(filter(({ action: incomingEvent }) => actions.includes(incomingEvent))));
   }
 }
 
@@ -104,7 +110,7 @@ export default class ConnectionStateMachine extends StateMachine {
   }
 
   get currentDbsNames() {
-    return this.currentDbs.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name) })));
+    return this.currentDbs.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name).sort() })));
   }
 
   get currentSchema() {
@@ -120,7 +126,7 @@ export default class ConnectionStateMachine extends StateMachine {
   }
 
   get currentSchemasNames() {
-    return this.currentSchemas.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name) })));
+    return this.currentSchemas.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name).sort() })));
   }
 
   get currentSource() {
@@ -136,7 +142,7 @@ export default class ConnectionStateMachine extends StateMachine {
   }
 
   get currentSourcesNames() {
-    return this.currentSources.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name) })));
+    return this.currentSources.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name).sort() })));
   }
 
   constructor(api) {
@@ -149,36 +155,42 @@ export default class ConnectionStateMachine extends StateMachine {
     await this.sleep(1);
     await this.selectCurrentDbs().toImmediatePromise();
 
-    this.emit({ data: 'db:list' });
+    this.emit({ data: _.DB_LIST });
 
     while (true) {
       const { action, data } = await this.waitFor(_.DB_CURRENT_SELECT, _.SCHEMA_CURRENT_SELECT, _.SOURCE_CURRENT_SELECT);
 
       switch (action) {
         case _.CONNECTION_CLOSE:
-          this.emit({ action })
+          this.emitAction(action);
 
           return { action };
         case _.DB_CURRENT_SELECT:
           await toPromise(this.selectCurrentSchemasFor(data));
 
-          if (this.currentSchema.data === '__ROOT__') {
-            this.emit({ action: 'schema:list' });
+          if (this.currentDb.data === '__ROOT__') {
+            this.emitAction(_.DB_LIST);
+          } else {
+            this.emitAction(_.SCHEMA_LIST);
           }
 
           break;
         case _.SCHEMA_CURRENT_SELECT:
           await toPromise(this.selectCurrentSourcesFor(data));
 
-          if (this.currentSource.data === '__ROOT__') {
-            this.emit({ action: 'source:list' });
+          if (this.currentSchema.data === '__ROOT__') {
+            this.emitAction(_.SCHEMA_LIST);
+          } else {
+            this.emitAction(_.SOURCE_LIST);
           }
 
           break;
         case _.SOURCE_CURRENT_SELECT:
           this.currentSource = { data };
 
-          // if (this.currentSource.data === '__ROOT__') {
+          // if (data === '__ROOT__') {
+          //   this.emitAction('source:list');
+          // } else if (this.currentSource.data === '__ROOT__') {
           //   this.emit({ action: 'source:list' });
           // }
 

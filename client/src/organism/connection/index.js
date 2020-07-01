@@ -47,25 +47,25 @@ export default (props) => {
       <Source source={ api } to='selected'>
         <ViewSwitcher>
           <Source
-            props={ [
-              [api.currentDbsNames, 'items', _ => _.map(_ => [_, _])],
-            ] }
+            props={ {
+              items: [api.currentDbsNames, _ => _.map(_ => [_, _])],
+            } }
             view='db:list'
           >
             <ActionList onSubmit={ (name) => api.actSelectCurrentDb(name) }></ActionList>
           </Source>
           <Source
-            props={ [
-              [api.currentSchemasNames, 'items', _ => _.map(_ => [_, _])],
-            ] }
+            props={ {
+              items: [api.currentSchemasNames, _ => _.map(_ => [_, _])],
+            } }
             view='schema:list'
           >
             <ActionList onSubmit={ (name) => api.actSelectCurrentSchema(name) }></ActionList>
           </Source>
           <Source
-            props={ [
-              [api.currentSourcesNames, 'items', _ => _.map(_ => [_, _])],
-            ] }
+            props={ {
+              items: [api.currentSourcesNames, _ => _.map(_ => [_, _])],
+            } }
             view='source:list'
           >
             <ActionList onSubmit={ (name) => api.actSelectCurrentSource(name) }></ActionList>

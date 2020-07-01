@@ -2,13 +2,28 @@ import { set } from 'invary';
 import React, { Children } from "react";
 
 export default (props) => {
-  const children = Array.isArray(props.children) ? props.children : [props.children];
+  let [children, setChildren] = React.useState(props.children);
+  let [selected, setSelected] = React.useState(null);
 
-  return children.map((child, index) => {
-    if (child.props.view === props.selected) {
-      return child;
-    } else {
-      return <div style={ { display: 'none' } }>{ child }</div>;
+  if (selected !== props.selected) {
+    children = props.children;
+    selected = props.selected;
+
+    if (!Array.isArray(children)) {
+      children = [children];
     }
-  });
+
+    children = children.map((child, index) => {
+      if (child.props.view === selected) {
+        return child;
+      } else {
+        return <div key={ index } style={ { display: 'none' } }>{ child }</div>;
+      }
+    });
+
+    setChildren(children);
+    setSelected(selected);
+  }
+
+  return children;
 };
