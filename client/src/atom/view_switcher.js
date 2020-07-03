@@ -2,10 +2,16 @@ import { set } from 'invary';
 import React, { Children } from "react";
 
 export default (props) => {
-  let [children, setChildren] = React.useState(props.children);
+  let [children, setChildren] = React.useState(null);
   let [selected, setSelected] = React.useState(null);
 
   if (selected !== props.selected) {
+    if (props.ignoreUnknown) {
+      if (!props.children.some((child) => child.props.view === props.selected)) {
+        return children;
+      }
+    }
+
     children = props.children;
     selected = props.selected;
 

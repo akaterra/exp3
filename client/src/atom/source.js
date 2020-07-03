@@ -1,4 +1,4 @@
-import { set, Arr } from 'invary';
+import { all, set, Arr } from 'invary';
 import React, { Children } from "react";
 import { from, Subject } from 'rxjs';
 
@@ -17,26 +17,28 @@ export default (props) => {
   }, []);
 
   if (!subscriptions) {
-    let { source, to, selector, props: p, ...restProps } = props;
+    let { source, to, selector, props: mapToProps, ...restProps } = props;
 
-    if (!p && source && to) {
-      p = [[source, to, selector]];
+    if (!mapToProps && source && to) {
+      mapToProps = [[source, to, selector]];
     }
 
-    if (p) {
-      if (!props.children) {
-        throw new Error('At least one child must be provided');
+    if (mapToProps) {
+      if (!props.children && !props.component) {
+        console.warn('At least one child or component must be provided');
+
+        return null;
       }
 
-      if (!Array.isArray(p) && typeof p === 'object') {
-        p = Object.entries(p).map(([prop, source]) => [
+      if (!Array.isArray(mapToProps) && typeof mapToProps === 'object') {
+        mapToProps = Object.entries(mapToProps).map(([prop, source]) => [
           Array.isArray(source) ? source[0] : source,
           prop,
           Array.isArray(source) ? source[1] : undefined,
         ]);
       }
 
-      children = props.children;
+      children = props.children || <props.component></props.component>;
 
       if (!Array.isArray(children)) {
         children = [children];
@@ -47,7 +49,13 @@ export default (props) => {
 
       function applyPropToChildren(prop, data) {
         children = initialChildren.map((child, index) => {
-          const props = initialChildrenProps[index] = set(initialChildrenProps[index], prop, data);
+          let props;
+
+          if (prop === '...') {
+            props = initialChildrenProps[index] = all(initialChildrenProps[index], ...Object.entries(data).flat());
+          } else {
+            props = initialChildrenProps[index] = set(initialChildrenProps[index], prop, data);
+          }
 
           return React.cloneElement(child, props);
         });
@@ -63,7 +71,7 @@ export default (props) => {
 
       subscriptions = [];
 
-      for (const [source, prop, selector] of p) {
+      for (const [source, prop, selector] of mapToProps) {
         source = typeof source === 'function' ? source() : source;
 
         if (!(source instanceof Subject)) {

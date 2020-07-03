@@ -92,6 +92,22 @@ class Source extends _.Source {
   get indexManagerClass() {
     return IndexManager;
   }
+
+  async select(query) {
+    const { filter, limit, offset, sort, projection } = query;
+    const client = await this.client;
+    const res = await client.db(this.db.name).collection(this.name).find().toArray();
+
+    return {
+      columns: Array.from(res.reduce((acc, doc) => {
+        Object.keys(doc).forEach((key) => acc.add(key));
+
+        return acc;
+      }, new Set()).values()),
+      result: res,
+      totalCount: await client.db(this.db.name).collection(this.name).count(),
+    };
+  }
 }
 
 class SourceManager extends _.SourceManager {

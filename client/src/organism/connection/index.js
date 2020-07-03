@@ -2,6 +2,40 @@ import React from "react";
 import { ActionList, Form, Source, Submit, ViewSwitcher } from '../../atom';
 import { Input, Password, Select } from '../../molecule';
 
+export { default as Auth } from './auth';
+// export { default as SourceSelect } from './source_select';
+
+function SourceSelect(props) {
+  if (!props.columns) {
+    return <div></div>;
+  }
+
+  const columnIndexes = props.columns.reduce((acc, key, ind) => {
+    acc[key] = ind;
+
+    return acc;
+  }, {});
+
+  return <table>
+    <thead>
+      { props.columns.map((key) => <th>{ key }</th>) }
+    </thead>
+    <tbody>
+      { props.result.map((res) => {
+        const arr = new Array(props.columns.length);
+
+        for (const key of Object.keys(res)) {
+          arr[columnIndexes[key]] = res[key];
+        }
+
+        arr.forEach((val, ind) => arr[ind] = <td>{ val !== undefined ? JSON.stringify(val) : null }</td>);
+
+        return <tr>{ arr }</tr>;
+      }) }
+    </tbody>
+  </table>;
+}
+
 export default (props) => {
   const api = props.api;
 
@@ -24,10 +58,10 @@ export default (props) => {
         items: api.currentSourcesNames,
         value: api.currentSource,
       } }>
-        <Select.WithLabel label='source' onChange={ (name) => {} }/>
+        <Select.WithLabel label='source' onChange={ (name) => api.actSelectCurrentSource(name) } />
       </Source>
       <Source source={ api } to='selected'>
-        <ViewSwitcher>
+        <ViewSwitcher ignoreUnknown>
           <Source
             props={ {
               items: [api.currentDbsNames, _ => _.map(_ => [_, _])],
@@ -58,7 +92,18 @@ export default (props) => {
 
       </Stream> */}
     </div>
+    <div className='f5'>
+      <Source source={ api } to='selected'>
+        <ViewSwitcher>
+          <Source
+            props = { {
+              '...': api.currentSourceSelect,
+            } }
+            component={ SourceSelect }
+            view='source:select'
+          />
+        </ViewSwitcher>
+      </Source>
+    </div>
   </div>;
 };
-
-export { default as Auth } from './auth';

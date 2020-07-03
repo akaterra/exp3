@@ -1,3 +1,4 @@
+const url = require('url');
 const _ = require('..');
 const ROOT = '__ROOT__';
 
@@ -19,15 +20,42 @@ class Db extends _.Db {
 
     const { Client } = require('pg');
 
+    if (!credentials.host) {
+      credentials.host = 'postgresql://127.0.0.1:5432';
+    }
+
+    if (credentials.host.substr(0, 13) !== 'postgresql://') {
+      credentials.host = `postgresql://${credentials.host}`;
+    }
+
+    const uri = new URL(credentials.host);
+
+    if (!uri.host) {
+      uri.host = credentials.host || '127.0.0.1';
+    }
+
+    if (!uri.port) {
+      uri.port = credentials.port || 5432;
+    }
+
+    if (!uri.schema) {
+      uri.schema = 'postgresql://';
+    }
+
+    if (!uri.username) {
+      uri.username = credentials.username || (credentials.password ? 'postgres' : undefined);
+    }
+
+    if (!uri.password) {
+      uri.password = credentials.password;
+    }
+
+    if (!uri.pathname) {
+      uri.pathname = `/${credentials.db || 'postgres'}`;
+    }
+
     const client = new Client({
-      // connectionString: credentials.host || 'localhost:5432',
-      host: credentials.host || 'localhost',
-      port: credentials.port || 5432,
-
-      user: credentials.username || (credentials.password ? 'postgres' : undefined),
-      password: credentials.password,
-
-      database: credentials.db || 'postgres',
+      connectionString: uri.toString(),
     });
 
     await client.connect();
@@ -101,6 +129,18 @@ class Source extends _.Source {
 
   get indexManagerClass() {
     return IndexManager;
+  }
+
+  async select(query) {
+    const { filter, limit, offset, sort, projection } = query;
+    const client = await this.client;
+    const res = await client.query(`SELECT * FROM ${this.name};`);
+
+    return {
+      columns: res.fields.map((field) => field.name),
+      result: res.rows,
+      totalCount: (await client.query(`SELECT COUNT(1) AS total FROM ${this.name};`)).rows[0].total,
+    };
   }
 }
 

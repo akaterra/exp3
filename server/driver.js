@@ -27,6 +27,20 @@ class Driver {
     this._descriptor = { connectionName };
   }
 
+  getNested(dbName, schameName, sourceName) {
+    let sub = this.dbManager.get(dbName);
+
+    if (schameName) {
+      sub = sub.schemaManager.get(schameName);
+    }
+
+    if (sourceName) {
+      sub = sub.sourceManager.get(sourceName);
+    }
+
+    return sub;
+  }
+
   toJSON() {
     return {
       dbs: Object.fromEntries(this.dbManager.dbs),

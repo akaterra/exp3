@@ -57,6 +57,10 @@ class Source extends manager.WithDescriptor {
 
   }
 
+  select(query) {
+    return {};
+  }
+
   toJSON() {
     return {
       columns: Object.fromEntries(this.columnManager.entities),

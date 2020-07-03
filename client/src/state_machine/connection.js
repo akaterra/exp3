@@ -69,6 +69,12 @@ export class StateMachine extends Subject {
     return this;
   }
 
+  filter(...actions) {
+    const stream = this._outgoing.pipe(filter(({ action }) => actions.includes(action)));
+
+    return stream;
+  }
+
   next(data) {
     this._incoming.next(data);
 
@@ -92,7 +98,7 @@ export class StateMachine extends Subject {
   }
 
   waitFor(...actions) {
-    return toPromise(this._incoming.pipe(filter(({ action: incomingEvent }) => actions.includes(incomingEvent))));
+    return toPromise(this._incoming.pipe(filter(({ action }) => actions.includes(action))));
   }
 }
 
@@ -133,6 +139,10 @@ export default class ConnectionStateMachine extends StateMachine {
     return this.getStream('source:current');
   }
 
+  get currentSourceSelect() {
+    return this.getStream('source:current:select');
+  }
+
   set currentSource(data) {
     this.getStream('source:current').setData(data);
   }
@@ -166,21 +176,25 @@ export default class ConnectionStateMachine extends StateMachine {
 
           return { action };
         case _.DB_CURRENT_SELECT:
-          await toPromise(this.selectCurrentSchemasFor(data));
+          this.currentDb = { data };
 
           if (this.currentDb.data === '__ROOT__') {
             this.emitAction(_.DB_LIST);
           } else {
+            await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
+
             this.emitAction(_.SCHEMA_LIST);
           }
 
           break;
         case _.SCHEMA_CURRENT_SELECT:
-          await toPromise(this.selectCurrentSourcesFor(data));
+          this.currentSchema = { data };
 
           if (this.currentSchema.data === '__ROOT__') {
             this.emitAction(_.SCHEMA_LIST);
           } else {
+            await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));
+
             this.emitAction(_.SOURCE_LIST);
           }
 
@@ -188,11 +202,13 @@ export default class ConnectionStateMachine extends StateMachine {
         case _.SOURCE_CURRENT_SELECT:
           this.currentSource = { data };
 
-          // if (data === '__ROOT__') {
-          //   this.emitAction('source:list');
-          // } else if (this.currentSource.data === '__ROOT__') {
-          //   this.emit({ action: 'source:list' });
-          // }
+          if (data === '__ROOT__') {
+            this.emitAction(_.SOURCE_LIST);
+          } else {
+            await toPromise(this.doCurrentSourceSelect({}));
+
+            this.emitAction('source:select');
+          }
 
           break;
       }
@@ -219,6 +235,16 @@ export default class ConnectionStateMachine extends StateMachine {
     this.next({ action: _.SOURCE_CURRENT_SELECT, data: sourceName });
 
     return this;
+  }
+
+  // current source
+
+  doCurrentSourceSelect(query) {
+    getFirst(this._api.sourceSelect(this.currentDb.data, this.currentSchema.data, this.currentSource.data, query)).subscribe((data) => {
+      this.currentSourceSelect.setData(data);
+    });
+
+    return this.currentSourceSelect;
   }
 
   // db
@@ -298,6 +324,10 @@ export default class ConnectionStateMachine extends StateMachine {
   selectSources(dbName, schemaName, refresh) {
     return this._api.selectSources(dbName, schemaName, refresh);
   }
+}
+
+function getFirst(stream) {
+  return stream.pipe(first());
 }
 
 function toPromise(stream) {

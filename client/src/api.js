@@ -103,6 +103,17 @@ class Connection extends Streamable {
     );
   }
 
+  sourceSelect(dbName, schemaName, sourceName, query, refresh) {
+    const stream = this.getStream(`db/${dbName}/schema/${schemaName}/source/${sourceName}`);
+
+    return wrapToStream(
+      this.execPost(`/connection/${this._session.name}/db/${dbName}/schema/${schemaName}/source/${sourceName}`, query),
+      stream,
+      'source:select',
+      refresh,
+    );
+  }
+
   execGet(path) {
     return fetch(`http://127.0.0.1:9009${path}`, {
       method: 'GET',
