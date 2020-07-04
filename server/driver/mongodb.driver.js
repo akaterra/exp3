@@ -89,6 +89,12 @@ class Source extends _.Source {
     return ColumnManager;
   }
 
+  get features() {
+    return {
+      indexes: true,
+    }
+  }
+
   get indexManagerClass() {
     return IndexManager;
   }

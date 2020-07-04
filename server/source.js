@@ -6,6 +6,13 @@ class Source extends manager.WithDescriptor {
     return this._parent.client;
   }
 
+  get features() {
+    return {
+      columns: true,
+      indexes: true,
+    }
+  }
+
   get nodeType() {
     return 'source';
   }
@@ -65,6 +72,7 @@ class Source extends manager.WithDescriptor {
     return {
       columns: Object.fromEntries(this.columnManager.entities),
       descriptor: this._descriptor,
+      features: this.features,
       indexes: Object.fromEntries(this.indexManager.entities),
       name: this.name,
     };

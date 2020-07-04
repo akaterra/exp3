@@ -16,24 +16,45 @@ function SourceSelect(props) {
     return acc;
   }, {});
 
-  return <table>
-    <thead>
-      { props.columns.map((key) => <th>{ key }</th>) }
-    </thead>
-    <tbody>
-      { props.result.map((res) => {
-        const arr = new Array(props.columns.length);
+  if (props.schemaless) {
+    return <table>
+      <thead>
+        { props.columns.map((key) => <td>{ key }</td>) }
+      </thead>
+      <tbody>
+        { props.result.map((res) => {
+          const arr = new Array(props.columns.length);
 
-        for (const key of Object.keys(res)) {
-          arr[columnIndexes[key]] = res[key];
-        }
+          for (const key of Object.keys(res)) {
+            arr[columnIndexes[key]] = res[key];
+          }
 
-        arr.forEach((val, ind) => arr[ind] = <td>{ val !== undefined ? JSON.stringify(val) : null }</td>);
+          arr.forEach((val, ind) => arr[ind] = <td>{ val !== undefined ? JSON.stringify(val) : null }</td>);
 
-        return <tr>{ arr }</tr>;
-      }) }
-    </tbody>
-  </table>;
+          return <tr>{ arr }</tr>;
+        }) }
+      </tbody>
+    </table>;
+  } else {
+    return <table>
+      <thead>
+        { props.columns.map((key) => <td>{ key }</td>) }
+      </thead>
+      <tbody>
+        { props.result.map((res) => {
+          const arr = new Array(props.columns.length);
+
+          for (const key of Object.keys(res)) {
+            arr[columnIndexes[key]] = res[key];
+          }
+
+          arr.forEach((val, ind) => arr[ind] = <td>{ val !== undefined ? JSON.stringify(val) : null }</td>);
+
+          return <tr>{ arr }</tr>;
+        }) }
+      </tbody>
+    </table>;
+  }
 }
 
 export default (props) => {

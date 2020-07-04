@@ -183,14 +183,14 @@ export default class ConnectionStateMachine extends StateMachine {
           } else {
             await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
 
-            this.emitAction(_.SCHEMA_LIST);
+            this.emitAction(Object.keys(this.currentSchemas.data) > 1 ? _.SCHEMA_LIST : _.SOURCE_LIST);
           }
 
           break;
         case _.SCHEMA_CURRENT_SELECT:
           this.currentSchema = { data };
 
-          if (this.currentSchema.data === '__ROOT__') {
+          if (this.currentSchema.data === '__ROOT__' && Object.keys(this.currentSchemas.data) > 1) {
             this.emitAction(_.SCHEMA_LIST);
           } else {
             await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));

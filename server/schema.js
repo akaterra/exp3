@@ -10,6 +10,10 @@ class Schema extends manager.WithDescriptor {
     return this._parent.parent;
   }
 
+  get features() {
+    return {};    
+  }
+
   get name() {
     return this._name;
   }
