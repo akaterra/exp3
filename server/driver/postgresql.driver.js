@@ -42,11 +42,11 @@ class Db extends _.Db {
       uri.schema = 'postgresql://';
     }
 
-    if (!uri.username) {
+    if (!uri.username && (credentials.username || credentials.password)) {
       uri.username = credentials.username || (credentials.password ? 'postgres' : undefined);
     }
 
-    if (!uri.password) {
+    if (!uri.password && credentials.password) {
       uri.password = credentials.password;
     }
 
