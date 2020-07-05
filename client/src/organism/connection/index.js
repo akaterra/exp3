@@ -81,7 +81,7 @@ export default (props) => {
       } }>
         <Select.WithLabel label='source' onChange={ (name) => api.actSelectCurrentSource(name) } />
       </Source>
-      <Source source={ api } to='selected'>
+      <Source source={ api.mode } prop='selected'>
         <ViewSwitcher ignoreUnknown>
           <Source
             props={ {
@@ -109,22 +109,9 @@ export default (props) => {
           </Source>
         </ViewSwitcher>
       </Source>
-      {/* <Stream source={ () => api.currentSources } to='items' field='source'>
-
-      </Stream> */}
     </div>
     <div className='f5'>
-      <Source source={ api } to='selected'>
-        <ViewSwitcher>
-          <Source
-            props = { {
-              '...': api.currentSourceSelect,
-            } }
-            component={ SourceSelect }
-            view='source:select'
-          />
-        </ViewSwitcher>
-      </Source>
+
     </div>
   </div>;
 };

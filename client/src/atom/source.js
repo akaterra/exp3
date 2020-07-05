@@ -17,10 +17,10 @@ export default (props) => {
   }, []);
 
   if (!subscriptions) {
-    let { source, to, selector, props: mapToProps, ...restProps } = props;
+    let { source, prop, selector, props: mapToProps, ...restProps } = props;
 
-    if (!mapToProps && source && to) {
-      mapToProps = [[source, to, selector]];
+    if (!mapToProps && source && prop) {
+      mapToProps = [[source, prop, selector]];
     }
 
     if (mapToProps) {
@@ -78,14 +78,20 @@ export default (props) => {
           source = from(source instanceof Promise ? source : [source]);
         }
 
-        const subscription = source.subscribe(({ action, data }) => {
+        const subscription = source.subscribe(({ action, data, extra }) => {
           console.log({ action, data, prop });
 
           if (selector) {
             data = selector(data !== undefined ? data : action);
           }
 
-          applyPropToChildren(prop, data !== undefined ? data : action);
+          if (extra && typeof extra === 'object') {
+            extra[prop] = data !== undefined ? data : action;
+
+            applyPropToChildren('...', extra);
+          } else {
+            applyPropToChildren(prop, data !== undefined ? data : action);
+          }
         });
 
         subscriptions.push(subscription);

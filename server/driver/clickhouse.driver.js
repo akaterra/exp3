@@ -93,6 +93,22 @@ class Source extends _.Source {
   get indexManagerClass() {
     return IndexManager;
   }
+
+  async select(query) {
+    const { filter, limit, offset, sort, projection } = query;
+    const client = await this.client;
+    const res = await client.query(`SELECT * FROM ${this.db.name}.${this.name};`).toPromise();
+
+    return {
+      columns: Array.from(res.reduce((acc, doc) => {
+        Object.keys(doc).forEach((key) => acc.add(key));
+
+        return acc;
+      }, new Set()).values()),
+      result: res,
+      totalCount: (await client.query(`SELECT count() AS total FROM ${this.db.name}.${this.name};`).toPromise())[0].total,
+    };
+  }
 }
 
 class SourceManager extends _.SourceManager {

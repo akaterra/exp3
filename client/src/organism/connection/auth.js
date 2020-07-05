@@ -16,7 +16,7 @@ export default (props) => {
         api.connect(params).then(props.onAuth)
       }) }
     >
-      <Source source={ api && (() => api.selectDrivers()) } to='items' field='driver'><Select.WithLabel label='Driver:' /></Source>
+      <Source source={ api && (() => api.selectDrivers()) } prop='items' field='driver'><Select.WithLabel label='Driver:' /></Source>
       <Input.WithLabel label='Host:' field='host' nullable />
       <Input.WithLabel label='Username:' field='username' nullable />
       <Password.WithLabel label='Password:' field='password' nullable />

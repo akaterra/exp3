@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 import { filter, first, map, take } from 'rxjs/operators';
-import { default as _ } from './action';
+import { default as _ } from './const';
 
 export class SubjectWithCache extends Subject {
   get data() {
@@ -46,6 +46,7 @@ export class StateMachine extends Subject {
 
     this._incoming = new Subject();
     this._outgoing = new Subject();
+    this._pipes = [];
     this._streams = new Map();
   }
 
@@ -63,8 +64,8 @@ export class StateMachine extends Subject {
     return this;
   }
 
-  emitAction(action, data) {
-    this._outgoing.next({ action, data });
+  emitAction(action, data, extra) {
+    this._outgoing.next({ action, data, extra });
 
     return this;
   }
@@ -85,6 +86,18 @@ export class StateMachine extends Subject {
 
   }
 
+  incomingPushTo(stateMachine) {
+    this._pipes.push(this._incoming.subscribe(stateMachine));
+
+    return stateMachine;
+  }
+
+  toOutgoingPull(stateMachine) {
+    this._pipes.push(stateMachine.subscribe(this._outgoing));
+
+    return stateMachine;
+  }
+
   sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
@@ -93,6 +106,12 @@ export class StateMachine extends Subject {
     return this._outgoing.subscribe(...args);
   }
 
+  unpipe() {
+    this._pipes.forEach((pipe) => pipe.unsubscribe());
+
+    return this;
+  }
+  
   wait() {
     return toPromise(this._incoming);
   }
@@ -139,10 +158,6 @@ export default class ConnectionStateMachine extends StateMachine {
     return this.getStream('source:current');
   }
 
-  get currentSourceSelect() {
-    return this.getStream('source:current:select');
-  }
-
   set currentSource(data) {
     this.getStream('source:current').setData(data);
   }
@@ -155,6 +170,10 @@ export default class ConnectionStateMachine extends StateMachine {
     return this.currentSources.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name).sort() })));
   }
 
+  get mode() {
+    return this.filter(_.MODE);
+  }
+
   constructor(api) {
     super();
 
@@ -165,53 +184,75 @@ export default class ConnectionStateMachine extends StateMachine {
     await this.sleep(1);
     await this.selectCurrentDbs().toImmediatePromise();
 
-    this.emit({ data: _.DB_LIST });
+    this.emitAction(_.MODE, _.DB_LIST);
 
     while (true) {
-      const { action, data } = await this.waitFor(_.DB_CURRENT_SELECT, _.SCHEMA_CURRENT_SELECT, _.SOURCE_CURRENT_SELECT);
+      let { action, data } = await this.waitFor(_.DB_CURRENT_SELECT, _.SCHEMA_CURRENT_SELECT, _.SOURCE_CURRENT_SELECT);
+      let brk;
 
-      switch (action) {
-        case _.CONNECTION_CLOSE:
-          this.emitAction(action);
+      do {
+        brk = true;
 
-          return { action };
-        case _.DB_CURRENT_SELECT:
-          this.currentDb = { data };
+        console.log({ action, data }, 'run connection');
 
-          if (this.currentDb.data === '__ROOT__') {
-            this.emitAction(_.DB_LIST);
-          } else {
-            await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
+        switch (action) {
+          case _.CONNECTION_CLOSE:
+            this.emitAction(action);
 
-            this.emitAction(Object.keys(this.currentSchemas.data) > 1 ? _.SCHEMA_LIST : _.SOURCE_LIST);
-          }
+            return { action };
+          case _.DB_CURRENT_SELECT:
+            this.currentDb = { data };
 
-          break;
-        case _.SCHEMA_CURRENT_SELECT:
-          this.currentSchema = { data };
+            if (this.currentDb.data === _.ROOT) {
+              this.emitAction(_.MODE, _.DB_LIST);
+            } else {
+              await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
 
-          if (this.currentSchema.data === '__ROOT__' && Object.keys(this.currentSchemas.data) > 1) {
-            this.emitAction(_.SCHEMA_LIST);
-          } else {
-            await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));
+              this.emitAction(_.MODE, Object.keys(this.currentSchemas.data).length > 1 ? _.SCHEMA_LIST : _.SOURCE_LIST);
+            }
 
-            this.emitAction(_.SOURCE_LIST);
-          }
+            break;
+          case _.SCHEMA_CURRENT_SELECT:
+            this.currentSchema = { data };
 
-          break;
-        case _.SOURCE_CURRENT_SELECT:
-          this.currentSource = { data };
+            if (this.currentSchema.data === _.ROOT && Object.keys(this.currentSchemas.data) > 1) {
+              this.emitAction(_.MODE, _.SCHEMA_LIST);
+            } else {
+              await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));
 
-          if (data === '__ROOT__') {
-            this.emitAction(_.SOURCE_LIST);
-          } else {
-            await toPromise(this.doCurrentSourceSelect({}));
+              this.emitAction(_.MODE, _.SOURCE_LIST);
+            }
 
-            this.emitAction('source:select');
-          }
+            break;
+          case _.SOURCE_CURRENT_SELECT:
+            this.currentSource = { data };
 
-          break;
-      }
+            if (data === _.ROOT) {
+              this.emitAction(_.MODE, _.SOURCE_LIST);
+            } else {
+              const sm = new SourceStateMachine(this._api, this.currentDb.data, this.currentSchema.data, this.currentSource.data);
+
+              this.emitAction(_.MODE, 'source');
+              this.emitAction('api', this.incomingPushTo(sm));
+
+              try {
+                const result = await sm.run();
+
+                if (result) {
+                  action = result.action;
+                  data = result.data;
+                  brk = false;
+                }
+              } catch (e) {
+
+              }
+
+              this.unpipe();
+            }
+
+            break;
+        }
+      } while (!brk);
     }
 
     return { action: 'completed' };
@@ -237,16 +278,6 @@ export default class ConnectionStateMachine extends StateMachine {
     return this;
   }
 
-  // current source
-
-  doCurrentSourceSelect(query) {
-    getFirst(this._api.sourceSelect(this.currentDb.data, this.currentSchema.data, this.currentSource.data, query)).subscribe((data) => {
-      this.currentSourceSelect.setData(data);
-    });
-
-    return this.currentSourceSelect;
-  }
-
   // db
 
   dbs() {
@@ -255,9 +286,9 @@ export default class ConnectionStateMachine extends StateMachine {
 
   selectCurrentDbs(refresh) {
     this._api.selectDbs(refresh).pipe(first()).subscribe((data) => {
-      this.currentDb = { data: '__ROOT__' };
+      this.currentDb = { data: _.ROOT };
       this.currentDbs.setData(data);
-      this.selectCurrentSchemasFor('__ROOT__');
+      this.selectCurrentSchemasFor(_.ROOT);
     });
 
     return this.currentDbs;
@@ -281,9 +312,9 @@ export default class ConnectionStateMachine extends StateMachine {
 
   selectCurrentSchemas(refresh) {
     this._api.selectSchemas(this.currentDb.data, refresh).pipe(first()).subscribe((data) => {
-      this.currentSchema = { data: '__ROOT__' };
+      this.currentSchema = { data: _.ROOT };
       this.currentSchemas.setData(data);
-      this.selectCurrentSourcesFor('__ROOT__');
+      this.selectCurrentSourcesFor(_.ROOT);
     });
 
     return this.currentSchemas;
@@ -307,9 +338,9 @@ export default class ConnectionStateMachine extends StateMachine {
 
   selectCurrentSources(refresh) {
     this._api.selectSources(this.currentDb.data, this.currentSchema.data, refresh).pipe(first()).subscribe((data) => {
-      this.currentSource = { data: '__ROOT__' };
+      this.currentSource = { data: _.ROOT };
       this.currentSources.setData(data);
-      // this.selectCurrentSourcesFor('__ROOT__');
+      // this.selectCurrentSourcesFor(_.ROOT);
     });
 
     return this.currentSources;
@@ -324,6 +355,55 @@ export default class ConnectionStateMachine extends StateMachine {
   selectSources(dbName, schemaName, refresh) {
     return this._api.selectSources(dbName, schemaName, refresh);
   }
+}
+
+export class SourceStateMachine extends StateMachine {
+
+  get onSelect() {
+    return this.getStream('select');
+  }
+
+  get mode() {
+    return this.filter(_.MODE);
+  }
+
+  constructor(api, db, schema, source) {
+    super();
+
+    this._api = api;
+    this._db = db;
+    this._schema = schema;
+    this._source = source;
+  }
+
+  async run() {
+    await this.sleep(1);
+    await this.select().toImmediatePromise();
+
+    this.emit({ data: null });
+    
+    while (true) {
+      let { action, data } = await this.wait();
+
+      console.log({ action, data }, 'run source');
+
+      switch (action) {
+        default:
+          return { action, data };
+      }
+    }
+  }
+
+  // current source
+
+  select(query) {
+    getFirst(this._api.sourceSelect(this._db, this._schema, this._source, query)).subscribe((data) => {
+      this.onSelect.setData(data);
+    });
+
+    return this.onSelect;
+  }
+
 }
 
 function getFirst(stream) {
