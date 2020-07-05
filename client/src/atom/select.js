@@ -26,6 +26,7 @@ export default (props) => {
   }
 
   return <select
+    className='control'
     onChange={ (e) => {
       const value = e.currentTarget.options[e.currentTarget.selectedIndex].value;
 

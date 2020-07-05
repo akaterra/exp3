@@ -12,6 +12,7 @@ export default (props) => {
   }, [props.value]);
 
   return <input
+    className='control'
     value={ value }
     type={ props.type || 'input' }
     onBlur={ props.onChange && ((e) => {

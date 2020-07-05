@@ -60,9 +60,8 @@ function SourceSelect(props) {
 export default (props) => {
   const api = props.api;
 
-  return <div className='container'>
-    <div>{ props.connection.name }</div>
-    <div className='f1'>
+  return <div className='row'>
+    <div className='c-3'>
       <Source props={ {
         items: api.currentDbsNames,
         value: api.currentDb,
@@ -110,7 +109,7 @@ export default (props) => {
         </ViewSwitcher>
       </Source>
     </div>
-    <div className='f5'>
+    <div className='c15'>
 
     </div>
   </div>;

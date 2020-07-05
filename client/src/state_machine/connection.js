@@ -233,7 +233,7 @@ export default class ConnectionStateMachine extends StateMachine {
               const sm = new SourceStateMachine(this._api, this.currentDb.data, this.currentSchema.data, this.currentSource.data);
 
               this.emitAction(_.MODE, 'source');
-              this.emitAction('api', this.incomingPushTo(sm));
+              this.incomingPushTo(sm);
 
               try {
                 const result = await sm.run();

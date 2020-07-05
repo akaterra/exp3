@@ -12,7 +12,7 @@ a:hover {
   text-decoration: none;
 }
 
-.container {
+/* .container {
   display: flex;
 }
 
@@ -22,7 +22,7 @@ a:hover {
 
 .container>* {
   margin-right: 1rem;
-}
+} */
 
 .flex {
   display: flex;

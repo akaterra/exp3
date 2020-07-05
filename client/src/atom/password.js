@@ -12,6 +12,7 @@ export default (props) => {
   }, [props.value]);
 
   return <input
+    className='control'
     value={ value }
     type={ 'password' }
     onBlur={ props.onChange && ((e) => {

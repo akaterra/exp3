@@ -1,7 +1,7 @@
 import React from "react";
 
 export default (props) => {
-  return <button role='submit' onClick={ (e) => {
+  return <button className='button' role='submit' onClick={ (e) => {
     e.preventDefault();
 
     if (props.onSubmit) {
