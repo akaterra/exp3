@@ -3,24 +3,24 @@ import React, { Children } from "react";
 
 export default (props) => {
   let [children, setChildren] = React.useState(null);
-  let [selected, setSelected] = React.useState(null);
+  let [view, setView] = React.useState(null);
 
-  if (selected !== props.selected) {
+  if (view !== props.view) {
     if (props.ignoreUnknown) {
-      if (!props.children.some((child) => child.props.view === props.selected)) {
+      if (!props.children.some((child) => child.props.view === props.view)) {
         return children;
       }
     }
 
     children = props.children;
-    selected = props.selected;
+    view = props.view;
 
     if (!Array.isArray(children)) {
       children = [children];
     }
 
     children = children.map((child, index) => {
-      if (child.props.view === selected) {
+      if (child.props.view === view) {
         return child;
       } else {
         return <div key={ index } style={ { display: 'none' } }>{ child }</div>;
@@ -28,7 +28,7 @@ export default (props) => {
     });
 
     setChildren(children);
-    setSelected(selected);
+    setView(view);
   }
 
   return children;
