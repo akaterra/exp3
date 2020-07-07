@@ -1,11 +1,11 @@
 import { Arr } from 'invary';
 import React from 'react';
 import { Auth, default as Connection } from './connection';
-import { withApi, withStateMachine } from '../hoc';
+import { withApi, withFlow } from '../hoc';
 import { ConnectionStateMachine } from '../state_machine';
 
 Auth.WithApi = withApi(Auth);
-Connection.WithStateMachine = withStateMachine(Connection, ConnectionStateMachine);
+Connection.WithStateMachine = withFlow(Connection, ConnectionStateMachine);
 
 export default (props) => {
   let [index, setIndex] = React.useState(0);

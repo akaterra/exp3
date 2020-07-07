@@ -7,8 +7,7 @@ export default (Component) => {
 
     if (label) {
       return <div>
-        <Label>{ label }</Label>
-        <Component { ...restProps } />
+        <Label>{ label }<Component { ...restProps } /></Label>
       </div>
     };
 
