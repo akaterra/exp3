@@ -13,8 +13,8 @@ export class SubjectWithCache extends Subject {
   setData(data) {
     this._data = data;
 
-    for (const observer of this.observers) {
-      observer.next(data);
+    if (data !== undefined) {
+      this.next(data);
     }
 
     return this;
@@ -52,6 +52,7 @@ export class Flow extends Subject {
   getStream(name, onCreate) {
     if (!this._streams.has(name)) {
       const stream = new SubjectWithCache();
+      stream.name = name;
 
       this._streams.set(name, stream);
 

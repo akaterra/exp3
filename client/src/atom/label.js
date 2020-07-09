@@ -1,5 +1,5 @@
 import React from "react";
 
 export default (props) => {
-  return <label >{ props.children }</label>;
+  return <label className='label'>{ props.children }</label>;
 };

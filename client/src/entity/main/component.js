@@ -19,6 +19,10 @@ function TabsContent(props) {
               [tabs,] = tabs.push(<Auth.Component flow={ tab.flow } { ...tab } key={ tab.id }></Auth.Component>);
 
               break;
+            case 'connection':
+              [tabs,] = tabs.push(<div>ok</div>);
+
+              break;
           }
         }
       });

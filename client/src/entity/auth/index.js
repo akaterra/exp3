@@ -1,15 +1,14 @@
-import { map } from 'rxjs/operators';
 import { default as Component } from './component';
 import { default as _ } from './const';
 import { Flow, getFirst } from '../../flow';
 
 export default class AuthFlow extends Flow {
   get currentDrivers() {
-    return this.getStream('driver:current');
+    return this.getStream('driver:list');
   }
 
   get currentDriversNames() {
-    return this.getStream('driver:current');
+    return this.getStream('driver:list');
   }
 
   constructor(api) {
@@ -19,10 +18,9 @@ export default class AuthFlow extends Flow {
   }
 
   async run() {
-    await this.sleep(1);
     await this.selectCurrentDrivers().toImmediatePromise();
 
-    this.emitAction(_.MODE, null);
+    this.emitAction(_.MODE, 'auth:credentials');
 
     while (true) {
       let { action, data } = await this.wait(_.CONNECT);
@@ -31,7 +29,9 @@ export default class AuthFlow extends Flow {
 
       switch (action) {
         case _.CONNECT:
-          this.emitAction(_.CONNECTION_OPEN, {});
+          const connection = await this.connect(data);
+
+          this.emitAction(_.CONNECTION_OPEN, connection);
 
           break;
       }
@@ -40,6 +40,10 @@ export default class AuthFlow extends Flow {
 
   sendConnectAction(data) {
     return this.sendAction(_.CONNECT, data);
+  }
+
+  connect(credentials) {
+    return this._api.connect(credentials);
   }
 
   selectCurrentDrivers(refresh) {

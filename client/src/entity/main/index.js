@@ -17,15 +17,16 @@ export default class MainFlow extends Flow {
   }
 
   async run() {
-    await this.sleep(1);
-
     this.emitAction(_.MODE, null);
 
     const authFlow = new AuthFlow(this._api);
     this.toIncomingPull(authFlow);
     authFlow.run();
 
-    this.tabs.setData({ action: 'tab:list', data: Arr([{ type: 'auth', id: 0, flow: authFlow }]) });
+    this.tabs.setData({
+      action: 'tab:list',
+      data: Arr([{ type: 'auth', id: 'auth', flow: authFlow }]),
+    });
 
     while (true) {
       let { action, data } = await this.wait();
@@ -34,6 +35,13 @@ export default class MainFlow extends Flow {
 
       switch (action) {
         case AuthFlow._.CONNECTION_OPEN:
+          const [tabs, _] = this.tabs.data.push({ type: 'connection', id: data.session.name, flow: null });
+
+          this.tabs.setData({
+            action: 'tab:list',
+            data: tabs,
+          });
+
           break;
       }
     }
