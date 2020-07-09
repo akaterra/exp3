@@ -1,9 +1,11 @@
-export { default as Component } from './ui';
+import { Arr } from 'invary';
+import { default as Component } from './component';
 import { default as _ } from './const';
 import { default as AuthFlow } from '../auth';
 import { Flow } from '../../flow';
+import { Auth } from '../../organism/connection';
 
-export default class ComponentFlow extends Flow {
+export default class MainFlow extends Flow {
   get tabs() {
     return this.getStream('tab:list');
   }
@@ -20,11 +22,15 @@ export default class ComponentFlow extends Flow {
     this.emitAction(_.MODE, null);
 
     const authFlow = new AuthFlow(this._api);
+    this.toIncomingPull(authFlow);
     authFlow.run();
-    authFlow.incomingPushTo(this);
+
+    this.tabs.setData({ action: 'tab:list', data: Arr([{ type: 'auth', id: 0, flow: authFlow }]) });
 
     while (true) {
       let { action, data } = await this.wait();
+
+      console.log({ action, data }, 'main');
 
       switch (action) {
         case AuthFlow._.CONNECTION_OPEN:
@@ -32,18 +38,7 @@ export default class ComponentFlow extends Flow {
       }
     }
   }
-
-  sendConnectAction(data) {
-    return this.sendAction(_.CONNECT, data);
-  }
-
-  selectCurrentDrivers(refresh) {
-    this._api.selectDrivers(refresh).pipe(first()).subscribe((data) => {
-      this.currentDrivers.setData(data);
-    });
-
-    return this.currentDrivers;
-  }
 }
 
-ComponentFlow._ = _;
+MainFlow._ = _;
+MainFlow.Component = Component;

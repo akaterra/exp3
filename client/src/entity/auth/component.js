@@ -12,9 +12,9 @@ export default (props) => {
       state={ {
         driver: 'mongodb',
       } }
-      onSubmit={ api && ((params) => {
+      onSubmit={ (params) => {
         flow.sendConnectAction(params);
-      }) }
+      } }
     >
       <Source source={ flow.currentDriversNames } prop='items' field='driver'><Select.WithLabel label='Driver:' /></Source>
       <Input.WithLabel label='Host:' field='host' nullable />

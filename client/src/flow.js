@@ -1,10 +1,13 @@
-export class SubjectWithCache extends Subject {
-  get data() {
-    return this._data && this._data.data;
-  }
+import { Subject, merge } from 'rxjs';
+import { filter, first } from 'rxjs/operators';
 
+export class SubjectWithCache extends Subject {
   get action() {
     return this._data && this._data.action;
+  }
+
+  get data() {
+    return this._data && this._data.data;
   }
 
   setData(data) {
@@ -18,13 +21,13 @@ export class SubjectWithCache extends Subject {
   }
 
   subscribe(...args) {
-    const subscription = super.subscribe(...args);
+    const subscriber = super.subscribe(...args);
 
     if (this._data !== undefined) {
-      subscription.next(this._data);
+      subscriber.next(this._data);
     }
 
-    return subscription;
+    return subscriber;
   }
 
   toImmediatePromise(resolveCached) {
@@ -46,9 +49,15 @@ export class Flow extends Subject {
     this._streams = new Map();
   }
 
-  getStream(name) {
+  getStream(name, onCreate) {
     if (!this._streams.has(name)) {
-      this._streams.set(name, new SubjectWithCache());
+      const stream = new SubjectWithCache();
+
+      this._streams.set(name, stream);
+
+      if (onCreate) {
+        onCreate(stream);
+      }
     }
 
     return this._streams.get(name);
@@ -83,19 +92,31 @@ export class Flow extends Subject {
 
     return this;
   }
-  
+
+  sendComplete(data) {
+    this._incoming.complete();
+
+    return this;
+  }
+
+  sendError(data) {
+    this._incoming.error(data);
+
+    return this;
+  }
+
   async run() {
 
   }
 
-  incomingPushTo(flow) {
-    this._pipes.push(this._incoming.subscribe(flow));
+  outgoingPushTo(flow) {
+    this._pipes.push(this._outgoing.subscribe((data) => flow.send(data)));
 
     return flow;
   }
 
-  toOutgoingPull(flow) {
-    this._pipes.push(flow.subscribe(this._outgoing));
+  toIncomingPull(flow) {
+    this._pipes.push(flow.subscribe(this._incoming));
 
     return flow;
   }
@@ -110,15 +131,35 @@ export class Flow extends Subject {
 
   unpipe() {
     this._pipes.forEach((pipe) => pipe.unsubscribe());
-
+    this._pipes = [];
     return this;
   }
   
-  wait() {
-    return toPromise(this._incoming);
-  }
+  wait(...mixed) {
+    if (!mixed.length) {
+      return toPromise(this._incoming);
+    }
 
-  waitFor(...actions) {
-    return toPromise(this._incoming.pipe(filter(({ action }) => actions.includes(action))));
+    let flows = mixed.filter((flow) => flow instanceof Subject);
+
+    if (flows.length === 0) {
+      flows = mixed = [this._incoming];
+    }
+
+    let actions = flows.length < mixed.length ? mixed.filter((flow) => !(flow instanceof Subject)) : null;
+
+    if (actions && actions.length) {
+      return toPromise(merge(...flows).pipe(filter(({ action }) => actions.includes(action)), first()));
+    }
+
+    return toPromise(merge(...flows).pipe(first()));
   }
+}
+
+export function getFirst(stream) {
+  return stream.pipe(first());
+}
+
+export function toPromise(stream) {
+  return stream.pipe(first()).toPromise();
 }

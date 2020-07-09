@@ -78,20 +78,14 @@ export default (props) => {
           source = from(source instanceof Promise ? source : [source]);
         }
 
-        const subscription = source.subscribe(({ action, data, extra }) => {
+        const subscription = source.subscribe(({ action, data }) => {
           console.log({ action, data, prop });
 
           if (selector) {
             data = selector(data !== undefined ? data : action);
           }
 
-          if (extra && typeof extra === 'object') {
-            extra[prop] = data !== undefined ? data : action;
-
-            applyPropToChildren('...', extra);
-          } else {
-            applyPropToChildren(prop, data !== undefined ? data : action);
-          }
+          applyPropToChildren(prop, data !== undefined ? data : action);
         });
 
         subscriptions.push(subscription);

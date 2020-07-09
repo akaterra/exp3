@@ -1,14 +1,15 @@
-export { default as Component } from './ui';
+import { map } from 'rxjs/operators';
+import { default as Component } from './component';
 import { default as _ } from './const';
-import { Flow } from '../../flow';
+import { Flow, getFirst } from '../../flow';
 
-export default class ComponentFlow extends Flow {
+export default class AuthFlow extends Flow {
   get currentDrivers() {
     return this.getStream('driver:current');
   }
 
   get currentDriversNames() {
-    return this.currentDrivers.pipe(map(({ data }) => ({ data: Object.values(data).map(_ => _.name).sort() })));
+    return this.getStream('driver:current');
   }
 
   constructor(api) {
@@ -24,7 +25,9 @@ export default class ComponentFlow extends Flow {
     this.emitAction(_.MODE, null);
 
     while (true) {
-      let { action, data } = await this.waitFor(_.CONNECT);
+      let { action, data } = await this.wait(_.CONNECT);
+
+      console.log({ action, data }, 'auth');
 
       switch (action) {
         case _.CONNECT:
@@ -40,7 +43,7 @@ export default class ComponentFlow extends Flow {
   }
 
   selectCurrentDrivers(refresh) {
-    this._api.selectDrivers(refresh).pipe(first()).subscribe((data) => {
+    getFirst(this._api.selectDrivers(refresh)).subscribe((data) => {
       this.currentDrivers.setData(data);
     });
 
@@ -48,4 +51,5 @@ export default class ComponentFlow extends Flow {
   }
 }
 
-ComponentFlow._ = _;
+AuthFlow._ = _;
+AuthFlow.Component = Component;
