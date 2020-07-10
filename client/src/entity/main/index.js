@@ -41,7 +41,7 @@ export default class MainFlow extends Flow {
       switch (action) {
         case AuthFlow._.CONNECTION_OPEN:
           const connectionFlow = new ConnectionFlow(data);
-          this.toIncomingPull(authFlow);
+          this.toIncomingPull(connectionFlow);
           connectionFlow.run();
 
           const [tabs, _] = this.tabs.data.push({
