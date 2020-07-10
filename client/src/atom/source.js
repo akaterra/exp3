@@ -1,6 +1,7 @@
 import { all, set, Arr } from 'invary';
 import React, { Children } from "react";
 import { from, Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 export default (props) => {
   let [children, setChildren] = React.useState(null);
@@ -78,7 +79,7 @@ export default (props) => {
           source = from(source instanceof Promise ? source : [source]);
         }
 
-        const subscription = source.subscribe(({ action, data }) => {
+        const subscription = source.pipe(filter(isNotUndefined)).subscribe(({ action, data }) => {
           console.log({ action, data, prop });
 
           if (selector) {
@@ -97,3 +98,7 @@ export default (props) => {
 
   return <React.Fragment>{ children || props.children }</React.Fragment>;
 };
+
+function isNotUndefined(val) {
+  return val !== undefined;
+}

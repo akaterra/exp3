@@ -1,7 +1,7 @@
-import { Subject, merge } from 'rxjs';
+import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
-export class SubjectWithCache extends Subject {
+export class SubjectWithCache extends BehaviorSubject {
   get action() {
     return this._data && this._data.action;
   }
@@ -10,24 +10,16 @@ export class SubjectWithCache extends Subject {
     return this._data && this._data.data;
   }
 
-  setData(data) {
+  next(data) {
     this._data = data;
 
-    if (data !== undefined) {
-      this.next(data);
-    }
-
-    return this;
+    return super.next(data);
   }
 
-  subscribe(...args) {
-    const subscriber = super.subscribe(...args);
+  pipe(...pipes) {
+    pipes.unshift(filter(isNotUndefined));
 
-    if (this._data !== undefined) {
-      subscriber.next(this._data);
-    }
-
-    return subscriber;
+    return super.pipe(...pipes);
   }
 
   toImmediatePromise(resolveCached) {
@@ -64,6 +56,12 @@ export class Flow extends Subject {
     return this._streams.get(name);
   }
 
+  complete(data) {
+    this._incoming.complete();
+
+    return this;
+  }
+
   emit(data) {
     this._outgoing.next(data);
 
@@ -76,32 +74,26 @@ export class Flow extends Subject {
     return this;
   }
 
-  filter(...actions) {
+  error(data) {
+    this._incoming.error(data);
+
+    return this;
+  }
+
+  filterAction(...actions) {
     const stream = this._outgoing.pipe(filter(({ action }) => actions.includes(action)));
 
     return stream;
   }
 
-  send(data) {
+  next(data) {
     this._incoming.next(data);
 
     return this;
   }
 
-  sendAction(action, data) {
+  nextAction(action, data) {
     this._incoming.next({ action, data });
-
-    return this;
-  }
-
-  sendComplete(data) {
-    this._incoming.complete();
-
-    return this;
-  }
-
-  sendError(data) {
-    this._incoming.error(data);
 
     return this;
   }
@@ -111,7 +103,7 @@ export class Flow extends Subject {
   }
 
   outgoingPushTo(flow) {
-    this._pipes.push(this._outgoing.subscribe((data) => flow.send(data)));
+    this._pipes.push(this._outgoing.subscribe(flow));
 
     return flow;
   }
@@ -163,4 +155,8 @@ export function getFirst(stream) {
 
 export function toPromise(stream) {
   return stream.pipe(first()).toPromise();
+}
+
+export function isNotUndefined(val) {
+  return val !== undefined;
 }

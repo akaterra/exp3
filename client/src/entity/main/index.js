@@ -2,8 +2,8 @@ import { Arr } from 'invary';
 import { default as Component } from './component';
 import { default as _ } from './const';
 import { default as AuthFlow } from '../auth';
+import { default as ConnectionFlow } from '../connection';
 import { Flow } from '../../flow';
-import { Auth } from '../../organism/connection';
 
 export default class MainFlow extends Flow {
   get tabs() {
@@ -23,9 +23,14 @@ export default class MainFlow extends Flow {
     this.toIncomingPull(authFlow);
     authFlow.run();
 
-    this.tabs.setData({
+    this.tabs.next({
       action: 'tab:list',
-      data: Arr([{ type: 'auth', id: 'auth', flow: authFlow }]),
+      data: Arr([{
+        type: 'auth',
+        id: 'auth',
+        name: 'Auth',
+        flow: authFlow,
+      }]),
     });
 
     while (true) {
@@ -35,9 +40,18 @@ export default class MainFlow extends Flow {
 
       switch (action) {
         case AuthFlow._.CONNECTION_OPEN:
-          const [tabs, _] = this.tabs.data.push({ type: 'connection', id: data.session.name, flow: null });
+          const connectionFlow = new ConnectionFlow(data);
+          this.toIncomingPull(authFlow);
+          connectionFlow.run();
 
-          this.tabs.setData({
+          const [tabs, _] = this.tabs.data.push({
+            type: 'connection',
+            id: data.session.name,
+            name: data.session.name,
+            flow: connectionFlow,
+          });
+
+          this.tabs.next({
             action: 'tab:list',
             data: tabs,
           });

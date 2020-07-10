@@ -39,7 +39,7 @@ export default class AuthFlow extends Flow {
   }
 
   sendConnectAction(data) {
-    return this.sendAction(_.CONNECT, data);
+    return this.nextAction(_.CONNECT, data);
   }
 
   connect(credentials) {
@@ -48,7 +48,7 @@ export default class AuthFlow extends Flow {
 
   selectCurrentDrivers(refresh) {
     getFirst(this._api.selectDrivers(refresh)).subscribe((data) => {
-      this.currentDrivers.setData(data);
+      this.currentDrivers.next(data);
     });
 
     return this.currentDrivers;

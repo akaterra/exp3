@@ -1,13 +1,11 @@
 import { Arr } from 'invary';
 import React from 'react';
 import { default as Auth } from '../auth';
+import { default as Connection } from '../connection';
 import { Source } from '../../atom';
 
 function Tabs(props) {
-
-}
-
-function TabsContent(props) {
+  let [currentTabIndex, setCurrentTabIndex] = React.useState(0);
   let [tabs, setTabs] = React.useState(_ => Arr([]));
 
   React.useEffect(() => {
@@ -16,11 +14,11 @@ function TabsContent(props) {
         if (!tabs.find((t) => t.props.id === tab.id)) {
           switch (tab.type) {
             case 'auth':
-              [tabs,] = tabs.push(<Auth.Component flow={ tab.flow } { ...tab } key={ tab.id }></Auth.Component>);
+              [tabs,] = tabs.push(<Auth.Component key={ tab.id } { ...tab }/>);
 
               break;
             case 'connection':
-              [tabs,] = tabs.push(<div>ok</div>);
+              [tabs,] = tabs.push(<Connection.Component key={ tab.id } { ...tab }/>);
 
               break;
           }
@@ -29,15 +27,39 @@ function TabsContent(props) {
 
       setTabs(tabs);
     }
-  }, [tabs]);
+  }, [props.tabs]);
 
-  return tabs;
+  return <div className='row'>
+    <div className='c18'>
+      <div className='tabs underlined'>
+        <div className='tabs-bar'>
+          {
+            tabs.map((tab, ind) => <div
+              className={ ind === currentTabIndex ? 'tab active' : 'tab' }
+              key={ ind }
+              onClick={ () => setCurrentTabIndex(ind) }>
+              { tab.props.name }
+            </div>)
+          }
+        </div>
+        <div className='tabs-content underlined'></div>
+        { 
+          tabs.map((tab, ind) => <div
+            className={ ind === currentTabIndex ? '' : 'hidden' }
+            key={ ind }
+          >
+            { tab }
+          </div>)
+        }
+      </div>
+    </div>
+  </div>;
 };
 
 export default (props) => {
   const { flow } = props;
 
   return <Source source={ flow.tabs } prop='tabs'>
-    <TabsContent></TabsContent>
+    <Tabs/>
   </Source>;
 };
