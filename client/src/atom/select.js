@@ -18,15 +18,16 @@ export default (props) => {
 
     if (Array.isArray(items)) {
       items = items
-        .map((item, i) => <option key={ i } value={ item } selected={ item === value }>{ mapper ? mapper(item) : item }</option>);
+        .map((item, i) => <option key={ i } value={ item }>{ mapper ? mapper(item) : item }</option>);
     } else if (typeof items === 'object') {
       items = Object.entries(items)
-        .map(([key, item]) => <option key={ key } value={ key } selected={ key === value }>{ mapper ? mapper(item) : item }</option>);
+        .map(([key, item]) => <option key={ key } value={ key }>{ mapper ? mapper(item) : item }</option>);
     }
   }
 
   return <select
     className='control'
+    value={ value }
     onChange={ (e) => {
       const value = e.currentTarget.options[e.currentTarget.selectedIndex].value;
 

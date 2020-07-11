@@ -10,19 +10,19 @@ function Tabs(props) {
 
   React.useEffect(() => {
     if (props.tabs) {
-      props.tabs.forEach((tab,) => {
-        if (!tabs.find((t) => t.props.id === tab.id)) {
+      tabs = props.tabs.map((tab,) => {
+        const cachedTabComponent = tabs.find((t) => t.props.id === tab.id);
+
+        if (!cachedTabComponent) {
           switch (tab.type) {
             case 'auth':
-              [tabs,] = tabs.push(<Auth.Component key={ tab.id } { ...tab }/>);
-
-              break;
+              return <Auth.Component key={ tab.id } { ...tab }/>;
             case 'connection':
-              [tabs,] = tabs.push(<Connection.Component key={ tab.id } { ...tab }/>);
-
-              break;
+              return <Connection.Component key={ tab.id } { ...tab }/>;
           }
         }
+
+        return cachedTabComponent;
       });
 
       setTabs(tabs);
@@ -59,7 +59,5 @@ function Tabs(props) {
 export default (props) => {
   const { flow } = props;
 
-  return <Source source={ flow.tabs } prop='tabs'>
-    <Tabs/>
-  </Source>;
+  return <Source source={ flow.tabs } prop='tabs' component={ Tabs }/>;
 };

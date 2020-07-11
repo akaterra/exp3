@@ -2,6 +2,7 @@ import { map } from 'rxjs/operators';
 import { default as Component } from './component';
 import { default as _ } from './const';
 import { Flow, getFirst, toPromise } from '../../flow';
+import { default as ConnectionSourceSelectFlow} from '../connection_source_select';
 
 export default class ConnectionFlow extends Flow {
   get currentDb() {
@@ -111,6 +112,21 @@ export default class ConnectionFlow extends Flow {
             if (data === _.ROOT) {
               this.emitAction(_.MODE, _.SOURCE_LIST);
             } else {
+              const connectionSourceSelectFlow = new ConnectionSourceSelectFlow(
+                this._api,
+                this.currentDb.data,
+                this.currentSchema.data,
+                this.currentSource.data,
+              );
+
+              this.nextAction(_.MODE, 'source');
+
+              const subscription = this.redirectTo(connectionSourceSelectFlow);
+
+              await connectionSourceSelectFlow.run();
+
+              subscription.unsubscribe();
+
               // const sm = new SourceStateMachine(this._api, this.currentDb.data, this.currentSchema.data, this.currentSource.data);
 
               // this.nextAction(_.MODE, 'source');
@@ -153,7 +169,7 @@ export default class ConnectionFlow extends Flow {
     return this;
   }
 
-  sendtSelectCurrentSourceAction(sourceName) {
+  sendSelectCurrentSourceAction(sourceName) {
     this.next({ action: _.SOURCE_CURRENT_SELECT, data: sourceName });
 
     return this;

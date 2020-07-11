@@ -2,6 +2,10 @@ import { set } from 'invary';
 import React, { Children } from "react";
 
 export default (props) => {
+  if (!props.children) {
+    return null;
+  }
+
   let [children, setChildren] = React.useState(null);
   let [view, setView] = React.useState(null);
 

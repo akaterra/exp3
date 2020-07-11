@@ -31,6 +31,20 @@ export class SubjectWithCache extends BehaviorSubject {
   }
 }
 
+export class FlowSubscription {
+  constructor(subscriptions) {
+    this._subscriptions = subscriptions;
+  }
+
+  unsubscribe() {
+    for (const subscription of this._subscriptions) {
+      subscription.unsubscribe();
+    }
+
+    return this;
+  }
+}
+
 export class Flow extends Subject {
   constructor() {
     super();
@@ -105,13 +119,17 @@ export class Flow extends Subject {
   outgoingPushTo(flow) {
     this._pipes.push(this._outgoing.subscribe(flow));
 
-    return flow;
+    return this;
   }
 
   toIncomingPull(flow) {
     this._pipes.push(flow.subscribe(this._incoming));
 
-    return flow;
+    return this;
+  }
+
+  redirectTo(flow) {
+    return new FlowSubscription(this._incoming.subscribe(flow), flow.subscribe(this._outgoing));
   }
 
   sleep(ms) {

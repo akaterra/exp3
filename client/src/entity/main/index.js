@@ -44,7 +44,7 @@ export default class MainFlow extends Flow {
           this.toIncomingPull(connectionFlow);
           connectionFlow.run();
 
-          const [tabs, _] = this.tabs.data.push({
+          const tabs = this.tabs.data.insertIndex(this.tabs.data.length - 1, {
             type: 'connection',
             id: data.session.name,
             name: data.session.name,

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActionList, Source, Select, ViewSwitcher } from '../../atom';
+import { default as ConnectionSourceSelect } from '../connection_source_select';
 
 export default (props) => {
   const { flow } = props;
@@ -54,7 +55,11 @@ export default (props) => {
       </Source>
     </div>
     <div className='c15'>
-  
+      <Source source={ flow.mode } prop='view'>
+        <ViewSwitcher>
+          <ConnectionSourceSelect.Component flow={ flow } view='source'/>
+        </ViewSwitcher>
+      </Source>
     </div>
   </div>;
 };
