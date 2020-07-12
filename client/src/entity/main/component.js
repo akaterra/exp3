@@ -32,7 +32,7 @@ function Tabs(props) {
   }, [props.tabs]);
 
   return <div className='row'>
-    <div className='c18'>
+    <div className='c20'>
       <div className='tabs underlined'>
         <div className='tabs-bar'>
           {
@@ -45,7 +45,7 @@ function Tabs(props) {
           }
         </div>
         <div className='tabs-content underlined'></div>
-        <div className='c18'>
+        <div className='c20'>
           { 
             tabs.map((tab, ind) => <div
               className={ ind === currentTabIndex ? '' : 'hidden' }

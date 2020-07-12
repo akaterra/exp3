@@ -5,10 +5,9 @@ import { Input, Password, Select } from '../../molecule';
 export default (props) => {
   const { flow } = props;
 
-  return <div className='row'>
-    <div className='c-6 show-med show-lrg'></div>
+  return <div className='row flex flex-center'>
     <Form
-      className='c-6 -m-'
+      className='f10'
       state={ {
         driver: 'mongodb',
       } }

@@ -5,26 +5,26 @@ import { default as ConnectionSourceSelect } from '../connection_source_select';
 export default (props) => {
   const { flow } = props;
   
-  return <div className='row'>
-    <div className='c-3'>
+  return <div className='row flex'>
+    <div className='f-5'>
       <div className='row'>
       <Source props={ {
         items: flow.currentDbsNames,
         value: flow.currentDb,
       } }>
-        <Select.WithLabel label='db' onChange={ (name) => flow.sendSelectCurrentDbAction(name) } />
+        <Select.WithLabel label='Database:' onChange={ (name) => flow.sendSelectCurrentDbAction(name) } />
       </Source>
       <Source props={ {
         items: flow.currentSchemasNames,
         value: flow.currentSchema,
       } }>
-        <Select.WithLabel label='schema' onChange={ (name) => flow.sendSelectCurrentSchemaAction(name) } />
+        <Select.WithLabel label='Schema:' onChange={ (name) => flow.sendSelectCurrentSchemaAction(name) } />
       </Source>
       <Source props={ {
         items: flow.currentSourcesNames,
         value: flow.currentSource,
       } }>
-        <Select.WithLabel label='source' onChange={ (name) => flow.sendSelectCurrentSourceAction(name) } />
+        <Select.WithLabel label='Source:' onChange={ (name) => flow.sendSelectCurrentSourceAction(name) } />
       </Source>
       <Source source={ flow.mode } prop='view'>
         <ViewSwitcher ignoreUnknown>
@@ -56,7 +56,7 @@ export default (props) => {
       </Source>
       </div>
     </div>
-    <div className='c15'>
+    <div className='f15 flex-1'>
       <div className='row'>
       <Source source={ flow.mode } prop='view'>
         <ViewSwitcher>

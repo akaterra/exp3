@@ -2229,11 +2229,14 @@
 .mini .flex {
   display: flex;
 }
-.mini .flex.center {
+.mini .flex-center {
   justify-content: center;
 }
-.mini .flex.middle {
+.mini .flex-middle {
   align-items: center;
+}
+.mini .row.flex {
+  display: flex;
 }
 .mini .flex-1 {
   flex: 1;
@@ -2288,6 +2291,12 @@
 }
 .mini .flex18 {
   flex: 18;
+}
+.mini .flex19 {
+  flex: 19;
+}
+.mini .flex20 {
+  flex: 20;
 }
 
 .mini .font {
@@ -2559,7 +2568,7 @@
 .mini .c-1 {
   float: left;
   min-height: 1px;
-  width: 5.5555555556%;
+  width: 5%;
 }
 .mini .f-1 {
   float: left;
@@ -2568,7 +2577,7 @@
 .mini .c-2 {
   float: left;
   min-height: 1px;
-  width: 11.1111111111%;
+  width: 10%;
 }
 .mini .f-2 {
   float: left;
@@ -2577,7 +2586,7 @@
 .mini .c-3 {
   float: left;
   min-height: 1px;
-  width: 16.6666666667%;
+  width: 15%;
 }
 .mini .f-3 {
   float: left;
@@ -2586,7 +2595,7 @@
 .mini .c-4 {
   float: left;
   min-height: 1px;
-  width: 22.2222222222%;
+  width: 20%;
 }
 .mini .f-4 {
   float: left;
@@ -2595,7 +2604,7 @@
 .mini .c-5 {
   float: left;
   min-height: 1px;
-  width: 27.7777777778%;
+  width: 25%;
 }
 .mini .f-5 {
   float: left;
@@ -2604,7 +2613,7 @@
 .mini .c-6 {
   float: left;
   min-height: 1px;
-  width: 33.3333333333%;
+  width: 30%;
 }
 .mini .f-6 {
   float: left;
@@ -2613,7 +2622,7 @@
 .mini .c-7 {
   float: left;
   min-height: 1px;
-  width: 38.8888888889%;
+  width: 35%;
 }
 .mini .f-7 {
   float: left;
@@ -2622,7 +2631,7 @@
 .mini .c-8 {
   float: left;
   min-height: 1px;
-  width: 44.4444444444%;
+  width: 40%;
 }
 .mini .f-8 {
   float: left;
@@ -2631,7 +2640,7 @@
 .mini .c-9 {
   float: left;
   min-height: 1px;
-  width: 50%;
+  width: 45%;
 }
 .mini .f-9 {
   float: left;
@@ -2640,7 +2649,7 @@
 .mini .c10 {
   float: left;
   min-height: 1px;
-  width: 55.5555555556%;
+  width: 50%;
 }
 .mini .f10 {
   float: left;
@@ -2649,7 +2658,7 @@
 .mini .c11 {
   float: left;
   min-height: 1px;
-  width: 61.1111111111%;
+  width: 55%;
 }
 .mini .f11 {
   float: left;
@@ -2658,7 +2667,7 @@
 .mini .c12 {
   float: left;
   min-height: 1px;
-  width: 66.6666666667%;
+  width: 60%;
 }
 .mini .f12 {
   float: left;
@@ -2667,7 +2676,7 @@
 .mini .c13 {
   float: left;
   min-height: 1px;
-  width: 72.2222222222%;
+  width: 65%;
 }
 .mini .f13 {
   float: left;
@@ -2676,7 +2685,7 @@
 .mini .c14 {
   float: left;
   min-height: 1px;
-  width: 77.7777777778%;
+  width: 70%;
 }
 .mini .f14 {
   float: left;
@@ -2685,7 +2694,7 @@
 .mini .c15 {
   float: left;
   min-height: 1px;
-  width: 83.3333333333%;
+  width: 75%;
 }
 .mini .f15 {
   float: left;
@@ -2694,7 +2703,7 @@
 .mini .c16 {
   float: left;
   min-height: 1px;
-  width: 88.8888888889%;
+  width: 80%;
 }
 .mini .f16 {
   float: left;
@@ -2703,17 +2712,35 @@
 .mini .c17 {
   float: left;
   min-height: 1px;
-  width: 94.4444444444%;
+  width: 85%;
 }
 .mini .f17 {
   float: left;
   min-height: 1px;
 }
 .mini .c18 {
+  float: left;
+  min-height: 1px;
+  width: 90%;
+}
+.mini .f18 {
+  float: left;
+  min-height: 1px;
+}
+.mini .c19 {
+  float: left;
+  min-height: 1px;
+  width: 95%;
+}
+.mini .f19 {
+  float: left;
+  min-height: 1px;
+}
+.mini .c20 {
   min-height: 1px;
   width: 100%;
 }
-.mini .f18 {
+.mini .f20 {
   min-height: 1px;
 }
 .mini .w-2 {
@@ -2865,165 +2892,183 @@
 }
 @media screen and (max-width: 3839px) {
   .mini .sml .f-1 {
-    width: 69.4444444444px;
+    width: 62.5px;
   }
   .mini .med .f-1 {
-    width: 70px;
+    width: 63px;
   }
   .mini .lrg .f-1 {
-    width: 70.5555555556px;
+    width: 63.5px;
   }
   .mini .sml .f-2 {
-    width: 138.8888888889px;
+    width: 125px;
   }
   .mini .med .f-2 {
-    width: 140px;
+    width: 126px;
   }
   .mini .lrg .f-2 {
-    width: 141.1111111111px;
+    width: 127px;
   }
   .mini .sml .f-3 {
-    width: 208.3333333333px;
+    width: 187.5px;
   }
   .mini .med .f-3 {
-    width: 210px;
+    width: 189px;
   }
   .mini .lrg .f-3 {
-    width: 211.6666666667px;
+    width: 190.5px;
   }
   .mini .sml .f-4 {
-    width: 277.7777777778px;
+    width: 250px;
   }
   .mini .med .f-4 {
-    width: 280px;
+    width: 252px;
   }
   .mini .lrg .f-4 {
-    width: 282.2222222222px;
+    width: 254px;
   }
   .mini .sml .f-5 {
-    width: 347.2222222222px;
+    width: 312.5px;
   }
   .mini .med .f-5 {
-    width: 350px;
+    width: 315px;
   }
   .mini .lrg .f-5 {
-    width: 352.7777777778px;
+    width: 317.5px;
   }
   .mini .sml .f-6 {
-    width: 416.6666666667px;
+    width: 375px;
   }
   .mini .med .f-6 {
-    width: 420px;
+    width: 378px;
   }
   .mini .lrg .f-6 {
-    width: 423.3333333333px;
+    width: 381px;
   }
   .mini .sml .f-7 {
-    width: 486.1111111111px;
+    width: 437.5px;
   }
   .mini .med .f-7 {
-    width: 490px;
+    width: 441px;
   }
   .mini .lrg .f-7 {
-    width: 493.8888888889px;
+    width: 444.5px;
   }
   .mini .sml .f-8 {
-    width: 555.5555555556px;
+    width: 500px;
   }
   .mini .med .f-8 {
-    width: 560px;
+    width: 504px;
   }
   .mini .lrg .f-8 {
-    width: 564.4444444444px;
+    width: 508px;
   }
   .mini .sml .f-9 {
-    width: 625px;
+    width: 562.5px;
   }
   .mini .med .f-9 {
-    width: 630px;
+    width: 567px;
   }
   .mini .lrg .f-9 {
-    width: 635px;
+    width: 571.5px;
   }
   .mini .sml .f10 {
-    width: 694.4444444444px;
+    width: 625px;
   }
   .mini .med .f10 {
-    width: 700px;
+    width: 630px;
   }
   .mini .lrg .f10 {
-    width: 705.5555555556px;
+    width: 635px;
   }
   .mini .sml .f11 {
-    width: 763.8888888889px;
+    width: 687.5px;
   }
   .mini .med .f11 {
-    width: 770px;
+    width: 693px;
   }
   .mini .lrg .f11 {
-    width: 776.1111111111px;
+    width: 698.5px;
   }
   .mini .sml .f12 {
-    width: 833.3333333333px;
+    width: 750px;
   }
   .mini .med .f12 {
-    width: 840px;
+    width: 756px;
   }
   .mini .lrg .f12 {
-    width: 846.6666666667px;
+    width: 762px;
   }
   .mini .sml .f13 {
-    width: 902.7777777778px;
+    width: 812.5px;
   }
   .mini .med .f13 {
-    width: 910px;
+    width: 819px;
   }
   .mini .lrg .f13 {
-    width: 917.2222222222px;
+    width: 825.5px;
   }
   .mini .sml .f14 {
-    width: 972.2222222222px;
+    width: 875px;
   }
   .mini .med .f14 {
-    width: 980px;
+    width: 882px;
   }
   .mini .lrg .f14 {
-    width: 987.7777777778px;
+    width: 889px;
   }
   .mini .sml .f15 {
-    width: 1041.6666666667px;
+    width: 937.5px;
   }
   .mini .med .f15 {
-    width: 1050px;
+    width: 945px;
   }
   .mini .lrg .f15 {
-    width: 1058.3333333333px;
+    width: 952.5px;
   }
   .mini .sml .f16 {
-    width: 1111.1111111111px;
+    width: 1000px;
   }
   .mini .med .f16 {
-    width: 1120px;
+    width: 1008px;
   }
   .mini .lrg .f16 {
-    width: 1128.8888888889px;
+    width: 1016px;
   }
   .mini .sml .f17 {
-    width: 1180.5555555556px;
+    width: 1062.5px;
   }
   .mini .med .f17 {
-    width: 1190px;
+    width: 1071px;
   }
   .mini .lrg .f17 {
-    width: 1199.4444444444px;
+    width: 1079.5px;
   }
   .mini .sml .f18 {
-    width: 1250px;
+    width: 1125px;
   }
   .mini .med .f18 {
-    width: 1260px;
+    width: 1134px;
   }
   .mini .lrg .f18 {
+    width: 1143px;
+  }
+  .mini .sml .f19 {
+    width: 1187.5px;
+  }
+  .mini .med .f19 {
+    width: 1197px;
+  }
+  .mini .lrg .f19 {
+    width: 1206.5px;
+  }
+  .mini .sml .f20 {
+    width: 1250px;
+  }
+  .mini .med .f20 {
+    width: 1260px;
+  }
+  .mini .lrg .f20 {
     width: 1270px;
   }
   .mini .container {
@@ -3035,216 +3080,240 @@
     width: 100% !important;
   }
   .mini .sml .f-1 {
-    width: 54.4444444444px;
+    width: 49px;
   }
   .mini .med .f-1 {
-    width: 55px;
+    width: 49.5px;
   }
   .mini .lrg .f-1 {
-    width: 55.5555555556px;
+    width: 50px;
   }
   .mini .c-2.-l-, .mini .f-2.-l- {
     width: 100% !important;
   }
   .mini .sml .f-2 {
-    width: 108.8888888889px;
+    width: 98px;
   }
   .mini .med .f-2 {
-    width: 110px;
+    width: 99px;
   }
   .mini .lrg .f-2 {
-    width: 111.1111111111px;
+    width: 100px;
   }
   .mini .c-3.-l-, .mini .f-3.-l- {
     width: 100% !important;
   }
   .mini .sml .f-3 {
-    width: 163.3333333333px;
+    width: 147px;
   }
   .mini .med .f-3 {
-    width: 165px;
+    width: 148.5px;
   }
   .mini .lrg .f-3 {
-    width: 166.6666666667px;
+    width: 150px;
   }
   .mini .c-4.-l-, .mini .f-4.-l- {
     width: 100% !important;
   }
   .mini .sml .f-4 {
-    width: 217.7777777778px;
+    width: 196px;
   }
   .mini .med .f-4 {
-    width: 220px;
+    width: 198px;
   }
   .mini .lrg .f-4 {
-    width: 222.2222222222px;
+    width: 200px;
   }
   .mini .c-5.-l-, .mini .f-5.-l- {
     width: 100% !important;
   }
   .mini .sml .f-5 {
-    width: 272.2222222222px;
+    width: 245px;
   }
   .mini .med .f-5 {
-    width: 275px;
+    width: 247.5px;
   }
   .mini .lrg .f-5 {
-    width: 277.7777777778px;
+    width: 250px;
   }
   .mini .c-6.-l-, .mini .f-6.-l- {
     width: 100% !important;
   }
   .mini .sml .f-6 {
-    width: 326.6666666667px;
+    width: 294px;
   }
   .mini .med .f-6 {
-    width: 330px;
+    width: 297px;
   }
   .mini .lrg .f-6 {
-    width: 333.3333333333px;
+    width: 300px;
   }
   .mini .c-7.-l-, .mini .f-7.-l- {
     width: 100% !important;
   }
   .mini .sml .f-7 {
-    width: 381.1111111111px;
+    width: 343px;
   }
   .mini .med .f-7 {
-    width: 385px;
+    width: 346.5px;
   }
   .mini .lrg .f-7 {
-    width: 388.8888888889px;
+    width: 350px;
   }
   .mini .c-8.-l-, .mini .f-8.-l- {
     width: 100% !important;
   }
   .mini .sml .f-8 {
-    width: 435.5555555556px;
+    width: 392px;
   }
   .mini .med .f-8 {
-    width: 440px;
+    width: 396px;
   }
   .mini .lrg .f-8 {
-    width: 444.4444444444px;
+    width: 400px;
   }
   .mini .c-9.-l-, .mini .f-9.-l- {
     width: 100% !important;
   }
   .mini .sml .f-9 {
-    width: 490px;
+    width: 441px;
   }
   .mini .med .f-9 {
-    width: 495px;
+    width: 445.5px;
   }
   .mini .lrg .f-9 {
-    width: 500px;
+    width: 450px;
   }
   .mini .c10.-l-, .mini .f10.-l- {
     width: 100% !important;
   }
   .mini .sml .f10 {
-    width: 544.4444444444px;
+    width: 490px;
   }
   .mini .med .f10 {
-    width: 550px;
+    width: 495px;
   }
   .mini .lrg .f10 {
-    width: 555.5555555556px;
+    width: 500px;
   }
   .mini .c11.-l-, .mini .f11.-l- {
     width: 100% !important;
   }
   .mini .sml .f11 {
-    width: 598.8888888889px;
+    width: 539px;
   }
   .mini .med .f11 {
-    width: 605px;
+    width: 544.5px;
   }
   .mini .lrg .f11 {
-    width: 611.1111111111px;
+    width: 550px;
   }
   .mini .c12.-l-, .mini .f12.-l- {
     width: 100% !important;
   }
   .mini .sml .f12 {
-    width: 653.3333333333px;
+    width: 588px;
   }
   .mini .med .f12 {
-    width: 660px;
+    width: 594px;
   }
   .mini .lrg .f12 {
-    width: 666.6666666667px;
+    width: 600px;
   }
   .mini .c13.-l-, .mini .f13.-l- {
     width: 100% !important;
   }
   .mini .sml .f13 {
-    width: 707.7777777778px;
+    width: 637px;
   }
   .mini .med .f13 {
-    width: 715px;
+    width: 643.5px;
   }
   .mini .lrg .f13 {
-    width: 722.2222222222px;
+    width: 650px;
   }
   .mini .c14.-l-, .mini .f14.-l- {
     width: 100% !important;
   }
   .mini .sml .f14 {
-    width: 762.2222222222px;
+    width: 686px;
   }
   .mini .med .f14 {
-    width: 770px;
+    width: 693px;
   }
   .mini .lrg .f14 {
-    width: 777.7777777778px;
+    width: 700px;
   }
   .mini .c15.-l-, .mini .f15.-l- {
     width: 100% !important;
   }
   .mini .sml .f15 {
-    width: 816.6666666667px;
+    width: 735px;
   }
   .mini .med .f15 {
-    width: 825px;
+    width: 742.5px;
   }
   .mini .lrg .f15 {
-    width: 833.3333333333px;
+    width: 750px;
   }
   .mini .c16.-l-, .mini .f16.-l- {
     width: 100% !important;
   }
   .mini .sml .f16 {
-    width: 871.1111111111px;
+    width: 784px;
   }
   .mini .med .f16 {
-    width: 880px;
+    width: 792px;
   }
   .mini .lrg .f16 {
-    width: 888.8888888889px;
+    width: 800px;
   }
   .mini .c17.-l-, .mini .f17.-l- {
     width: 100% !important;
   }
   .mini .sml .f17 {
-    width: 925.5555555556px;
+    width: 833px;
   }
   .mini .med .f17 {
-    width: 935px;
+    width: 841.5px;
   }
   .mini .lrg .f17 {
-    width: 944.4444444444px;
+    width: 850px;
   }
   .mini .c18.-l-, .mini .f18.-l- {
     width: 100% !important;
   }
   .mini .sml .f18 {
-    width: 980px;
+    width: 882px;
   }
   .mini .med .f18 {
-    width: 990px;
+    width: 891px;
   }
   .mini .lrg .f18 {
+    width: 900px;
+  }
+  .mini .c19.-l-, .mini .f19.-l- {
+    width: 100% !important;
+  }
+  .mini .sml .f19 {
+    width: 931px;
+  }
+  .mini .med .f19 {
+    width: 940.5px;
+  }
+  .mini .lrg .f19 {
+    width: 950px;
+  }
+  .mini .c20.-l-, .mini .f20.-l- {
+    width: 100% !important;
+  }
+  .mini .sml .f20 {
+    width: 980px;
+  }
+  .mini .med .f20 {
+    width: 990px;
+  }
+  .mini .lrg .f20 {
     width: 1000px;
   }
   .mini .container {
@@ -3259,13 +3328,13 @@
     width: 100% !important;
   }
   .mini .sml .f-1 {
-    width: 39.4444444444px;
+    width: 35.5px;
   }
   .mini .med .f-1 {
-    width: 40px;
+    width: 36px;
   }
   .mini .lrg .f-1 {
-    width: 40.5555555556px;
+    width: 36.5px;
   }
   .mini .c-2.-l-, .mini .f-2.-l- {
     width: 100% !important;
@@ -3274,13 +3343,13 @@
     width: 100% !important;
   }
   .mini .sml .f-2 {
-    width: 78.8888888889px;
+    width: 71px;
   }
   .mini .med .f-2 {
-    width: 80px;
+    width: 72px;
   }
   .mini .lrg .f-2 {
-    width: 81.1111111111px;
+    width: 73px;
   }
   .mini .c-3.-l-, .mini .f-3.-l- {
     width: 100% !important;
@@ -3289,13 +3358,13 @@
     width: 100% !important;
   }
   .mini .sml .f-3 {
-    width: 118.3333333333px;
+    width: 106.5px;
   }
   .mini .med .f-3 {
-    width: 120px;
+    width: 108px;
   }
   .mini .lrg .f-3 {
-    width: 121.6666666667px;
+    width: 109.5px;
   }
   .mini .c-4.-l-, .mini .f-4.-l- {
     width: 100% !important;
@@ -3304,13 +3373,13 @@
     width: 100% !important;
   }
   .mini .sml .f-4 {
-    width: 157.7777777778px;
+    width: 142px;
   }
   .mini .med .f-4 {
-    width: 160px;
+    width: 144px;
   }
   .mini .lrg .f-4 {
-    width: 162.2222222222px;
+    width: 146px;
   }
   .mini .c-5.-l-, .mini .f-5.-l- {
     width: 100% !important;
@@ -3319,13 +3388,13 @@
     width: 100% !important;
   }
   .mini .sml .f-5 {
-    width: 197.2222222222px;
+    width: 177.5px;
   }
   .mini .med .f-5 {
-    width: 200px;
+    width: 180px;
   }
   .mini .lrg .f-5 {
-    width: 202.7777777778px;
+    width: 182.5px;
   }
   .mini .c-6.-l-, .mini .f-6.-l- {
     width: 100% !important;
@@ -3334,13 +3403,13 @@
     width: 100% !important;
   }
   .mini .sml .f-6 {
-    width: 236.6666666667px;
+    width: 213px;
   }
   .mini .med .f-6 {
-    width: 240px;
+    width: 216px;
   }
   .mini .lrg .f-6 {
-    width: 243.3333333333px;
+    width: 219px;
   }
   .mini .c-7.-l-, .mini .f-7.-l- {
     width: 100% !important;
@@ -3349,13 +3418,13 @@
     width: 100% !important;
   }
   .mini .sml .f-7 {
-    width: 276.1111111111px;
+    width: 248.5px;
   }
   .mini .med .f-7 {
-    width: 280px;
+    width: 252px;
   }
   .mini .lrg .f-7 {
-    width: 283.8888888889px;
+    width: 255.5px;
   }
   .mini .c-8.-l-, .mini .f-8.-l- {
     width: 100% !important;
@@ -3364,13 +3433,13 @@
     width: 100% !important;
   }
   .mini .sml .f-8 {
-    width: 315.5555555556px;
+    width: 284px;
   }
   .mini .med .f-8 {
-    width: 320px;
+    width: 288px;
   }
   .mini .lrg .f-8 {
-    width: 324.4444444444px;
+    width: 292px;
   }
   .mini .c-9.-l-, .mini .f-9.-l- {
     width: 100% !important;
@@ -3379,13 +3448,13 @@
     width: 100% !important;
   }
   .mini .sml .f-9 {
-    width: 355px;
+    width: 319.5px;
   }
   .mini .med .f-9 {
-    width: 360px;
+    width: 324px;
   }
   .mini .lrg .f-9 {
-    width: 365px;
+    width: 328.5px;
   }
   .mini .c10.-l-, .mini .f10.-l- {
     width: 100% !important;
@@ -3394,13 +3463,13 @@
     width: 100% !important;
   }
   .mini .sml .f10 {
-    width: 394.4444444444px;
+    width: 355px;
   }
   .mini .med .f10 {
-    width: 400px;
+    width: 360px;
   }
   .mini .lrg .f10 {
-    width: 405.5555555556px;
+    width: 365px;
   }
   .mini .c11.-l-, .mini .f11.-l- {
     width: 100% !important;
@@ -3409,13 +3478,13 @@
     width: 100% !important;
   }
   .mini .sml .f11 {
-    width: 433.8888888889px;
+    width: 390.5px;
   }
   .mini .med .f11 {
-    width: 440px;
+    width: 396px;
   }
   .mini .lrg .f11 {
-    width: 446.1111111111px;
+    width: 401.5px;
   }
   .mini .c12.-l-, .mini .f12.-l- {
     width: 100% !important;
@@ -3424,13 +3493,13 @@
     width: 100% !important;
   }
   .mini .sml .f12 {
-    width: 473.3333333333px;
+    width: 426px;
   }
   .mini .med .f12 {
-    width: 480px;
+    width: 432px;
   }
   .mini .lrg .f12 {
-    width: 486.6666666667px;
+    width: 438px;
   }
   .mini .c13.-l-, .mini .f13.-l- {
     width: 100% !important;
@@ -3439,13 +3508,13 @@
     width: 100% !important;
   }
   .mini .sml .f13 {
-    width: 512.7777777778px;
+    width: 461.5px;
   }
   .mini .med .f13 {
-    width: 520px;
+    width: 468px;
   }
   .mini .lrg .f13 {
-    width: 527.2222222222px;
+    width: 474.5px;
   }
   .mini .c14.-l-, .mini .f14.-l- {
     width: 100% !important;
@@ -3454,13 +3523,13 @@
     width: 100% !important;
   }
   .mini .sml .f14 {
-    width: 552.2222222222px;
+    width: 497px;
   }
   .mini .med .f14 {
-    width: 560px;
+    width: 504px;
   }
   .mini .lrg .f14 {
-    width: 567.7777777778px;
+    width: 511px;
   }
   .mini .c15.-l-, .mini .f15.-l- {
     width: 100% !important;
@@ -3469,13 +3538,13 @@
     width: 100% !important;
   }
   .mini .sml .f15 {
-    width: 591.6666666667px;
+    width: 532.5px;
   }
   .mini .med .f15 {
-    width: 600px;
+    width: 540px;
   }
   .mini .lrg .f15 {
-    width: 608.3333333333px;
+    width: 547.5px;
   }
   .mini .c16.-l-, .mini .f16.-l- {
     width: 100% !important;
@@ -3484,13 +3553,13 @@
     width: 100% !important;
   }
   .mini .sml .f16 {
-    width: 631.1111111111px;
+    width: 568px;
   }
   .mini .med .f16 {
-    width: 640px;
+    width: 576px;
   }
   .mini .lrg .f16 {
-    width: 648.8888888889px;
+    width: 584px;
   }
   .mini .c17.-l-, .mini .f17.-l- {
     width: 100% !important;
@@ -3499,13 +3568,13 @@
     width: 100% !important;
   }
   .mini .sml .f17 {
-    width: 670.5555555556px;
+    width: 603.5px;
   }
   .mini .med .f17 {
-    width: 680px;
+    width: 612px;
   }
   .mini .lrg .f17 {
-    width: 689.4444444444px;
+    width: 620.5px;
   }
   .mini .c18.-l-, .mini .f18.-l- {
     width: 100% !important;
@@ -3514,12 +3583,42 @@
     width: 100% !important;
   }
   .mini .sml .f18 {
-    width: 710px;
+    width: 639px;
   }
   .mini .med .f18 {
-    width: 720px;
+    width: 648px;
   }
   .mini .lrg .f18 {
+    width: 657px;
+  }
+  .mini .c19.-l-, .mini .f19.-l- {
+    width: 100% !important;
+  }
+  .mini .c19.-m-, .mini .f19.-m- {
+    width: 100% !important;
+  }
+  .mini .sml .f19 {
+    width: 674.5px;
+  }
+  .mini .med .f19 {
+    width: 684px;
+  }
+  .mini .lrg .f19 {
+    width: 693.5px;
+  }
+  .mini .c20.-l-, .mini .f20.-l- {
+    width: 100% !important;
+  }
+  .mini .c20.-m-, .mini .f20.-m- {
+    width: 100% !important;
+  }
+  .mini .sml .f20 {
+    width: 710px;
+  }
+  .mini .med .f20 {
+    width: 720px;
+  }
+  .mini .lrg .f20 {
     width: 730px;
   }
   .mini .container {
@@ -3604,6 +3703,12 @@
 .mini .sml .c18, .mini .sml .f18 {
   padding: 2.5px 5px;
 }
+.mini .sml .c19, .mini .sml .f19 {
+  padding: 2.5px 5px;
+}
+.mini .sml .c20, .mini .sml .f20 {
+  padding: 2.5px 5px;
+}
 .mini .sml .ccc {
   padding: 2.5px 5px;
 }
@@ -3661,6 +3766,12 @@
 .mini .med .c18, .mini .med .f18 {
   padding: 5px 10px;
 }
+.mini .med .c19, .mini .med .f19 {
+  padding: 5px 10px;
+}
+.mini .med .c20, .mini .med .f20 {
+  padding: 5px 10px;
+}
 .mini .med .ccc {
   padding: 5px 10px;
 }
@@ -3716,6 +3827,12 @@
   padding: 7.5px 15px;
 }
 .mini .lrg .c18, .mini .lrg .f18 {
+  padding: 7.5px 15px;
+}
+.mini .lrg .c19, .mini .lrg .f19 {
+  padding: 7.5px 15px;
+}
+.mini .lrg .c20, .mini .lrg .f20 {
   padding: 7.5px 15px;
 }
 .mini .lrg .ccc {
@@ -3843,6 +3960,18 @@
   float: right;
 }
 .mini .rtl .f18 {
+  float: right;
+}
+.mini .rtl .c19 {
+  float: right;
+}
+.mini .rtl .f19 {
+  float: right;
+}
+.mini .rtl .c20 {
+  float: right;
+}
+.mini .rtl .f20 {
   float: right;
 }
 .mini .rtl .ccc, .mini .rtl .oriented {
