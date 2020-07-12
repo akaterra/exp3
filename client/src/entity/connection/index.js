@@ -86,6 +86,8 @@ export default class ConnectionFlow extends Flow {
             this.currentDb = { data };
 
             if (this.currentDb.data === _.ROOT) {
+              await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
+
               this.emitAction(_.MODE, _.DB_LIST);
             } else {
               await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
@@ -98,6 +100,8 @@ export default class ConnectionFlow extends Flow {
             this.currentSchema = { data };
 
             if (this.currentSchema.data === _.ROOT && Object.keys(this.currentSchemas.data).length > 1) {
+              await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));
+
               this.emitAction(_.MODE, _.SCHEMA_LIST);
             } else {
               await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));

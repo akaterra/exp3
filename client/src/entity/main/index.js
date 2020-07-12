@@ -33,6 +33,28 @@ export default class MainFlow extends Flow {
       }]),
     });
 
+    const connections = await this._api.selectConnections().toImmediatePromise();
+
+    this.tabs.next({
+      action: 'tab:list',
+      data: this.tabs.data.batch((tabs) => {
+        Object.entries(connections.data).forEach(([key, session]) => {
+          const connectionFlow = new ConnectionFlow(this._api.createConnection(session));
+          this.toIncomingPull(connectionFlow);
+          connectionFlow.run();
+
+          tabs = tabs.insertIndex(tabs.length - 1, {
+            type: 'connection',
+            id: key,
+            name: session.name,
+            flow: connectionFlow,
+          });
+        });
+
+        return tabs;
+      }),
+    });
+
     while (true) {
       let { action, data } = await this.wait();
 

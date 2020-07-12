@@ -1,5 +1,7 @@
 import React from "react";
 
 export default (props) => {
-  return <label className='label'>{ props.children }</label>;
+  return <label className={ props.className ? `${props.className} label primary` : 'label primary' }>
+    { props.children }
+  </label>;
 };

@@ -3,14 +3,14 @@ import { Label } from '../atom';
 
 export default (Component) => {
   return (props) => {
-    const { label, ...restProps } = props;
+    const { className, label, ...restProps } = props;
 
     if (label) {
-      return <div>
+      return <div className={ className || 'c18' }>
         <Label>{ label }<Component { ...restProps } /></Label>
       </div>
     };
 
-    return <Component { ...restProps } />;
+    return <Component className={ className } { ...restProps } />;
   };
 };

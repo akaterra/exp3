@@ -25,6 +25,10 @@ function run(port) {
     return cm.toJSON().drivers;
   }));
 
+  app.get('/connection', error(async (req, res) => {
+    return cm.toJSON().connections;
+  }));
+
   app.post('/connection', error(async (req, res) => {
     return await cm.connectWithAutoId(req.body);
   }));

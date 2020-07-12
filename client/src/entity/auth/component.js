@@ -6,9 +6,9 @@ export default (props) => {
   const { flow } = props;
 
   return <div className='row'>
-    <div className='c-7 show-med show-lrg'></div>
+    <div className='c-6 show-med show-lrg'></div>
     <Form
-      className='c-4 -m-'
+      className='c-6 -m-'
       state={ {
         driver: 'mongodb',
       } }
@@ -18,8 +18,8 @@ export default (props) => {
     >
       <Source source={ flow.currentDriversNames } prop='items' field='driver'><Select.WithLabel label='Driver:' /></Source>
       <Input.WithLabel label='Host:' field='host' nullable />
-      <Input.WithLabel label='Username:' field='username' nullable />
-      <Password.WithLabel label='Password:' field='password' nullable />
+      <Input.WithLabel className='c-9' label='Username:' field='username' nullable />
+      <Password.WithLabel className='c-9' label='Password:' field='password' nullable />
       <Submit>Connect</Submit>
     </Form>
   </div>;

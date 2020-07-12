@@ -54,6 +54,12 @@ class Connection extends Streamable {
     return this._stream;
   }
 
+  constructor(session) {
+    super();
+
+    this._session = session;
+  }
+
   async connect(credentials) {
     this._session = await this.execPost('/connection', credentials);
 
@@ -160,6 +166,16 @@ class ConnectionManager extends Streamable {
     return this._connections.set(connectionName, connection);
   }
 
+  createConnection(session) {
+    const connection = new Connection(session);
+
+    // await connection.connect(credentials);
+
+    this.set(session.name, connection);
+
+    return connection;
+  }
+
   async connect(credentials) {
     const connection = new Connection();
 
@@ -168,6 +184,14 @@ class ConnectionManager extends Streamable {
     this.set(connection.session.name, connection);
 
     return connection;
+  }
+
+  selectConnections() {
+    return wrapToStream(
+      this.execGet('/connection'),
+      this.getStream('connection'),
+      'connection:list',
+    );
   }
 
   selectDrivers() {

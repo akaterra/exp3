@@ -7,6 +7,7 @@ export default (props) => {
   
   return <div className='row'>
     <div className='c-3'>
+      <div className='row'>
       <Source props={ {
         items: flow.currentDbsNames,
         value: flow.currentDb,
@@ -53,13 +54,16 @@ export default (props) => {
           </Source>
         </ViewSwitcher>
       </Source>
+      </div>
     </div>
     <div className='c15'>
+      <div className='row'>
       <Source source={ flow.mode } prop='view'>
         <ViewSwitcher>
           <ConnectionSourceSelect.Component flow={ flow } view='source'/>
         </ViewSwitcher>
       </Source>
+      </div>
     </div>
   </div>;
 };

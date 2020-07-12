@@ -18,15 +18,16 @@ export default (props) => {
 
     if (Array.isArray(items)) {
       items = items
-        .map((item, i) => <option key={ i } value={ item }>{ mapper ? mapper(item) : item }</option>);
+        .map((item, i) => <option key={ i } value={ item }>{ mapper ? mapper(item) : item === '__ROOT__' ? 'All' : item }</option>);
     } else if (typeof items === 'object') {
       items = Object.entries(items)
-        .map(([key, item]) => <option key={ key } value={ key }>{ mapper ? mapper(item) : item }</option>);
+        .map(([key, item]) => <option key={ key } value={ key }>{ mapper ? mapper(item) : item === '__ROOT__' ? 'All' : item }</option>);
     }
   }
 
   return <select
     className='control'
+    disabled={ items ? items.length < 2 : false }
     value={ value }
     onChange={ (e) => {
       const value = e.currentTarget.options[e.currentTarget.selectedIndex].value;

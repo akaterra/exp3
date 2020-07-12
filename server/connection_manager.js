@@ -51,6 +51,7 @@ class ConnectionManager extends manager.Manager {
 
   toJSON() {
     return {
+      connections: Object.fromEntries(this._entities),
       drivers: [...this._drivers.values()].map((driver) => driver.name),
     }
   }
