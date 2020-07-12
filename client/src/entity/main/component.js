@@ -45,14 +45,16 @@ function Tabs(props) {
           }
         </div>
         <div className='tabs-content underlined'></div>
-        { 
-          tabs.map((tab, ind) => <div
-            className={ ind === currentTabIndex ? '' : 'hidden' }
-            key={ ind }
-          >
-            { tab }
-          </div>)
-        }
+        <div className='c18'>
+          { 
+            tabs.map((tab, ind) => <div
+              className={ ind === currentTabIndex ? '' : 'hidden' }
+              key={ ind }
+            >
+              { tab }
+            </div>)
+          }
+        </div>
       </div>
     </div>
   </div>;
