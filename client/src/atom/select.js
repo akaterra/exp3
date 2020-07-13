@@ -1,8 +1,32 @@
 import React from "react";
 
+const style = {
+  dropdown: {
+    position: 'absolute',
+    top: 0,
+    width: '100%',
+    zIndex: 1000,
+  },
+  dropdownInput: {
+    opacity: 0,
+    cursor: 'pointer',
+  },
+  input: {
+    caretColor: 'transparent',
+    cursor: 'pointer',
+  },
+  list: {
+    maxHeight: '200px',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    width: '100%',
+  },
+}
+
 export default (props) => {
   let [isShown, setIsShown] = React.useState(false);
   let [value, setValue] = React.useState(props.value);
+  let [tempValue, setTempValue] = React.useState();
 
   React.useEffect(() => {
     setValue(props.value);
@@ -39,6 +63,7 @@ export default (props) => {
             key={ i }
             className={ item === value ? 'link primary' : 'link default' }
             style={ { display: 'block' } }
+            value={ item }
             onClick={ () => {
               if (props.onChange) {
                 props.onChange(item);
@@ -72,6 +97,7 @@ export default (props) => {
             key={ key }
             className={ key === value ? 'link primary' : 'link default' }
             style={ { display: 'block' } }
+            value={ key }
             onClick={ () => {
               if (props.onChange) {
                 props.onChange(key);
@@ -91,62 +117,56 @@ export default (props) => {
     return <input
       className='control no-margin'
       value={ shownValue }
-      style={ { cursor: 'pointer' } }
+      style={ style.input }
       readonly
     />
   }
 
   return <div className='cow'>
     <input
-      className='control no-margin'
-      style={ { cursor: 'pointer' } }
-      readonly
+      className='control'
+      style={ style.input }
       value={ shownValue }
-      onFocus={ () => setIsShown(true) }
-      onClick={ () => setIsShown(true) }
+      onClick={ () => setIsShown(!isShown) }
+      onKeyDown={ (e) => {
+        const index = items.findIndex((item) => item.props.value === value);
+
+        if (e.keyCode === 38) { // key up
+          if (index > 0) {
+            if (props.onChange) {
+              props.onChange(value);
+            }
+
+            setValue(items[index - 1].props.value);
+          }
+        } else if (e.keyCode === 40) { // key down
+          if (index < items.length - 1) {
+            if (props.onChange) {
+              props.onChange(value);
+            }
+
+            setValue(items[index + 1].props.value);
+          }
+        }
+      } }
     />
     <div
-      style={ {
-        display: isShown ? '' : 'none',
-        position: 'absolute',
-        top: 0,
-        width: '100%',
-        zIndex: 1000,
-      } }
+      className={ isShown ? '' : 'hidden' }
+      style={ style.dropdown }
+      onMouseLeave={ () => setIsShown(false) }
     >
-      <div
-        onBlur={ () => setIsShown(false) }
-        onMouseOver={ () => setIsShown(true) }
-        onMouseOut={ () => setIsShown(false) }
-      >
-        <input
-          className='control'
-          style={ { cursor: 'pointer' } }
-          readonly
-          value={ shownValue }
-          onClick={ () => setIsShown(false) }
-        />
-        <div style={ { maxHeight: '200px', overflowX: 'hidden', overflowY: 'auto' } } className='panel shadow'>
-          { items }
-        </div>
+      <div className='control' style={ style.dropdownInput }></div>
+      <div className='panel shadow' style={ style.list } onClick={ preventDefault }>
+        { items }
       </div>
     </div>
   </div>
-
-  // return <select
-  //   className='control'
-  //   disabled={ items ? items.length < 2 : false }
-  //   value={ value }
-  //   onChange={ (e) => {
-  //     const value = e.currentTarget.options[e.currentTarget.selectedIndex].value;
-
-  //     setValue(value);
-
-  //     if (props.onChange) {
-  //       props.onChange(value);
-  //     }
-  //   } }
-  // >
-  //   { items }
-  // </select>;
 };
+
+function preventDefault(e) {
+  e.preventDefault();
+}
+
+function stopPropagation(e) {
+  e.stopPropagation();
+}
