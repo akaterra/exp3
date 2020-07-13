@@ -2,12 +2,17 @@ import React from 'react';
 import { Form, Source, Submit } from '../../atom';
 import { Input, Password, Select } from '../../molecule';
 
+const style = {
+  width: '400px',
+};
+
 export default (props) => {
   const { flow } = props;
 
   return <div className='row flex flex-center'>
     <Form
-      className='f10'
+      className='ccc'
+      style={ style }
       state={ {
         driver: 'mongodb',
       } }

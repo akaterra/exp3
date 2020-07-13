@@ -1,4 +1,8 @@
 class Driver {
+  static get displayName() {
+    this.name;
+  }
+
   static get features() {
     return {};
   }
@@ -46,6 +50,7 @@ class Driver {
       dbs: Object.fromEntries(this.dbManager.dbs),
       descriptor: this._descriptor,
       driver: {
+        displayName: Object.getPrototypeOf(this).constructor.displayName,
         features: Object.getPrototypeOf(this).constructor.features,
         name: Object.getPrototypeOf(this).constructor.name,
       },

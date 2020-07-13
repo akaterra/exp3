@@ -2,11 +2,17 @@ import React from 'react';
 import { ActionList, Source, Select, ViewSwitcher } from '../../atom';
 import { default as ConnectionSourceSelect } from '../connection_source_select';
 
+const style = {
+  menu: {
+    width: '300px',
+  },
+};
+
 export default (props) => {
   const { flow } = props;
   
   return <div className='row flex'>
-    <div className='f-5'>
+    <div className='ccc' style={ style.menu }>
       <div className='row'>
       <Source props={ {
         items: flow.currentDbsNames,
@@ -56,7 +62,7 @@ export default (props) => {
       </Source>
       </div>
     </div>
-    <div className='f15 flex-1'>
+    <div className='ccc flex-1'>
       <div className='row'>
       <Source source={ flow.mode } prop='view'>
         <ViewSwitcher>

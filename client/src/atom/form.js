@@ -54,7 +54,7 @@ export default (props) => {
     setChildren(children);
   }
 
-  return <form { ...{ className: props.className } }>
+  return <form { ...{ className: props.classNam, style: props.style } }>
     <div className='row'>
       { children }
       <div>{ l > 0 ? 'loading' : '' }</div>

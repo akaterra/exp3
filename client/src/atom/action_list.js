@@ -15,6 +15,7 @@ export default (props) => {
 
         return <a
           key={ i }
+          className='link default'
           style={ { display: 'block' } }
           onClick={ props.onSubmit && (() => props.onSubmit(action)) }
         >

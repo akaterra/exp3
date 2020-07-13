@@ -16,3 +16,11 @@ body {
   overflow-x: hidden;
   overflow-y: scroll;
 }
+
+.w200 {
+  width: 200px;
+}
+
+.w400 {
+  width: 400px;
+}
