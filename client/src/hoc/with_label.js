@@ -6,7 +6,7 @@ export default (Component) => {
     const { className, label, ...restProps } = props;
 
     if (label) {
-      return <div className={ className || 'c18' }>
+      return <div className={ className || 'c20' }>
         <Label>{ label }<Component { ...restProps } /></Label>
       </div>
     };

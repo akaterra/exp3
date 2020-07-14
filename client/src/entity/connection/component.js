@@ -6,6 +6,9 @@ const style = {
   menu: {
     width: '300px',
   },
+  menuList: {
+    overflowY: 'auto',
+  },
 };
 
 export default (props) => {
@@ -56,7 +59,7 @@ export default (props) => {
             } }
             view='source:list'
           >
-            <ActionList onSubmit={ (name) => flow.sendSelectCurrentSourceAction(name) }></ActionList>
+            <ActionList style={ style.menuList } onSubmit={ (name) => flow.sendSelectCurrentSourceAction(name) }></ActionList>
           </Source>
         </ViewSwitcher>
       </Source>

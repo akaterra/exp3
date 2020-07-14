@@ -115,7 +115,7 @@ export default (props) => {
 
   if (items && items.length < 2) {
     return <input
-      className='control no-margin'
+      className='control'
       value={ shownValue }
       style={ style.input }
       readonly
@@ -147,6 +147,8 @@ export default (props) => {
 
             setValue(items[index + 1].props.value);
           }
+        } else if (e.keyCode === 32) {
+          setIsShown(!isShown);
         }
       } }
     />

@@ -3,7 +3,8 @@ import { Form, Source, Submit } from '../../atom';
 import { Input, Password, Select } from '../../molecule';
 
 const style = {
-  width: '400px',
+  paddingTop: '50px',
+  width: '300px',
 };
 
 export default (props) => {
@@ -20,11 +21,12 @@ export default (props) => {
         flow.sendConnectAction(params);
       } }
     >
-      <Source source={ flow.currentDriversNames } prop='items' field='driver'><Select.WithLabel label='Driver:' /></Source>
-      <Input.WithLabel label='Host:' field='host' nullable />
-      <Input.WithLabel className='c-9' label='Username:' field='username' nullable />
-      <Password.WithLabel className='c-9' label='Password:' field='password' nullable />
-      <Submit>Connect</Submit>
+      <div className='caption caption-lrg primary center'>DBEE</div>
+      <Source source={ flow.currentDriversNames } prop='items' field='driver' title='Auth tab, driver selectbox'><Select.WithLabel label='Driver:' /></Source>
+      <Input.WithLabel label='Host:' field='host' nullable title='Auth tab, host URI input'/>
+      <Input.WithLabel className='c10' label='Username:' field='username' nullable title='Auth tab, username input'/>
+      <Password.WithLabel className='c10' label='Password:' field='password' nullable title='Auth tab, username input'/>
+      <Submit title='Auth tab, submit'>Connect</Submit>
     </Form>
   </div>;
 };

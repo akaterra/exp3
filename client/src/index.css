@@ -13,8 +13,11 @@ a:hover {
 }
 
 body {
-  overflow-x: hidden;
-  overflow-y: scroll;
+  overflow: hidden;
+}
+
+input:focus, select:focus, textarea:focus, button:focus {
+  outline: none;
 }
 
 .w200 {

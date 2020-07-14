@@ -4,6 +4,12 @@ import { default as Auth } from '../auth';
 import { default as Connection } from '../connection';
 import { Source } from '../../atom';
 
+const style = {
+  main: {
+    paddingTop: '25px',
+  },
+};
+
 function Tabs(props) {
   if (!props.tabs) {
     return null;
@@ -31,17 +37,18 @@ function Tabs(props) {
     setTabs(tabs);
   }, [props.tabs]);
 
-  return <div className='row'>
+  return <div className='row' style={ style.main }>
     <div className='c20'>
       <div className='tabs underlined'>
         <div className='tabs-bar'>
           {
-            tabs.map((tab, i) => <div
+            tabs.map((tab, i) => <button
               className={ i === currentTabIndex ? `tab ${ props.tabs[i].type === 'auth' ? 'primary' : ''} active` : `tab ${ props.tabs[i].type === 'auth' ? 'primary' : ''}` }
               key={ i }
-              onClick={ () => setCurrentTabIndex(i) }>
+              onClick={ () => setCurrentTabIndex(i) }
+            >
               { tab.props.name }
-            </div>)
+            </button>)
           }
         </div>
         <div className='tabs-content underlined'></div>
