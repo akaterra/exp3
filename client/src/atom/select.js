@@ -134,7 +134,7 @@ export default (props) => {
         if (e.keyCode === 38) { // key up
           if (index > 0) {
             if (props.onChange) {
-              props.onChange(value);
+              props.onChange(items[index - 1].props.value);
             }
 
             setValue(items[index - 1].props.value);
@@ -142,7 +142,7 @@ export default (props) => {
         } else if (e.keyCode === 40) { // key down
           if (index < items.length - 1) {
             if (props.onChange) {
-              props.onChange(value);
+              props.onChange(items[index + 1].props.value);
             }
 
             setValue(items[index + 1].props.value);

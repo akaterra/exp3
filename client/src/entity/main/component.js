@@ -39,7 +39,7 @@ function Tabs(props) {
 
   return <div className='row' style={ style.main }>
     <div className='c20'>
-      <div className='tabs underlined'>
+      <div className='tabs'>
         <div className='tabs-bar'>
           {
             tabs.map((tab, i) => <button

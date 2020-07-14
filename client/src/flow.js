@@ -32,7 +32,7 @@ export class SubjectWithCache extends BehaviorSubject {
 }
 
 export class FlowSubscription {
-  constructor(subscriptions) {
+  constructor(...subscriptions) {
     this._subscriptions = subscriptions;
   }
 
@@ -94,12 +94,6 @@ export class Flow extends Subject {
     return this;
   }
 
-  filterAction(...actions) {
-    const stream = this._outgoing.pipe(filter(({ action }) => actions.includes(action)));
-
-    return stream;
-  }
-
   next(data) {
     this._incoming.next(data);
 
@@ -140,30 +134,8 @@ export class Flow extends Subject {
     return this._outgoing.subscribe(...args);
   }
 
-  unpipe() {
-    this._pipes.forEach((pipe) => pipe.unsubscribe());
-    this._pipes = [];
-    return this;
-  }
-  
   wait(...mixed) {
-    if (!mixed.length) {
-      return toPromise(this._incoming);
-    }
-
-    let flows = mixed.filter((flow) => flow instanceof Subject);
-
-    if (flows.length === 0) {
-      flows = mixed = [this._incoming];
-    }
-
-    let actions = flows.length < mixed.length ? mixed.filter((flow) => !(flow instanceof Subject)) : null;
-
-    if (actions && actions.length) {
-      return toPromise(merge(...flows).pipe(filter(({ action }) => actions.includes(action)), first()));
-    }
-
-    return toPromise(merge(...flows).pipe(first()));
+    return !mixed.length ? toPromise(this._incoming) : toPromise(filterAction(this._incoming, ...mixed));
   }
 }
 
@@ -171,10 +143,26 @@ export function getFirst(stream) {
   return stream.pipe(first());
 }
 
-export function toPromise(stream) {
-  return stream.pipe(first()).toPromise();
+export function filterAction(...mixed) {
+  let flows = mixed.filter((flow) => flow instanceof Subject);
+
+  if (flows.length === 0) {
+    return null;
+  }
+
+  let actions = flows.length < mixed.length ? mixed.filter((flow) => !(flow instanceof Subject)) : null;
+
+  if (actions && actions.length) {
+    return merge(...flows).pipe(filter(({ action }) => actions.includes(action)));
+  }
+
+  return merge(...flows);
 }
 
 export function isNotUndefined(val) {
   return val !== undefined;
+}
+
+export function toPromise(stream) {
+  return stream.pipe(first()).toPromise();
 }

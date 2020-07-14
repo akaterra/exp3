@@ -1,15 +1,11 @@
 import { filter, map } from 'rxjs/operators';
 import { default as Component } from './component';
 import { default as _ } from './const';
-import { Flow, getFirst, toPromise } from '../../flow';
+import { Flow, getFirst, filterAction } from '../../flow';
 
 export default class ConnectionSourceSelectFlow extends Flow {
-  get data() {
-    return this.getStream('data');
-  }
-
   get mode() {
-    return this.filterAction(_.MODE);
+    return filterAction(this._outgoing, _MODE);
   }
 
   constructor(api, db, schema, source) {

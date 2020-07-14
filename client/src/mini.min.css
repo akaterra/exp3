@@ -2122,10 +2122,13 @@
   border-width: 2px 0;
 }
 .mini .sml.roof .tabs > .tabs-bar > .tab, .mini .med.roof .tabs > .tabs-bar > .tab, .mini .lrg.roof .tabs > .tabs-bar > .tab {
-  border-width: 2px 0;
+  border-width: 2px 0 0 0;
 }
 .mini .sml.roof .tabs > .tabs-content, .mini .med.roof .tabs > .tabs-content, .mini .lrg.roof .tabs > .tabs-content {
   border-width: 2px 0;
+}
+.mini .sml.roof .tabs > .tabs-content.underlined, .mini .med.roof .tabs > .tabs-content.underlined, .mini .lrg.roof .tabs > .tabs-content.underlined {
+  border-width: 2px 0 0 0;
 }
 .mini .sml .alert-square, .mini .sml .button-square, .mini .sml .control-square, .mini .sml .panel-square, .mini .med .alert-square, .mini .med .button-square, .mini .med .control-square, .mini .med .panel-square, .mini .lrg .alert-square, .mini .lrg .button-square, .mini .lrg .control-square, .mini .lrg .panel-square {
   border-radius: 0;

@@ -1,7 +1,7 @@
 import { map } from 'rxjs/operators';
 import { default as Component } from './component';
 import { default as _ } from './const';
-import { Flow, getFirst, toPromise } from '../../flow';
+import { Flow, getFirst, filterAction, toPromise } from '../../flow';
 import { default as ConnectionSourceSelectFlow} from '../connection_source_select';
 
 export default class ConnectionFlow extends Flow {
@@ -54,7 +54,7 @@ export default class ConnectionFlow extends Flow {
   }
 
   get mode() {
-    return this.filterAction(_.MODE);
+    return filterAction(this._outgoing, _.MODE);
   }
 
   constructor(api) {

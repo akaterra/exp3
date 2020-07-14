@@ -39,7 +39,7 @@ export default (props) => {
         ]);
       }
 
-      children = props.children || <props.component></props.component>;
+      children = props.children || <props.component { ...props.componentProps }></props.component>;
 
       if (!Array.isArray(children)) {
         children = [children];

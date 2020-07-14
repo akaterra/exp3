@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActionList, Source, Select, ViewSwitcher } from '../../atom';
+import { readSourceSelectData } from '../action';
 
 function RowList(props) {
   if (!props.columns) {
@@ -56,7 +57,7 @@ function RowList(props) {
 export default (props) => {
   const { flow } = props;
 
-  return <Source source={ flow.data } prop='...'>
+  return <Source source={ readSourceSelectData(flow) } prop='...'>
     <RowList/>
   </Source>;
 };
