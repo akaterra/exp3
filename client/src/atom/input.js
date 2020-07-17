@@ -13,8 +13,9 @@ export default (props) => {
 
   return <input
     className={ props.className ? `${props.className} control` : 'control' }
-    value={ value }
+    title={ props.title }
     type={ props.type || 'input' }
+    value={ value }
     onBlur={ props.onChange && ((e) => {
       if (!value && props.nullable) {
         props.onChange(undefined);

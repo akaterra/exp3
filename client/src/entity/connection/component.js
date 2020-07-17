@@ -9,6 +9,9 @@ const style = {
   menuList: {
     overflowY: 'auto',
   },
+  main: {
+    overflowX: 'auto',
+  },
 };
 
 export default (props) => {
@@ -65,10 +68,12 @@ export default (props) => {
       </Source>
       </div>
     </div>
-    <div className='ccc flex-1'>
+    <div className='ccc flex-1' style={ style.main }>
       <div className='row'>
       <Source source={ flow.mode } prop='view'>
-        <ViewSwitcher>
+        <ViewSwitcher ignoreUnknown>
+          <div view='db'></div>
+          <div view='schema'></div>
           <ConnectionSourceSelect.Component flow={ flow } view='source'/>
         </ViewSwitcher>
       </Source>

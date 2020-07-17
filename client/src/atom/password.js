@@ -13,8 +13,9 @@ export default (props) => {
 
   return <input
     className='control'
-    value={ value }
+    title={ props.title }
     type={ 'password' }
+    value={ value }
     onBlur={ props.onChange && ((e) => {
       if (!value && props.nullable) {
         props.onChange(undefined);

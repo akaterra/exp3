@@ -2,7 +2,7 @@ import React from "react";
 
 export default (props) => {
   return <div className='c20'>
-    <button className='button shadow' role='submit' onClick={ (e) => {
+    <button className='button shadow' role='submit' title={ props.title } onClick={ (e) => {
       e.preventDefault();
 
       if (props.onSubmit) {

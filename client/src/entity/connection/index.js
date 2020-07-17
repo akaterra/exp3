@@ -70,11 +70,8 @@ export default class ConnectionFlow extends Flow {
 
     while (true) {
       let { action, data } = await this.wait(_.DB_CURRENT_SELECT, _.SCHEMA_CURRENT_SELECT, _.SOURCE_CURRENT_SELECT);
-      let brk;
 
-      do {
-        brk = true;
-
+      while (true) {
         console.log({ action, data }, 'run connection');
 
         switch (action) {
@@ -92,7 +89,7 @@ export default class ConnectionFlow extends Flow {
             } else {
               await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
 
-              this.emitAction(_.MODE, Object.keys(this.currentSchemas.data).length > 1 ? _.SCHEMA_LIST : _.SOURCE_LIST);
+              this.emitAction(_.MODE, 'db').emitAction(_.MODE, Object.keys(this.currentSchemas.data).length > 1 ? _.SCHEMA_LIST : _.SOURCE_LIST);
             }
 
             break;
@@ -106,7 +103,7 @@ export default class ConnectionFlow extends Flow {
             } else {
               await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));
 
-              this.emitAction(_.MODE, _.SOURCE_LIST);
+              this.emitAction(_.MODE, 'schema').emitAction(_.MODE, _.SOURCE_LIST);
             }
 
             break;
@@ -123,37 +120,22 @@ export default class ConnectionFlow extends Flow {
                 this.currentSource.data,
               );
 
-              this.nextAction(_.MODE, 'source');
+              this.emitAction(_.MODE, 'source');
 
               const subscription = this.redirectTo(connectionSourceSelectFlow);
 
-              await connectionSourceSelectFlow.run();
+              ({ action, data } = await connectionSourceSelectFlow.run());
 
               subscription.unsubscribe();
 
-              // const sm = new SourceStateMachine(this._api, this.currentDb.data, this.currentSchema.data, this.currentSource.data);
-
-              // this.nextAction(_.MODE, 'source');
-              // this.incomingPushTo(sm);
-
-              // try {
-              //   const result = await sm.run();
-
-              //   if (result) {
-              //     action = result.action;
-              //     data = result.data;
-              //     brk = false;
-              //   }
-              // } catch (e) {
-
-              // }
-
-              // this.unpipe();
+              continue;
             }
 
             break;
         }
-      } while (!brk);
+
+        break;
+      };
     }
 
     return { action: 'completed' };

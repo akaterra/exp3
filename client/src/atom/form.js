@@ -17,6 +17,7 @@ export default (props) => {
         key: i,
         field: props.field && child.props.field ? `${props.field}.${child.props.field}` : child.props.field,
         value: child.props.field ? params[child.props.field] : undefined,
+        title: child.props.title,
         onChange: child.props.field && ((value) => {
           if (child.props.onChange) {
             child.props.onChange(value);

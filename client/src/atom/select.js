@@ -113,12 +113,15 @@ export default (props) => {
     }
   }
 
+  const title = props.title ? `${props.title}, selected: ${value}` : `Selectbox, selected: ${value}`;
+
   if (items && items.length < 2) {
     return <input
       className='control'
-      value={ shownValue }
       style={ style.input }
       readonly
+      title={ title }
+      value={ shownValue }
     />
   }
 
@@ -126,6 +129,9 @@ export default (props) => {
     <input
       className='control'
       style={ style.input }
+      aria-label={ title }
+      aria-selected={ title }
+      title={ title }
       value={ shownValue }
       onClick={ () => setIsShown(!isShown) }
       onKeyDown={ (e) => {

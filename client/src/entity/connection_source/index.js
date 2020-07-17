@@ -3,17 +3,9 @@ import { default as Component } from './component';
 import { default as _ } from './const';
 import { Flow, getFirst, filterAction } from '../../flow';
 
-export default class ConnectionSourceSelectFlow extends Flow {
-  get data() {
-    return this.getStream('data');
-  }
-
+export default class ConnectionSourceFlow extends Flow {
   get mode() {
     return filterAction(this._outgoing, _.MODE);
-  }
-
-  set data(data) {
-    this.emitAction('source:select:data', data.data).data.next({ action: 'source:select:data', data: data.data });
   }
 
   constructor(api, db, schema, source) {
@@ -26,7 +18,7 @@ export default class ConnectionSourceSelectFlow extends Flow {
   }
 
   async run() {
-    await this.selectRowsSet().toImmediatePromise();
+    await this;
 
     this.emit({ data: null });
     
@@ -41,17 +33,7 @@ export default class ConnectionSourceSelectFlow extends Flow {
       }
     }
   }
-
-  // current source
-
-  selectRowsSet(query) {
-    getFirst(this._api.sourceSelect(this._db, this._schema, this._source, query)).subscribe((data) => {
-      this.data = data;
-    });
-
-    return this.data;
-  }
 }
 
-ConnectionSourceSelectFlow._ = _;
-ConnectionSourceSelectFlow.Component = Component;
+ConnectionSourceFlow._ = _;
+ConnectionSourceFlow.Component = Component;
