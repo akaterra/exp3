@@ -1,6 +1,12 @@
 import { set } from 'invary';
 import React, { Children } from "react";
 
+const style = {
+  item: {
+    paddingRight: '1rem',
+  },
+};
+
 export default (props) => {
   if (!props.children) {
     return null;
@@ -30,6 +36,20 @@ export default (props) => {
         return <div key={ index } style={ { display: 'none' } }>{ child }</div>;
       }
     });
+
+    if (props.switchers) {
+      children.unshift(<div className='c20'>
+        {
+          Object.entries(props.switchers).map(([key, val]) => <a
+            className={ key === props.view ? 'link primary text-shadow' : 'link default' }
+            style={ style.item }
+            onClick={ _ => setView(key) }
+          >
+            { val }
+          </a>)
+        }
+      </div>);
+    }
 
     setChildren(children);
     setView(view);

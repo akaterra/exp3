@@ -6,8 +6,14 @@ export default (props) => {
   const { flow } = props;
 
   return <Source source={ readMode(flow) } prop='view'>
-    <ViewSwitcher>
+    <ViewSwitcher switchers={{
+      'source:statistic': 'Statistic',
+      'source': 'Select',
+      'source:alter': 'Alter schema',
+    }}>
+      <div view='source:statistic'></div>
       <div view='source:select'></div>
+      <div view='source:alter'></div>
     </ViewSwitcher>
   </Source>;
 };

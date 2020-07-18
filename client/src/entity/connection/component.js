@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActionList, Source, Select, ViewSwitcher } from '../../atom';
+import { default as ConnectionSource } from '../connection_source';
 import { default as ConnectionSourceSelect } from '../connection_source_select';
 
 const style = {
@@ -43,6 +44,7 @@ export default (props) => {
           <Source
             props={ {
               items: [flow.currentDbsNames, _ => _.map(_ => [_, _])],
+              value: flow.currentDb,
             } }
             view='db:list'
           >
@@ -51,6 +53,7 @@ export default (props) => {
           <Source
             props={ {
               items: [flow.currentSchemasNames, _ => _.map(_ => [_, _])],
+              value: flow.currentSchema,
             } }
             view='schema:list'
           >
@@ -59,10 +62,11 @@ export default (props) => {
           <Source
             props={ {
               items: [flow.currentSourcesNames, _ => _.map(_ => [_, _])],
+              value: flow.currentSource,
             } }
             view='source:list'
           >
-            <ActionList style={ style.menuList } onSubmit={ (name) => flow.sendSelectCurrentSourceAction(name) }></ActionList>
+            <ActionList onSubmit={ (name) => flow.sendSelectCurrentSourceAction(name) }></ActionList>
           </Source>
         </ViewSwitcher>
       </Source>
@@ -74,6 +78,7 @@ export default (props) => {
         <ViewSwitcher ignoreUnknown>
           <div view='db'></div>
           <div view='schema'></div>
+          <ConnectionSource.Component flow={ flow } view='source'/>
           <ConnectionSourceSelect.Component flow={ flow } view='source'/>
         </ViewSwitcher>
       </Source>

@@ -61,7 +61,7 @@ export default (props) => {
 
           return <a
             key={ i }
-            className={ item === value ? 'link primary' : 'link default' }
+            className={ item === value ? 'link primary text-shadow' : 'link default' }
             style={ { display: 'block' } }
             value={ item }
             onClick={ () => {
@@ -95,7 +95,7 @@ export default (props) => {
 
           return <a
             key={ key }
-            className={ key === value ? 'link primary' : 'link default' }
+            className={ key === value ? 'link primary text-shadow' : 'link default' }
             style={ { display: 'block' } }
             value={ key }
             onClick={ () => {
