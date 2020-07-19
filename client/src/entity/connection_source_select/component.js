@@ -1,6 +1,12 @@
 import React from 'react';
-import { ActionList, Source, Select, ViewSwitcher } from '../../atom';
+import { ActionList, Source, Select, ValueViewer, ViewSwitcher } from '../../atom';
 import { readSourceSelectData } from '../action';
+
+const style = {
+  td: {
+    verticalAlign: 'top',
+  },
+};
 
 function RowList(props) {
   if (!props.columns) {
@@ -26,7 +32,7 @@ function RowList(props) {
             arr[columnIndexes[key]] = res[key];
           }
 
-          arr.forEach((val, ind) => arr[ind] = <td>{ val !== undefined ? JSON.stringify(val) : null }</td>);
+          arr.forEach((val, ind) => arr[ind] = <td style={ style.td }><ValueViewer refresh={ true } value={ val }/></td>);
 
           return <tr>{ arr }</tr>;
         }) }
@@ -45,7 +51,7 @@ function RowList(props) {
             arr[columnIndexes[key]] = res[key];
           }
 
-          arr.forEach((val, ind) => arr[ind] = <td>{ val !== undefined ? JSON.stringify(val) : null }</td>);
+          arr.forEach((val, ind) => arr[ind] = <td style={ style.td }><ValueViewer refresh={ true } value={ val }/></td>);
 
           return <tr>{ arr }</tr>;
         }) }

@@ -134,7 +134,7 @@ class Source extends _.Source {
   async select(query) {
     const { filter, limit, offset, sort, projection } = query;
     const client = await this.client;
-    const res = await client.query(`SELECT * FROM ${this.name};`);
+    const res = await client.query(`SELECT * FROM ${this.name} LIMIT $1 OFFSET $2;`, [limit || 20, offset || 0]);
 
     return {
       columns: res.fields.map((field) => field.name),

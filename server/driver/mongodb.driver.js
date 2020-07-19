@@ -102,7 +102,7 @@ class Source extends _.Source {
   async select(query) {
     const { filter, limit, offset, sort, projection } = query;
     const client = await this.client;
-    const res = await client.db(this.db.name).collection(this.name).find().toArray();
+    const res = await client.db(this.db.name).collection(this.name).find().limit(limit || 20).toArray();
 
     return {
       columns: Array.from(res.reduce((acc, doc) => {
