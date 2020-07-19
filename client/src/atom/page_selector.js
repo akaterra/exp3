@@ -4,11 +4,13 @@ const style = {
   container: {
     '>*:nthChild(even)': { backgroundColor: 'grey' },
   },
-  arrow: {
-    minWidth: '30px',
-  },
   index: {
-    minWidth: '30px',
+    fontFamily: 'monospace',
+    minWidth: '4rem',
+  },
+  nav: {
+    fontFamily: 'monospace',
+    minWidth: '4rem',
   },
 };
 
@@ -46,7 +48,7 @@ export default (props) => {
   for (;start <= end; start += 1) {
     tabs.push(
       <a
-        className={ start === currentIndex ? 'bagde link primary text-shadow center' : 'link default center' }
+        className={ start === currentIndex ? 'link primary text-shadow center' : 'link default center' }
         style={ style.index }
         onClick={ function(start) {
           if (props.onSelect) {
@@ -60,12 +62,20 @@ export default (props) => {
   }
 
   return <div className='c20' style={ style.container }>
-    <a className='link default center' style={ style.arrow }>&lt;&lt;</a>
-    <a className='link default center' style={ style.arrow }>-10</a>
-    <a className='link default center' style={ style.arrow }>&lt;</a>
-    { tabs }
-    <a className='link default center' style={ style.arrow }>&gt;</a>
-    <a className='link default center' style={ style.arrow }>+10</a>
-    <a className='link default center' style={ style.arrow }>&gt;&gt;</a>
+    <button className='button button-inline primary center' style={ style.nav }>1</button>
+    <button className='button button-inline default center' style={ style.nav }>-10</button>
+    <button className='button button-inline default center' style={ style.nav } onClick={ _ => {
+      if (props.onSelect && currentIndex - 1 >= 0) {
+        props.onSelect(currentIndex - 1, (currentIndex - 1) * perPage);
+      }
+    } }>-1</button>
+      { tabs }
+    <button className='button button-inline default center' style={ style.nav } onClick={ _ => {
+      if (props.onSelect && currentIndex + 1 <= max) {
+        props.onSelect(currentIndex + 1, (currentIndex + 1) * perPage);
+      }
+    } }>+1</button>
+    <button className='button button-inline default center' style={ style.nav }>+10</button>
+    <button className='button button-inline primary center' style={ style.nav }>{ max + 1 }</button>
   </div>;
 };

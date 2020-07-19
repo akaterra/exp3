@@ -25,29 +25,27 @@ export default class ConnectionSourceSelectFlow extends Flow {
     this._source = source;
   }
 
-  async run() {
+  async onRunIterAction(action, data) {
+    console.log({ action, data }, 'run source select');
+
+    switch (action) {
+      case 'source:select:filter':
+        Object.assign(this._query, data);
+        this.emitAction('source:select:filter', this._query);
+
+        this.selectRowsSet(this._query);
+
+        break;
+      default:
+        return false;
+    }
+  }
+
+  async onRunInit() {
     await this.selectRowsSet().toImmediatePromise();
 
     this.emit({ data: null });
     this.emitAction('source:select:filter', this._query);
-    
-    while (true) {
-      let { action, data } = await this.wait();
-
-      console.log({ action, data }, 'run source select');
-
-      switch (action) {
-        case 'source:select:filter':
-          Object.assign(this._query, data);
-          this.emitAction('source:select:filter', this._query);
-
-          this.selectRowsSet(this._query);
-
-          break;
-        default:
-          return { action, data };
-      }
-    }
   }
 
   // current source

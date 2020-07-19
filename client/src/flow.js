@@ -107,6 +107,40 @@ export class Flow extends Subject {
   }
 
   async run() {
+    await this.onRunInit();
+
+    let action;
+    let data;
+
+    while (true) {
+      try {
+        ({ action, data } = await this.wait());
+
+        let result = await this.onRunIterAction(action, data);
+
+        while (typeof result === 'object') {
+          result = await this.onRunIterAction(result.action, result.data);
+        }
+
+        if (result === false) {
+          break;
+        }
+      } catch (error) {
+        this.emitAction('error', { error });
+      }
+    }
+
+    // this._incoming.complete();
+    // this._outgoing.complete();
+
+    return { action, data };
+  }
+
+  async onRunIterAction(action, data) {
+    
+  }
+
+  async onRunInit() {
 
   }
 
