@@ -54,6 +54,10 @@ export default (props) => {
 
           if (prop === '...') {
             props = initialChildrenProps[index] = all(initialChildrenProps[index], ...Object.entries(data).flat());
+          } else if (typeof prop === 'object') {
+            for (let key of Object.keys(prop)) {
+              props = initialChildrenProps[index] = set(initialChildrenProps[index], prop[key], data[key]);
+            }
           } else {
             props = initialChildrenProps[index] = set(initialChildrenProps[index], prop, data);
           }

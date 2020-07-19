@@ -1,4 +1,3 @@
-import { filter, map } from 'rxjs/operators';
 import { default as Component } from './component';
 import { default as _ } from './const';
 import { Flow, getFirst, filterAction } from '../../flow';
@@ -21,6 +20,7 @@ export default class ConnectionSourceSelectFlow extends Flow {
 
     this._api = api;
     this._db = db;
+    this._query = { limit: 20, offset: 0 };
     this._schema = schema;
     this._source = source;
   }
@@ -29,13 +29,21 @@ export default class ConnectionSourceSelectFlow extends Flow {
     await this.selectRowsSet().toImmediatePromise();
 
     this.emit({ data: null });
+    this.emitAction('source:select:filter', this._query);
     
     while (true) {
       let { action, data } = await this.wait();
 
-      console.log({ action, data }, 'run source');
+      console.log({ action, data }, 'run source select');
 
       switch (action) {
+        case 'source:select:filter':
+          Object.assign(this._query, data);
+          this.emitAction('source:select:filter', this._query);
+
+          this.selectRowsSet(this._query);
+
+          break;
         default:
           return { action, data };
       }

@@ -1,47 +1,48 @@
 import React, { Component } from "react";
 
 const style = {
-  array: {
-    display: 'block',
-    fontFamily: 'monospace',
-    whiteSpace: 'nowrap',
-  },
   boolean: {
     display: 'block',
     fontFamily: 'monospace',
+    fontWeight: '300',
   },
   Date: {
     display: 'block',
     fontFamily: 'monospace',
+    fontWeight: '300',
   },
   key: {
     paddingRight: '0.25rem',
     fontFamily: 'monospace',
+    fontWeight: '300',
   },
   null: {
     display: 'block',
     fontFamily: 'monospace',
+    fontWeight: '300',
   },
   number: {
     display: 'block',
     fontFamily: 'monospace',
-  },
-  object: {
-    display: 'block',
-    fontFamily: 'monospace',
-    whiteSpace: 'nowrap',
+    fontWeight: '300',
   },
   string: {
     display: 'block',
     fontFamily: 'monospace',
+    fontWeight: '300',
+  },
+
+  arrObj: {
+    color: '#a38529',
+    display: 'block',
+    fontFamily: 'monospace',
+    whiteSpace: 'nowrap',
   },
   sub: {
     borderLeft: '2px solid #bfbfbf',
     fontFamily: 'monospace',
-    marginBottom: '0.5rem',
-    marginTop: '0.5rem',
-    paddingLeft: 'calc(1rem - 2px)',
-    
+    margin: '0.5rem 0 0.5rem calc(0.25rem - 1px)',
+    paddingLeft: 'calc(0.75rem - 1px)',
   },
 }
 
@@ -64,39 +65,43 @@ const ValueViewerComponent = (props) => {
     }
 
     if (value === null) {
-      children = <span style={ style.boolean }>{ keyName }{ value }</span>;
+      children = <span className='default-1' style={ style.null }>{ keyName }{ 'Null' }</span>;
     } else if (value instanceof Date) {
-      children = <span style={ style.boolean }>{ keyName }{ value.replace(/-/g, '&#8209;') }</span>;
+      children = <span className='default-1' style={ style.date }>{ keyName }{ value.replace(/-/g, '&#8209;') }</span>;
     } else {
       switch (typeof value) {
         case 'boolean':
-          children = <span style={ style.boolean }>{ keyName }{ value }</span>
+          children = <span className='failure-1' style={ style.boolean }>{ keyName }{ value ? 'True' : 'False' }</span>
 
           break;
         case 'number':
-          children = <span style={ style.number }>{ keyName }{ value }</span>
+          children = <span className='primary-1' style={ style.number }>{ keyName }{ value }</span>
 
           break;
         case 'object':
           if (Array.isArray(value)) {
+            const len = value.length;
+
             children = <a
-              style={ style.array }
-              onClick={ _ => setChildren(<ValueViewerArrComponent keyName={ keyName } value={ value }/>)}
+              style={ style.arrObj }
+              onClick={ len && (_ => setChildren(<ValueViewerArrComponent keyName={ keyName } value={ value }/>))}
             >
-              { keyName }{ `[ ${value.length} ]` }
+              { keyName }{ `[ ${len} ]` }
             </a>
           } else {
+            const len = Object.keys(value).length;
+
             children = <a
-              style={ style.object }
-              onClick={ _ => setChildren(<ValueViewerObjComponent keyName={ keyName } value={ value }/>)}
+              style={ style.arrObj }
+              onClick={ len && (_ => setChildren(<ValueViewerObjComponent keyName={ keyName } value={ value }/>))}
             >
-              { keyName }{ `{ ${Object.keys(value).length} }` }
+              { keyName }{ `{ ${len} }` }
             </a>
           }
 
           break;
         case 'string':
-          children = <span style={ style.string }>{ keyName }{ value }</span>
+          children = <span className='success-1' style={ style.string }>{ keyName }{ value }</span>
 
           break;
       }
@@ -119,7 +124,7 @@ const ValueViewerArrComponent = (props) => {
 
   return [
     <a
-    style={ style.object }
+    style={ style.arrObj }
     onClick={ _ => {
       setIsExpended(!isExpended);
     } }
@@ -143,7 +148,7 @@ const ValueViewerObjComponent = (props) => {
 
   return [
     <a
-    style={ style.object }
+    style={ style.arrObj }
     onClick={ _ => {
       setIsExpended(!isExpended);
     } }

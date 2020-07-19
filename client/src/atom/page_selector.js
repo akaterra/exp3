@@ -1,52 +1,71 @@
 import React from "react";
 
 const style = {
+  container: {
+    '>*:nthChild(even)': { backgroundColor: 'grey' },
+  },
   arrow: {
     minWidth: '30px',
   },
   index: {
-    ':nthChild(even)': { backgroundColor: 'grey' },
+    minWidth: '30px',
   },
 };
 
 export default (props) => {
-  let { page, perPage=20, total } = props;
+  let { index, perPage=20, total, value } = props;
 
   if (!total) {
     return null;
   }
 
-  [page, setPage] = React.useState(page);
+  let currentIndex = value !== undefined ? Math.floor(value / perPage) : index;
 
-  let pageEnd = page + 4;
-  let pageMax = Math.floor(total / perPage);
-  let pageStart = page - 4;
+  let end = currentIndex + 4;
+  let max = Math.floor(total / perPage);
+  let start = currentIndex - 4;
 
-  if (pageStart < 0) {
-    if (pageEnd - pageStart <= pageMax) {
-      pageEnd -= pageStart;
+  if (start < 0) {
+    if (end - start <= max) {
+      end -= start;
     }
 
-    pageStart = 0;
+    start = 0;
   }
 
-  if (pageEnd > pageMax) {
-    if (pageStart - (pageEnd - pageMax) >= 0) {
-      pageStart -= (pageEnd - pageMax);
+  if (end > max) {
+    if (start - (end - max) >= 0) {
+      start -= (end - max);
     }
 
-    pageEnd = pageMax;
+    end = max;
   }
 
   const tabs = [];
 
-  for (;pageStart <= pageEnd; pageStart += 1) {
-    tabs.push(<a className='link default' style={ style.index }>{ pageStart }</a>);
+  for (;start <= end; start += 1) {
+    tabs.push(
+      <a
+        className={ start === currentIndex ? 'bagde link primary text-shadow center' : 'link default center' }
+        style={ style.index }
+        onClick={ function(start) {
+          if (props.onSelect) {
+            props.onSelect(start, start * perPage);
+          }
+        }.bind(null, start) }
+      >
+        { start + 1 }
+      </a>
+    );
   }
 
-  return <div className='c20'>
-    <a className='link default' style={ style.arrow }>&lt;&lt;</a>
+  return <div className='c20' style={ style.container }>
+    <a className='link default center' style={ style.arrow }>&lt;&lt;</a>
+    <a className='link default center' style={ style.arrow }>-10</a>
+    <a className='link default center' style={ style.arrow }>&lt;</a>
     { tabs }
-    <a className='link default' style={ style.arrow }>&gt;&gt;</a>
+    <a className='link default center' style={ style.arrow }>&gt;</a>
+    <a className='link default center' style={ style.arrow }>+10</a>
+    <a className='link default center' style={ style.arrow }>&gt;&gt;</a>
   </div>;
 };

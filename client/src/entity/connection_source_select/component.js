@@ -1,7 +1,14 @@
 import React from 'react';
-import { ActionList, Source, Select, ValueViewer, ViewSwitcher } from '../../atom';
-import { readSourceSelectData } from '../action';
+import { ActionList, PageSelector, Source, Select, ValueViewer, ViewSwitcher } from '../../atom';
+import {
+  readSourceSelectData,
+  readSourceSelectFilter,
+  sendSourceSelectFilterOffsetAction,
+} from '../action';
 
+const stub = {
+  td: <td/>,
+};
 const style = {
   td: {
     verticalAlign: 'top',
@@ -32,7 +39,7 @@ function RowList(props) {
             arr[columnIndexes[key]] = res[key];
           }
 
-          arr.forEach((val, ind) => arr[ind] = <td style={ style.td }><ValueViewer refresh={ true } value={ val }/></td>);
+          arr.forEach((val, ind) => arr[ind] = <td style={ style.td }><ValueViewer value={ val }/></td>);
 
           return <tr>{ arr }</tr>;
         }) }
@@ -45,15 +52,17 @@ function RowList(props) {
       </thead>
       <tbody>
         { props.result.map((res) => {
-          const arr = new Array(props.columns.length);
-
-          for (const key of Object.keys(res)) {
-            arr[columnIndexes[key]] = res[key];
-          }
-
-          arr.forEach((val, ind) => arr[ind] = <td style={ style.td }><ValueViewer refresh={ true } value={ val }/></td>);
-
-          return <tr>{ arr }</tr>;
+          return <tr>
+            {
+              props.columns.map((columnName) => {
+                if (columnName in res) {
+                  return <td style={ style.td }><ValueViewer value={ res[columnName] }/></td>;
+                } else {
+                  return stub.td;
+                }
+              })
+            }
+          </tr>;
         }) }
       </tbody>
     </table>;
@@ -63,7 +72,15 @@ function RowList(props) {
 export default (props) => {
   const { flow } = props;
 
-  return <Source source={ readSourceSelectData(flow) } prop='...'>
-    <RowList/>
-  </Source>;
+  return <React.Fragment>
+    <Source source={ readSourceSelectData(flow) } prop='...'>
+      <RowList/>
+    </Source>
+    <Source props={ [
+      [readSourceSelectData(flow), { totalCount: 'total' }],
+      [readSourceSelectFilter(flow), { limit: 'perPage', offset: 'value' }],
+    ] }>
+      <PageSelector onSelect={ sendSourceSelectFilterOffsetAction.bind(null, flow) } />
+    </Source>
+  </React.Fragment>;
 };
