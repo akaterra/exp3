@@ -2126,16 +2126,22 @@
   right: auto;
 }
 
-.mini .back {
-  background-color: inherit;
-}
 .mini .back-light, .mini.back-light {
+  background-color: #f7f7f7;
+}
+.mini .back-light .back-color, .mini.back-light .back-color {
   background-color: #f7f7f7;
 }
 .mini .back-medium, .mini.back-medium {
   background-color: #f0f0f0;
 }
+.mini .back-medium .back-color, .mini.back-medium .back-color {
+  background-color: #f0f0f0;
+}
 .mini .back-dark, .mini.back-dark {
+  background-color: #e8e8e8;
+}
+.mini .back-dark .back-color, .mini.back-dark .back-color {
   background-color: #e8e8e8;
 }
 

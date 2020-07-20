@@ -9,6 +9,7 @@
     "clickhouse": "^2.1.4",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "file-loader": "^6.0.0",
     "firebase": "^7.15.4",
     "i": "^0.3.6",
     "invary": "^1.0.7",

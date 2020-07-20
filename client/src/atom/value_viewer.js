@@ -51,17 +51,17 @@ const ValueViewerComponent = (props) => {
     }
 
     if (value === null) {
-      children = <span className='default-1' style={ style.null }>{ keyName }{ 'Null' }</span>;
+      children = <span className='success-dark-20' style={ style.null }>{ keyName }{ 'Null' }</span>;
     } else if (value instanceof Date) {
-      children = <span className='default-1' style={ style.date }>{ keyName }{ value.replace(/-/g, '&#8209;') }</span>;
+      children = <span className='success-dark-20' style={ style.date }>{ keyName }{ value.replace(/-/g, '&#8209;') }</span>;
     } else {
       switch (typeof value) {
         case 'boolean':
-          children = <span className='failure-1' style={ style.boolean }>{ keyName }{ value ? 'True' : 'False' }</span>
+          children = <span className='failure-dark-20' style={ style.boolean }>{ keyName }{ value ? 'True' : 'False' }</span>
 
           break;
         case 'number':
-          children = <span className='primary-1' style={ style.number }>{ keyName }{ value }</span>
+          children = <span className='primary-dark-20' style={ style.number }>{ keyName }{ value }</span>
 
           break;
         case 'object':
@@ -69,6 +69,7 @@ const ValueViewerComponent = (props) => {
             const len = value.length;
 
             children = <a
+              className='warning-dark-20'
               style={ style.arrObj }
               onClick={ len && (_ => setChildren(<ValueViewerArrComponent keyName={ keyName } value={ value }/>))}
             >
@@ -78,6 +79,7 @@ const ValueViewerComponent = (props) => {
             const len = Object.keys(value).length;
 
             children = <a
+              className='warning-dark-20'
               style={ style.arrObj }
               onClick={ len && (_ => setChildren(<ValueViewerObjComponent keyName={ keyName } value={ value }/>))}
             >
@@ -87,7 +89,7 @@ const ValueViewerComponent = (props) => {
 
           break;
         case 'string':
-          children = <span className='success-1' style={ style.string }>{ keyName }{ value }</span>
+          children = <span className='default-dark-20' style={ style.string }>{ keyName }{ value }</span>
 
           break;
       }

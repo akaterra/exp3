@@ -49,21 +49,29 @@ export default (props) => {
       const initialChildrenProps = children.map((child, index) => ({ key: index, ...restProps, ...child.props }));
 
       function applyPropToChildren(prop, data) {
-        children = initialChildren.map((child, index) => {
-          let props;
+        let props;
 
-          if (prop === '...') {
+        if (prop === '...') {
+          children = initialChildren.map((child, index) => {
             props = initialChildrenProps[index] = all(initialChildrenProps[index], ...Object.entries(data).flat());
-          } else if (typeof prop === 'object') {
-            for (let key of Object.keys(prop)) {
+  
+            return React.cloneElement(child, props);
+          });
+        } else if (typeof prop === 'object') {
+          children = initialChildren.map((child, index) => {
+            for (const key of Object.keys(prop)) {
               props = initialChildrenProps[index] = set(initialChildrenProps[index], prop[key], data[key]);
             }
-          } else {
+  
+            return React.cloneElement(child, props);
+          });
+        } else {
+          children = initialChildren.map((child, index) => {
             props = initialChildrenProps[index] = set(initialChildrenProps[index], prop, data);
-          }
-
-          return React.cloneElement(child, props);
-        });
+  
+            return React.cloneElement(child, props);
+          });
+        }
 
         setChildren(children);
       }

@@ -67,7 +67,7 @@ function makeRows(rows, columns, limit) {
   });
 
   if (rows.length < limit) {
-    for (let i = rows.length; i <= limit; i += 1) {
+    for (let i = rows.length; i < limit; i += 1) {
       rows.push(trStub);
     }
   }
@@ -79,7 +79,10 @@ export default (props) => {
   const { flow } = props;
 
   return <React.Fragment>
-    <Source source={ readSourceSelectData(flow) } prop='...'>
+    <Source props={ [
+      [readSourceSelectData(flow), '...'],
+      [readSourceSelectFilter(flow), { limit: 'limit' }],
+    ] }>
       <RowList/>
     </Source>
     <Source props={ [

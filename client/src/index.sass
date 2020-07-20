@@ -4,39 +4,43 @@ $col-primary: hsl(210, 60%, 50%)
 $col-success: hsl(135, 60%, 50%)
 $col-warning: hsl(45, 60%, 50%)
 
+@font-face 
+  font-family: "VictorMono"
+  src: url(./VictorMonoAll/OTF/VictorMono-Bold.otf) format("opentype")
+
 table
   border-collapse: collapse
 
 table
   width: 100%
 
-table>thead>tr:nth-child(even), table>tbody>tr:nth-child(even)
+table>thead>tr:nth-child(odd), table>tbody>tr:nth-child(odd)
   background-color: #e8e8e8
 
 th, td
   border-bottom: 2px solid #ddd
-  font-family: monospace
-  font-weight: 300
+  font-family: VictorMono
+  font-size: small
   padding: 0.25rem 0.5rem
   overflow: hidden
   text-overflow: ellipsis
   vertical-align: top
   white-space: nowrap
 
-.default-1
-    color: darken($col-default, 25%)
+.default-dark-20
+    color: darken($col-default, 15%)
 
-.failure-1
-    color: darken($col-failure, 25%)
+.failure-dark-20
+    color: darken($col-failure, 10%)
 
-.primary-1
-    color: darken($col-primary, 25%)
+.primary-dark-20
+    color: darken($col-primary, 10%)
 
-.success-1
-    color: darken($col-success, 25%)
+.success-dark-20
+    color: darken($col-success, 10%)
 
-.warning-1
-    color: darken($col-warning, 25%)
+.warning-dark-20
+    color: darken($col-warning, 15%)
 
 .button.button-inline
     border-radius: 2rem
