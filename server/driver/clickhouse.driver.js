@@ -97,7 +97,7 @@ class Source extends _.Source {
   async select(query) {
     const { filter, limit, offset, sort, projection } = query;
     const client = await this.client;
-    const res = await client.query(`SELECT * FROM ${this.db.name}.${this.name};`).toPromise();
+    const res = await client.query(`SELECT * FROM ${this.db.name}.${this.name} LIMIT ${offset || 0}, ${limit || 20};`).toPromise();
 
     return {
       columns: Array.from(res.reduce((acc, doc) => {

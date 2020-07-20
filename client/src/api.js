@@ -1,49 +1,4 @@
-import { Observable, Subject } from 'rxjs';
-import { take } from 'rxjs/operators';
-
-class SubjectWithCache extends Subject {
-  setCache(data) {
-    this._data = data;
-
-    for (const observer of this.observers) {
-      observer.next(data);
-    }
-
-    return this;
-  }
-
-  subscribe(...args) {
-    const subscription = super.subscribe(...args);
-
-    if (this._data !== undefined) {
-      subscription.next(this._data);
-    }
-
-    return subscription;
-  }
-
-  toImmediatePromise(resolveCached) {
-    if (resolveCached && this._data !== undefined) {
-      return Promise.resolve(this._data);
-    }
-
-    return this.pipe(take(1)).toPromise();
-  }
-}
-
-class Streamable {
-  constructor() {
-    this._streams = new Map();
-  }
-
-  getStream(name) {
-    if (!this._streams.has(name)) {
-      this._streams.set(name, new SubjectWithCache());
-    }
-
-    return this._streams.get(name);
-  }
-}
+import { Streamable } from './streamable';
 
 class Connection extends Streamable {
   get session() {
@@ -215,11 +170,7 @@ class ConnectionManager extends Streamable {
 
 function wrapToStream(promise, stream, action) {
   promise.then((data) => {
-    if (stream instanceof SubjectWithCache) {
-      stream.setCache({ action, data });
-    } else {
-      stream.next({ action, data });
-    }
+    stream.next({ action, data });
   });
 
   return stream;

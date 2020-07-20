@@ -33,7 +33,7 @@ export default class MainFlow extends Flow {
       }]),
     });
 
-    const connections = await this._api.selectConnections().toImmediatePromise();
+    const connections = await this._api.selectConnections().toPromise();
 
     this.tabs.next({
       action: 'tab:list',

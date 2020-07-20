@@ -3,44 +3,30 @@ import React, { Component } from "react";
 const style = {
   boolean: {
     display: 'block',
-    fontFamily: 'monospace',
-    fontWeight: '300',
   },
   Date: {
     display: 'block',
-    fontFamily: 'monospace',
-    fontWeight: '300',
   },
   key: {
     paddingRight: '0.25rem',
-    fontFamily: 'monospace',
-    fontWeight: '300',
   },
   null: {
     display: 'block',
-    fontFamily: 'monospace',
-    fontWeight: '300',
   },
   number: {
     display: 'block',
-    fontFamily: 'monospace',
-    fontWeight: '300',
   },
   string: {
     display: 'block',
-    fontFamily: 'monospace',
-    fontWeight: '300',
   },
 
   arrObj: {
     color: '#a38529',
     display: 'block',
-    fontFamily: 'monospace',
     whiteSpace: 'nowrap',
   },
   sub: {
     borderLeft: '2px solid #bfbfbf',
-    fontFamily: 'monospace',
     margin: '0.5rem 0 0.5rem calc(0.25rem - 1px)',
     paddingLeft: 'calc(0.75rem - 1px)',
   },

@@ -4,22 +4,44 @@ $col-primary: hsl(210, 60%, 50%)
 $col-success: hsl(135, 60%, 50%)
 $col-warning: hsl(45, 60%, 50%)
 
+table
+  border-collapse: collapse
+
+table
+  width: 100%
+
+table>thead>tr:nth-child(even), table>tbody>tr:nth-child(even)
+  background-color: #e8e8e8
+
+th, td
+  border-bottom: 2px solid #ddd
+  font-family: monospace
+  font-weight: 300
+  padding: 0.25rem 0.5rem
+  overflow: hidden
+  text-overflow: ellipsis
+  vertical-align: top
+  white-space: nowrap
+
 .default-1
-    color: darken($col-default, 15%)
+    color: darken($col-default, 25%)
 
 .failure-1
-    color: darken($col-failure, 15%)
+    color: darken($col-failure, 25%)
 
 .primary-1
-    color: darken($col-primary, 15%)
+    color: darken($col-primary, 25%)
 
 .success-1
-    color: darken($col-success, 15%)
+    color: darken($col-success, 25%)
 
 .warning-1
-    color: darken($col-warning, 15%)
+    color: darken($col-warning, 25%)
 
 .button.button-inline
     border-radius: 2rem
     display: inline-block
     width: auto
+
+.tab.active
+    background-color: #f0f0f0 !important

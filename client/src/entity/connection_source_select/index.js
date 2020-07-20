@@ -20,7 +20,7 @@ export default class ConnectionSourceSelectFlow extends Flow {
 
     this._api = api;
     this._db = db;
-    this._query = { limit: 20, offset: 0 };
+    this._query = { limit: 25, offset: 0 };
     this._schema = schema;
     this._source = source;
   }
@@ -42,7 +42,7 @@ export default class ConnectionSourceSelectFlow extends Flow {
   }
 
   async onRunInit() {
-    await this.selectRowsSet().toImmediatePromise();
+    await this.selectRowsSet().toPromise();
 
     this.emit({ data: null });
     this.emitAction('source:select:filter', this._query);

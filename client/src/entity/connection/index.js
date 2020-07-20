@@ -64,7 +64,7 @@ export default class ConnectionFlow extends Flow {
   }
 
   async run() {
-    await this.selectCurrentDbs().toImmediatePromise();
+    await this.selectCurrentDbs().toPromise();
 
     this.emitAction(_.MODE, _.DB_LIST);
 
@@ -122,11 +122,7 @@ export default class ConnectionFlow extends Flow {
 
               this.emitAction(_.MODE, 'source');
 
-              const subscription = this.redirectTo(connectionSourceSelectFlow);
-
-              ({ action, data } = await connectionSourceSelectFlow.run());
-
-              subscription.unsubscribe();
+              ({ action, data } = await this.redirectToAndRun(connectionSourceSelectFlow));
 
               continue;
             }

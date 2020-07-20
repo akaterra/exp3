@@ -10,14 +10,16 @@ const stub = {
   td: <td/>,
 };
 const style = {
-  td: {
-    verticalAlign: 'top',
-  },
+
 };
 
 function RowList(props) {
   if (!props.columns) {
     return null;
+  }
+
+  if (!props.result || props.result.length === 0) {
+    return <div className='span success'>No data</div>;
   }
 
   const columnIndexes = props.columns.reduce((acc, key, ind) => {
@@ -32,17 +34,7 @@ function RowList(props) {
         { props.columns.map((key) => <td>{ key }</td>) }
       </thead>
       <tbody>
-        { props.result.map((res) => {
-          const arr = new Array(props.columns.length);
-
-          for (const key of Object.keys(res)) {
-            arr[columnIndexes[key]] = res[key];
-          }
-
-          arr.forEach((val, ind) => arr[ind] = <td style={ style.td }><ValueViewer value={ val }/></td>);
-
-          return <tr>{ arr }</tr>;
-        }) }
+        { makeRows(props.result, props.columns, props.limit || 20) }
       </tbody>
     </table>;
   } else {
@@ -51,23 +43,37 @@ function RowList(props) {
         { props.columns.map((key) => <td>{ key }</td>) }
       </thead>
       <tbody>
-        { props.result.map((res) => {
-          return <tr>
-            {
-              props.columns.map((columnName) => {
-                if (columnName in res) {
-                  return <td style={ style.td }><ValueViewer value={ res[columnName] }/></td>;
-                } else {
-                  return stub.td;
-                }
-              })
-            }
-          </tr>;
-        }) }
+        { makeRows(props.result, props.columns, props.limit || 20) }
       </tbody>
     </table>;
   }
 };
+
+function makeRows(rows, columns, limit) {
+  const trStub = <tr><td colspan={ limit }>&nbsp;</td></tr>;
+
+  rows = rows.map((row) => {
+    return <tr>
+      {
+        columns.map((columnName) => {
+          if (columnName in row) {
+            return <td style={ style.td }><ValueViewer value={ row[columnName] }/></td>;
+          } else {
+            return stub.td;
+          }
+        })
+      }
+    </tr>;
+  });
+
+  if (rows.length < limit) {
+    for (let i = rows.length; i <= limit; i += 1) {
+      rows.push(trStub);
+    }
+  }
+
+  return rows;
+}
 
 export default (props) => {
   const { flow } = props;

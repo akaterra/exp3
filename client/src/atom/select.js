@@ -119,7 +119,7 @@ export default (props) => {
     return <input
       className='control'
       style={ style.input }
-      readonly
+      readOnly
       title={ title }
       value={ shownValue }
     />

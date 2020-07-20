@@ -18,7 +18,7 @@ export default class AuthFlow extends Flow {
   }
 
   async run() {
-    await this.selectCurrentDrivers().toImmediatePromise();
+    await this.selectCurrentDrivers().toPromise();
 
     this.emitAction(_.MODE, 'auth:credentials');
 

@@ -63,7 +63,11 @@ export default (props) => {
 
   return <div className='c20' style={ style.container }>
     <button className='button button-inline primary center' style={ style.nav }>1</button>
-    <button className='button button-inline default center' style={ style.nav }>-10</button>
+    <button className='button button-inline default center' style={ style.nav } onClick={ _ => {
+      if (props.onSelect && currentIndex - 10 >= 0) {
+        props.onSelect(currentIndex - 10, (currentIndex - 10) * perPage);
+      }
+    } }>-10</button>
     <button className='button button-inline default center' style={ style.nav } onClick={ _ => {
       if (props.onSelect && currentIndex - 1 >= 0) {
         props.onSelect(currentIndex - 1, (currentIndex - 1) * perPage);
@@ -75,7 +79,11 @@ export default (props) => {
         props.onSelect(currentIndex + 1, (currentIndex + 1) * perPage);
       }
     } }>+1</button>
-    <button className='button button-inline default center' style={ style.nav }>+10</button>
+    <button className='button button-inline default center' style={ style.nav } onClick={ _ => {
+      if (props.onSelect && currentIndex + 10 <= max) {
+        props.onSelect(currentIndex + 10, (currentIndex + 10) * perPage);
+      }
+    } }>+10</button>
     <button className='button button-inline primary center' style={ style.nav }>{ max + 1 }</button>
   </div>;
 };

@@ -31,7 +31,7 @@ export class SubjectWithCache extends Subject {
     return subscription;
   }
 
-  toImmediatePromise(resolveCached) {
+  toPromise(resolveCached) {
     if (resolveCached && this._data !== undefined) {
       return Promise.resolve(this._data);
     }
@@ -182,7 +182,7 @@ export default class ConnectionStateMachine extends StateMachine {
 
   async run() {
     await this.sleep(1);
-    await this.selectCurrentDbs().toImmediatePromise();
+    await this.selectCurrentDbs().toPromise();
 
     this.emitAction(_.MODE, _.DB_LIST);
 
@@ -378,7 +378,7 @@ export class SourceStateMachine extends StateMachine {
 
   async run() {
     await this.sleep(1);
-    await this.select().toImmediatePromise();
+    await this.select().toPromise();
 
     this.emit({ data: null });
     
