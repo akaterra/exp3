@@ -63,78 +63,68 @@ export default class ConnectionFlow extends Flow {
     this._api = api;
   }
 
-  async run() {
+  async onRunInit() {
     await this.selectCurrentDbs().toPromise();
 
     this.emitAction(_.MODE, _.DB_LIST);
+  }
 
-    while (true) {
-      let { action, data } = await this.wait(_.DB_CURRENT_SELECT, _.SCHEMA_CURRENT_SELECT, _.SOURCE_CURRENT_SELECT);
+  async onRunIterAction(action, data) {
+    console.log({ action, data }, 'run connection');
 
-      while (true) {
-        console.log({ action, data }, 'run connection');
+    switch (action) {
+      case _.CONNECTION_CLOSE:
+        this.emitAction(action);
 
-        switch (action) {
-          case _.CONNECTION_CLOSE:
-            this.emitAction(action);
+        return { action };
+      case _.DB_CURRENT_SELECT:
+        this.currentDb = { data };
 
-            return { action };
-          case _.DB_CURRENT_SELECT:
-            this.currentDb = { data };
+        if (this.currentDb.data === _.ROOT) {
+          await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
 
-            if (this.currentDb.data === _.ROOT) {
-              await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
+          this.emitAction(_.MODE, _.DB_LIST);
+        } else {
+          await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
 
-              this.emitAction(_.MODE, _.DB_LIST);
-            } else {
-              await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
-
-              this.emitAction(_.MODE, 'db').emitAction(_.MODE, Object.keys(this.currentSchemas.data).length > 1 ? _.SCHEMA_LIST : _.SOURCE_LIST);
-            }
-
-            break;
-          case _.SCHEMA_CURRENT_SELECT:
-            this.currentSchema = { data };
-
-            if (this.currentSchema.data === _.ROOT && Object.keys(this.currentSchemas.data).length > 1) {
-              await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));
-
-              this.emitAction(_.MODE, _.SCHEMA_LIST);
-            } else {
-              await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));
-
-              this.emitAction(_.MODE, 'schema').emitAction(_.MODE, _.SOURCE_LIST);
-            }
-
-            break;
-          case _.SOURCE_CURRENT_SELECT:
-            this.currentSource = { data };
-
-            if (data === _.ROOT) {
-              this.emitAction(_.MODE, _.SOURCE_LIST);
-            } else {
-              const connectionSourceSelectFlow = new ConnectionSourceSelectFlow(
-                this._api,
-                this.currentDb.data,
-                this.currentSchema.data,
-                this.currentSource.data,
-              );
-
-              this.emitAction(_.MODE, 'source');
-
-              ({ action, data } = await this.redirectToAndRun(connectionSourceSelectFlow));
-
-              continue;
-            }
-
-            break;
+          this.emitAction(_.MODE, 'db').emitAction(_.MODE, Object.keys(this.currentSchemas.data).length > 1 ? _.SCHEMA_LIST : _.SOURCE_LIST);
         }
 
         break;
-      };
-    }
+      case _.SCHEMA_CURRENT_SELECT:
+        this.currentSchema = { data };
 
-    return { action: 'completed' };
+        if (this.currentSchema.data === _.ROOT && Object.keys(this.currentSchemas.data).length > 1) {
+          await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));
+
+          this.emitAction(_.MODE, _.SCHEMA_LIST);
+        } else {
+          await toPromise(this.selectCurrentSourcesFor(this.currentSchema.data));
+
+          this.emitAction(_.MODE, 'schema').emitAction(_.MODE, _.SOURCE_LIST);
+        }
+
+        break;
+      case _.SOURCE_CURRENT_SELECT:
+        this.currentSource = { data };
+
+        if (data === _.ROOT) {
+          this.emitAction(_.MODE, _.SOURCE_LIST);
+        } else {
+          const connectionSourceSelectFlow = new ConnectionSourceSelectFlow(
+            this._api,
+            this.currentDb.data,
+            this.currentSchema.data,
+            this.currentSource.data,
+          );
+
+          this.emitAction(_.MODE, 'source');
+
+          return await this.redirectToAndRun(connectionSourceSelectFlow);
+        }
+
+        break;
+    }
   }
 
   // actions
