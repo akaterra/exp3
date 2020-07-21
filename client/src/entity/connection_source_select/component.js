@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActionList, PageSelector, Source, Select, ValueViewer, ViewSwitcher } from '../../atom';
+import { ActionList, PageSelector, Source, Select, ValueViewer, ViewSelector } from '../../atom';
 import {
   readSourceSelectData,
   readSourceSelectFilter,

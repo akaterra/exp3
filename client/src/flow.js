@@ -23,6 +23,8 @@ export class Flow extends Streamable {
 
     this._incoming = new Subject();
     this._outgoing = new Subject();
+
+    this._modeActionSubscription = filterAction(this._outgoing, 'mode').subscribe(_ => this.getStream('mode').next(_));
   }
 
   // incoming
@@ -105,6 +107,8 @@ export class Flow extends Streamable {
 
     // this._incoming.complete();
     // this._outgoing.complete();
+
+    this._modeActionSubscription.unsubscribe();
 
     return { action, data };
   }

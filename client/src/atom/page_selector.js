@@ -5,12 +5,13 @@ const style = {
     '>*:nthChild(even)': { backgroundColor: 'grey' },
   },
   index: {
-    fontFamily: 'monospace',
     minWidth: '4rem',
   },
-  nav: {
-    fontFamily: 'monospace',
+  nav1: {
     minWidth: '4rem',
+  },
+  nav2: {
+    minWidth: '3rem',
   },
 };
 
@@ -23,9 +24,9 @@ export default (props) => {
 
   let currentIndex = value !== undefined ? Math.floor(value / perPage) : index;
 
-  let end = currentIndex + 4;
+  let end = currentIndex + 3;
   let max = Math.floor(total / perPage);
-  let start = currentIndex - 4;
+  let start = currentIndex - 3;
 
   if (start < 0) {
     if (end - start <= max) {
@@ -47,8 +48,8 @@ export default (props) => {
 
   for (;start <= end; start += 1) {
     tabs.push(
-      <a
-        className={ start === currentIndex ? 'link primary text-shadow center' : 'link default center' }
+      <button
+        className={ start === currentIndex ? 'link primary center text-shadow' : 'link default center' }
         style={ style.index }
         onClick={ function(start) {
           if (props.onSelect) {
@@ -57,33 +58,45 @@ export default (props) => {
         }.bind(null, start) }
       >
         { start + 1 }
-      </a>
+      </button>
     );
   }
 
   return <div className='c20' style={ style.container }>
-    <button className='button button-inline primary center' style={ style.nav }>1</button>
-    <button className='button button-inline default center' style={ style.nav } onClick={ _ => {
+    <button className='button primary inline center' style={ style.nav1 } onClick={ _ => {
+      if (currentIndex > 0) {
+        props.onSelect(0, 0);
+      }
+    } }>1</button>
+    <button className='link primary center' style={ style.nav2 } onClick={ _ => {
       if (props.onSelect && currentIndex - 10 >= 0) {
         props.onSelect(currentIndex - 10, (currentIndex - 10) * perPage);
+      } else if (currentIndex > 0) {
+        props.onSelect(0, 0);
       }
     } }>-10</button>
-    <button className='button button-inline default center' style={ style.nav } onClick={ _ => {
+    <button className='link primary center' style={ style.nav2 } onClick={ _ => {
       if (props.onSelect && currentIndex - 1 >= 0) {
         props.onSelect(currentIndex - 1, (currentIndex - 1) * perPage);
       }
     } }>-1</button>
       { tabs }
-    <button className='button button-inline default center' style={ style.nav } onClick={ _ => {
+    <button className='link primary center' style={ style.nav2 } onClick={ _ => {
       if (props.onSelect && currentIndex + 1 <= max) {
         props.onSelect(currentIndex + 1, (currentIndex + 1) * perPage);
       }
     } }>+1</button>
-    <button className='button button-inline default center' style={ style.nav } onClick={ _ => {
+    <button className='link primary center' style={ style.nav2 } onClick={ _ => {
       if (props.onSelect && currentIndex + 10 <= max) {
         props.onSelect(currentIndex + 10, (currentIndex + 10) * perPage);
+      } else if (currentIndex < max) {
+        props.onSelect(max, max * perPage);
       }
     } }>+10</button>
-    <button className='button button-inline primary center' style={ style.nav }>{ max + 1 }</button>
+    <button className='button primary inline center' style={ style.nav1 } onClick={ _ => {
+      if (currentIndex < max) {
+        props.onSelect(max, max * perPage);
+      }
+    } }>{ max + 1 }</button>
   </div>;
 };

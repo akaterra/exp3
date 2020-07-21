@@ -1,7 +1,7 @@
-import React from "react";
 import { Select } from '../atom';
-import { withLabel } from '../hoc';
+import { withBoundary, withLabel } from '../hoc';
 
-Select.WithLabel = withLabel(Select);
+const Component = Select;
+Component.WithLabel = withBoundary(withLabel(Select));
 
-export default Select;
+export default Component;

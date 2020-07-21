@@ -8,4 +8,4 @@ export { default as Select } from './select';
 export { default as Source } from './source';
 export { default as Submit } from './submit';
 export { default as ValueViewer } from './value_viewer';
-export { default as ViewSwitcher } from './view_switcher';
+export { default as ViewSelector } from './view_selector';

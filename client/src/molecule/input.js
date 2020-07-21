@@ -1,7 +1,7 @@
-import React from "react";
 import { Input } from '../atom';
-import { withLabel } from '../hoc';
+import { withBoundary, withLabel } from '../hoc';
 
-Input.WithLabel = withLabel(Input);
+const Component = withBoundary(Input);
+Component.WithLabel = withBoundary(withLabel(Input));
 
-export default Input;
+export default Component;

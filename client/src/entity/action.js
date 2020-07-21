@@ -1,7 +1,7 @@
 import { filterAction } from '../flow';
 
 export function readMode(flow) {
-    return filterAction(flow, 'mode');
+    return flow.getStream('mode');
 }
 
 export function readSourceSelectData(flow) {

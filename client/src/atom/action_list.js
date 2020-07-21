@@ -6,7 +6,7 @@ export default (props) => {
     return null;
   }
 
-  return <div className='ccc' style={ props.style }>
+  return <div className={ props.className } style={ props.style }>
     {
       props.items.map(([name, action], i) => {
         if (name === '__ROOT__') {

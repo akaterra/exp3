@@ -42,7 +42,7 @@ export default class ConnectionSourceSelectFlow extends Flow {
   }
 
   async onRunInit() {
-    await this.selectRowsSet().toPromise();
+    await this.selectRowsSet(this._query).toPromise();
 
     this.emit({ data: null });
     this.emitAction('source:select:filter', this._query);

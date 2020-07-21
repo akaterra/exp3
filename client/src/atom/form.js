@@ -3,12 +3,13 @@ import React from "react";
 
 export default (props) => {
   let [params, setParams] = React.useState(props.state || {});
-  const [l, setL] = React.useState(0);
   let [children, setChildren] = React.useState(null);
 
   if (!children) {
     if (!props.children) {
-      throw new Error('At lease one child must be provided');
+      console.warn('At lease one child must be provided');
+
+      return null;
     }
 
     children = (Array.isArray(props.children) ? props.children : [props.children]).map((child, i) => React.cloneElement(
@@ -31,23 +32,8 @@ export default (props) => {
             props.onChange(params);
           }
         }),
-        onError: () => setL(l - 1),
-        onLoaded: () => setL(l - 1),
-        onLoading: () => setL(l + 1),
         onSubmit: props.onSubmit && (() => {
-          setL(l + 1);
-
           const result = props.onSubmit(params);
-
-          if (result instanceof Promise) {
-            result.then(() => setL(l - 1)).catch((e) => {
-              console.log(e);
-
-              setL(l - 1);
-            })
-          } else {
-            setL(l - 1);
-          }
         }),
       },
     ));
@@ -55,10 +41,9 @@ export default (props) => {
     setChildren(children);
   }
 
-  return <form { ...{ className: props.classNam, style: props.style } }>
+  return <form { ...{ className: props.className, style: props.style } }>
     <div className='row'>
       { children }
-      <div>{ l > 0 ? 'loading' : '' }</div>
     </div>
   </form>;
 };

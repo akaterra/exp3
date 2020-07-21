@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionList, Form, Source, Submit, ViewSwitcher } from '../../atom';
+import { ActionList, Form, Source, Submit, ViewSelector } from '../../atom';
 import { Input, Password, Select } from '../../molecule';
 
 export { default as Auth } from './auth';
@@ -81,7 +81,7 @@ export default (props) => {
         <Select.WithLabel label='source' onChange={ (name) => app.actSelectCurrentSource(name) } />
       </Source>
       <Source source={ app.mode } prop='view'>
-        <ViewSwitcher ignoreUnknown>
+        <ViewSelector ignoreUnknown>
           <Source
             props={ {
               items: [app.currentDbsNames, _ => _.map(_ => [_, _])],
@@ -106,7 +106,7 @@ export default (props) => {
           >
             <ActionList onSubmit={ (name) => app.actSelectCurrentSource(name) }></ActionList>
           </Source>
-        </ViewSwitcher>
+        </ViewSelector>
       </Source>
     </div>
     <div className='c15'>

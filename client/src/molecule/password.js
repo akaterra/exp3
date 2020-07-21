@@ -1,7 +1,7 @@
-import React from "react";
 import { Password } from '../atom';
-import { withLabel } from '../hoc';
+import { withBoundary, withLabel } from '../hoc';
 
-Password.WithLabel = withLabel(Password);
+const Component = withBoundary(Password);
+Component.WithLabel = withBoundary(withLabel(Password));
 
-export default Password;
+export default Component;

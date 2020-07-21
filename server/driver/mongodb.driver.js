@@ -109,7 +109,7 @@ class Source extends _.Source {
         Object.keys(doc).forEach((key) => acc.add(key));
 
         return acc;
-      }, new Set()).values()),
+      }, new Set()).values()).sort(),
       result: res,
       totalCount: await client.db(this.db.name).collection(this.name).count(),
     };
