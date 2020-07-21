@@ -92,7 +92,7 @@ export default (props) => {
         }
 
         const subscription = source.pipe(filter(isNotUndefined)).subscribe(({ action, data }) => {
-          console.log({ action, data, prop });
+          // console.log({ action, data, prop });
 
           if (selector) {
             data = selector(data !== undefined ? data : action);

@@ -23,6 +23,16 @@ export class Streamable extends Subject {
 
     return this._streams.get(name);
   }
+
+  complete() {
+    for (const stream of this._streams) {
+      stream.complete();
+    }
+
+    this._streams.clear();
+
+    return super.complete();
+  }
 }
 
 export function toPromise(stream) {

@@ -23,8 +23,6 @@ export class Flow extends Streamable {
 
     this._incoming = new Subject();
     this._outgoing = new Subject();
-
-    this._modeActionSubscription = filterAction(this._outgoing, 'mode').subscribe(_ => this.getStream('mode').next(_));
   }
 
   // incoming
@@ -62,7 +60,11 @@ export class Flow extends Streamable {
   }
 
   emitAction(action, data) {
-    this._outgoing.next({ action, data });
+    this.getStream(action)
+      .next({ action, data });
+
+    this._outgoing
+      .next({ action, data });
 
     return this;
   }
@@ -81,8 +83,12 @@ export class Flow extends Streamable {
 
   // run cycle
 
-  async run() {
-    await this.onRunInit();
+  async run(...args) {
+    const name = Object.getPrototypeOf(this).constructor.name;
+
+    console.log('>>>>>', name, 'run');
+
+    await this.onRunInit(...args);
 
     let action;
     let data;
@@ -90,6 +96,8 @@ export class Flow extends Streamable {
     while (true) {
       try {
         ({ action, data } = await this.wait());
+
+        console.log('>>>>>', name, 'action', { action, data });
 
         let result = await this.onRunIterAction(action, data);
 
@@ -108,17 +116,19 @@ export class Flow extends Streamable {
     // this._incoming.complete();
     // this._outgoing.complete();
 
-    this._modeActionSubscription.unsubscribe();
+    this.complete();
+
+    console.log('>>>>>', name, 'complete');
 
     return { action, data };
   }
 
-  async onRunIterAction(action, data) {
-    
+  async onRunInit(...args) {
+
   }
 
-  async onRunInit() {
-
+  async onRunIterAction(action, data) {
+    
   }
 
   outgoingPushTo(flow) {

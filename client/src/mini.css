@@ -2482,19 +2482,19 @@
 }
 
 .mini .span {
-  color: #666666;
+  color: #4d4d4d;
 }
 .mini .span.failure {
-  color: #a32929;
+  color: #7a1f1f;
 }
 .mini .span.primary {
-  color: #2966a3;
+  color: #1f4d7a;
 }
 .mini .span.success {
-  color: #29a347;
+  color: #1f7a36;
 }
 .mini .span.warning {
-  color: #a38529;
+  color: #7a631f;
 }
 
 .mini .bold {

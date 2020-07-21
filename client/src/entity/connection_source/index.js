@@ -17,20 +17,10 @@ export default class ConnectionSourceFlow extends Flow {
     this._source = source;
   }
 
-  async run() {
-    await this;
-
-    this.emit({ data: null });
-    
-    while (true) {
-      let { action, data } = await this.wait();
-
-      console.log({ action, data }, 'run source');
-
-      switch (action) {
-        default:
-          return { action, data };
-      }
+  async onRunIterAction(action, data) {
+    switch (action) {
+      default:
+        return false;
     }
   }
 }

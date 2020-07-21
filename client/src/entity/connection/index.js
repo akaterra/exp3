@@ -70,8 +70,6 @@ export default class ConnectionFlow extends Flow {
   }
 
   async onRunIterAction(action, data) {
-    console.log({ action, data }, 'run connection');
-
     switch (action) {
       case _.CONNECTION_CLOSE:
         this.emitAction(action);

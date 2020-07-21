@@ -4,7 +4,7 @@ import { Flow, getFirst, filterAction } from '../../flow';
 
 export default class ConnectionSourceSelectFlow extends Flow {
   get data() {
-    return this.getStream('data');
+    return this.getStream('source:select:data');
   }
 
   get mode() {
@@ -12,7 +12,7 @@ export default class ConnectionSourceSelectFlow extends Flow {
   }
 
   set data(data) {
-    this.emitAction('source:select:data', data.data).data.next({ action: 'source:select:data', data: data.data });
+    this.emitAction('source:select:data', data.data);
   }
 
   constructor(api, db, schema, source) {
@@ -25,9 +25,14 @@ export default class ConnectionSourceSelectFlow extends Flow {
     this._source = source;
   }
 
-  async onRunIterAction(action, data) {
-    console.log({ action, data }, 'run source select');
+  async onRunInit() {
+    await this.selectRowsSet(this._query).toPromise();
 
+    this.emit({ data: null });
+    this.emitAction('source:select:filter', this._query);
+  }
+
+  async onRunIterAction(action, data) {
     switch (action) {
       case 'source:select:filter':
         Object.assign(this._query, data);
@@ -39,13 +44,6 @@ export default class ConnectionSourceSelectFlow extends Flow {
       default:
         return false;
     }
-  }
-
-  async onRunInit() {
-    await this.selectRowsSet(this._query).toPromise();
-
-    this.emit({ data: null });
-    this.emitAction('source:select:filter', this._query);
   }
 
   // current source
