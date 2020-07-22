@@ -7,9 +7,11 @@ export default (props) => {
 
   return <Source source={ readMode(flow) } prop='view'>
     <ViewSelector switchers={{
-      'source:statistic': 'Statistic',
-      'source': 'Select',
-      'source:alter': 'Alter schema',
+      'source:Details': 'Details',
+      'source': 'Select data',
+      'source:insert': 'Insert data',
+      'source:alter': 'Structure',
+      'source:indexes': 'Indexes',
     }}>
       <div view='source:statistic'></div>
       <div view='source:select'></div>

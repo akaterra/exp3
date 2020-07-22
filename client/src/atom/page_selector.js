@@ -24,17 +24,15 @@ export default (props) => {
 
   let currentIndex = value !== undefined ? Math.floor(value / perPage) : index;
 
-  let end = currentIndex + 3;
+  let end;
   let max = Math.floor(total / perPage);
   let start = currentIndex - 3;
 
   if (start < 0) {
-    if (end - start <= max) {
-      end -= start;
-    }
-
     start = 0;
   }
+
+  end = start + 6;
 
   if (end > max) {
     if (start - (end - max) >= 0) {
@@ -44,56 +42,60 @@ export default (props) => {
     end = max;
   }
 
+  if (end - start < 6) {
+    start = 0;
+  }
+
   const tabs = [];
 
-  for (;start <= end; start += 1) {
+  for (let i = start; i <= end; i += 1) {
     tabs.push(
       <button
-        className={ start === currentIndex ? 'link primary center text-shadow' : 'link default center' }
+        className={ i === currentIndex ? 'link primary center text-shadow' : 'link default center' }
         style={ style.index }
         onClick={ function(start) {
           if (props.onSelect) {
             props.onSelect(start, start * perPage);
           }
-        }.bind(null, start) }
+        }.bind(null, i) }
       >
-        { start + 1 }
+        { i + 1 }
       </button>
     );
   }
 
   return <div className='c20' style={ style.container }>
-    <button className='button primary inline center' style={ style.nav1 } onClick={ _ => {
+    <button className={ `button primary inline center ${currentIndex === 0 ? 'disabled' : ''}` } style={ style.nav1 } onClick={ _ => {
       if (currentIndex > 0) {
         props.onSelect(0, 0);
       }
     } }>1</button>
-    <button className='link primary center' style={ style.nav2 } onClick={ _ => {
+    <button className={ `link primary center ${currentIndex === 0 ? 'disabled' : ''}` } style={ style.nav2 } onClick={ _ => {
       if (props.onSelect && currentIndex - 10 >= 0) {
         props.onSelect(currentIndex - 10, (currentIndex - 10) * perPage);
       } else if (currentIndex > 0) {
         props.onSelect(0, 0);
       }
     } }>-10</button>
-    <button className='link primary center' style={ style.nav2 } onClick={ _ => {
+    <button className={ `link primary center ${currentIndex === 0 ? 'disabled' : ''}` } style={ style.nav2 } onClick={ _ => {
       if (props.onSelect && currentIndex - 1 >= 0) {
         props.onSelect(currentIndex - 1, (currentIndex - 1) * perPage);
       }
     } }>-1</button>
       { tabs }
-    <button className='link primary center' style={ style.nav2 } onClick={ _ => {
+    <button className={ `link primary center ${currentIndex === max ? 'disabled' : ''}` } style={ style.nav2 } onClick={ _ => {
       if (props.onSelect && currentIndex + 1 <= max) {
         props.onSelect(currentIndex + 1, (currentIndex + 1) * perPage);
       }
     } }>+1</button>
-    <button className='link primary center' style={ style.nav2 } onClick={ _ => {
+    <button className={ `link primary center ${currentIndex === max ? 'disabled' : ''}` } style={ style.nav2 } onClick={ _ => {
       if (props.onSelect && currentIndex + 10 <= max) {
         props.onSelect(currentIndex + 10, (currentIndex + 10) * perPage);
       } else if (currentIndex < max) {
         props.onSelect(max, max * perPage);
       }
     } }>+10</button>
-    <button className='button primary inline center' style={ style.nav1 } onClick={ _ => {
+    <button className={ `button primary inline center ${currentIndex === max ? 'disabled' : ''}` } style={ style.nav1 } onClick={ _ => {
       if (currentIndex < max) {
         props.onSelect(max, max * perPage);
       }

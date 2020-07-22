@@ -31,9 +31,9 @@ export default (props) => {
 
     children = children.map((child, index) => {
       if (child.props.view === view) {
-        return child;
+        return <div key={ index }>{ child }</div>;
       } else {
-        return <div key={ index } style={ { display: 'none' } }>{ child }</div>;
+        return <div key={ index }className='hidden'>{ child }</div>;
       }
     });
 
@@ -51,7 +51,7 @@ export default (props) => {
       </div>);
     }
 
-    setChildren(children);
+    setChildren(<div className={ props.className }>{ children }</div>);
     setView(view);
   }
 
