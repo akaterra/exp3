@@ -48,7 +48,7 @@ export default (props) => {
       const initialChildren = children;
       const initialChildrenProps = children.map((child, index) => ({ key: index, ...restProps, ...child.props }));
 
-      function applyPropToChildren(prop, data) {
+      function mapPropToChildren(prop, data) {
         let props;
 
         if (prop === '...') {
@@ -60,7 +60,9 @@ export default (props) => {
         } else if (typeof prop === 'object') {
           children = initialChildren.map((child, index) => {
             for (const key of Object.keys(prop)) {
-              props = initialChildrenProps[index] = set(initialChildrenProps[index], prop[key], data[key]);
+              if (key in data) {
+                props = initialChildrenProps[index] = set(initialChildrenProps[index], prop[key], data[key]);
+              }
             }
   
             return React.cloneElement(child, props);
@@ -98,7 +100,7 @@ export default (props) => {
             data = selector(data !== undefined ? data : action);
           }
 
-          applyPropToChildren(prop, data !== undefined ? data : action);
+          mapPropToChildren(prop, data !== undefined ? data : action);
         });
 
         subscriptions.push(subscription);

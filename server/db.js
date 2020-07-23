@@ -45,8 +45,20 @@ class Db extends manager.WithDescriptor {
     this._parent = parent;
   }
 
+  setClient(client) {
+    this._client = client;
+
+    return this;
+  }
+
   setCredentials(credentials) {
     this._credentials = credentials;
+
+    return this;
+  }
+
+  setIsConnected() {
+    this._isConnected = true;
 
     return this;
   }
@@ -112,7 +124,7 @@ class DbManager extends manager.Manager {
     }
 
     for (const db of this._entities.values()) {
-      await db.setCredentials(db.name !== ROOT ? { ...credentials, name: db.name } : credentials).connect();
+      await db.setCredentials(db.name !== ROOT ? { ...credentials, name: db.name } : { ...credentials }).connect();
     }
 
     return this;

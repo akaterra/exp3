@@ -127,6 +127,16 @@ class Source extends _.Source {
     return ColumnManager;
   }
 
+  get features() {
+    return {
+      ...super.features,
+      extraType: [
+        'point',
+        'polygon',
+      ],
+    };
+  }
+
   get indexManagerClass() {
     return IndexManager;
   }

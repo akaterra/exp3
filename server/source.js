@@ -8,9 +8,16 @@ class Source extends manager.WithDescriptor {
 
   get features() {
     return {
-      columns: true,
-      indexes: true,
-    }
+      index: {
+
+      },
+      insert: {
+
+      },
+      structure: {
+        alter: true,
+      },
+    };
   }
 
   get nodeType() {

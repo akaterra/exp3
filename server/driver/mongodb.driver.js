@@ -1,3 +1,4 @@
+const url = require('url');
 const _ = require('..');
 
 class Db extends _.Db {
@@ -18,13 +19,43 @@ class Db extends _.Db {
 
     const { MongoClient } = require('mongodb');
 
+    if (!credentials.host) {
+      credentials.host = 'mongodb://127.0.0.1:27017';
+    }
+
+    if (credentials.host.substr(0, 10) !== 'mongodb://' && credentials.host.substr(0, 14) !== 'mongodb+srv://') {
+      credentials.host = `mongodb://${credentials.host}`;
+    }
+
+    const uri = new URL(credentials.host);
+
+    if (!uri.host) {
+      uri.host = credentials.host || '127.0.0.1';
+    }
+
+    if (!uri.port && credentials.port) {
+      uri.port = credentials.port;
+    }
+
+    if (!uri.schema) {
+      uri.schema = 'mongodb://';
+    }
+
+    if (!uri.username && (credentials.username || credentials.password)) {
+      uri.username = credentials.username || (credentials.password ? 'guest' : undefined);
+    }
+
+    if (!uri.password && credentials.password) {
+      uri.password = credentials.password;
+    }
+
+    if (!uri.pathname) {
+      uri.pathname = `/${credentials.db || 'admin'}`;
+    }
+
     const client = await MongoClient.connect(
-      `mongodb://${credentials.host || '127.0.0.1'}:${credentials.port || 27017}`,
+      uri.toString(),
       {
-        auth: credentials.password ? {
-          user: credentials.username || 'guest',
-          password: credentials.password,
-        } : undefined,
         useUnifiedTopology: true,
       },
     );
@@ -56,7 +87,7 @@ class DbManager extends _.DbManager {
       const name = row.name;
 
       if (!this.has(name)) {
-        this.set(name, new Db(name, this));
+        this.set(name, new Db(name, this).setClient(client).setIsConnected());
       }
   
       this.get(name).assign({
@@ -91,8 +122,11 @@ class Source extends _.Source {
 
   get features() {
     return {
-      indexes: true,
-    }
+      ...super.features,
+      extraType: [
+        'mongo:id',
+      ],
+    };
   }
 
   get indexManagerClass() {

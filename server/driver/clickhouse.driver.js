@@ -90,6 +90,10 @@ class Source extends _.Source {
     return ColumnManager;
   }
 
+  get features() {
+    return {};
+  }
+
   get indexManagerClass() {
     return IndexManager;
   }
