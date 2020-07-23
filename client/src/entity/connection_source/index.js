@@ -17,6 +17,10 @@ export default class ConnectionSourceFlow extends Flow {
     this._source = source;
   }
 
+  async onRunInit(...args) {
+
+  }
+
   async onRunIterAction(action, data) {
     switch (action) {
       default:
