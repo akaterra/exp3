@@ -2,6 +2,7 @@ import { map } from 'rxjs/operators';
 import { default as Component } from './component';
 import { default as _ } from './const';
 import { Flow, getFirst, filterAction, toPromise } from '../../flow';
+import { default as ConnectionSourceFlow} from '../connection_source';
 import { default as ConnectionSourceSelectFlow} from '../connection_source_select';
 
 export default class ConnectionFlow extends Flow {
@@ -109,16 +110,21 @@ export default class ConnectionFlow extends Flow {
         if (data === _.ROOT) {
           this.emitAction(_.MODE, _.SOURCE_LIST);
         } else {
-          const connectionSourceSelectFlow = new ConnectionSourceSelectFlow(
+          const connectionSourceFlow = new ConnectionSourceFlow(
             this._api,
             this.currentDb.data,
             this.currentSchema.data,
-            this.currentSource.data,
+            this.currentSources.data[data],
           );
+          // const connectionSourceSelectFlow = new ConnectionSourceSelectFlow(
+          //   this._api,
+          //   this.currentDb.data,
+          //   this.currentSchema.data,
+          //   this.currentSource.data,
+          // );
 
-          this.emitAction(_.MODE, 'source');
-
-          return await this.redirectToAndRun(connectionSourceSelectFlow);
+          return await this.redirectToAndRun(connectionSourceFlow);
+          // return await this.redirectToAndRun(connectionSourceSelectFlow);
         }
 
         break;

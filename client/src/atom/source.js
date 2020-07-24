@@ -48,32 +48,38 @@ export default (props) => {
       const initialChildren = children;
       const initialChildrenProps = children.map((child, index) => ({ key: index, ...restProps, ...child.props }));
 
-      function mapPropToChildren(prop, data) {
+      function mapPropAsMapToChildren(prop, data) {
         let props;
 
-        if (prop === '...') {
-          children = initialChildren.map((child, index) => {
-            props = initialChildrenProps[index] = all(initialChildrenProps[index], ...Object.entries(data).flat());
-  
-            return React.cloneElement(child, props);
-          });
-        } else if (typeof prop === 'object') {
-          children = initialChildren.map((child, index) => {
-            for (const key of Object.keys(prop)) {
-              if (key in data) {
-                props = initialChildrenProps[index] = set(initialChildrenProps[index], prop[key], data[key]);
-              }
+        children = initialChildren.map((child, index) => {
+          for (const key of Object.keys(prop)) {
+            if (key in data) {
+              props = initialChildrenProps[index] = set(initialChildrenProps[index], prop[key], data[key]);
             }
-  
-            return React.cloneElement(child, props);
-          });
-        } else {
-          children = initialChildren.map((child, index) => {
-            props = initialChildrenProps[index] = set(initialChildrenProps[index], prop, data);
-  
-            return React.cloneElement(child, props);
-          });
-        }
+          }
+
+          return React.cloneElement(child, props);
+        });
+
+        setChildren(children);
+      }
+
+      function mapPropAsSingleToChildren(prop, data) {
+        children = initialChildren.map((child, index) => {
+          const props = initialChildrenProps[index] = set(initialChildrenProps[index], prop, data);
+
+          return React.cloneElement(child, props);
+        });
+
+        setChildren(children);
+      }
+
+      function mapPropAsSpreadToChildren(prop, data) {
+        children = initialChildren.map((child, index) => {
+          const props = initialChildrenProps[index] = all(initialChildrenProps[index], ...Object.entries(data).flat());
+
+          return React.cloneElement(child, props);
+        });
 
         setChildren(children);
       }
@@ -93,6 +99,16 @@ export default (props) => {
           source = from(source instanceof Promise ? source : [source]);
         }
 
+        let mapper;
+
+        if (prop === '...') {
+          mapper = mapPropAsSpreadToChildren;
+        } else if (typeof prop === 'object') {
+          mapper = mapPropAsMapToChildren;
+        } else {
+          mapper = mapPropAsSingleToChildren;
+        }
+
         const subscription = source.pipe(filter(isNotUndefined)).subscribe(({ action, data }) => {
           // console.log({ action, data, prop });
 
@@ -100,7 +116,7 @@ export default (props) => {
             data = selector(data !== undefined ? data : action);
           }
 
-          mapPropToChildren(prop, data !== undefined ? data : action);
+          mapper(prop, data !== undefined ? data : action);
         });
 
         subscriptions.push(subscription);

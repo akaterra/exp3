@@ -10,7 +10,9 @@ const stub = {
   td: <td/>,
 };
 const style = {
-
+  th: {
+    textAlign: 'left',
+  },
 };
 
 function RowList(props) {
@@ -22,16 +24,12 @@ function RowList(props) {
     return <div className='span success'>No data</div>;
   }
 
-  const columnIndexes = props.columns.reduce((acc, key, ind) => {
-    acc[key] = ind;
-
-    return acc;
-  }, {});
-
   if (props.schemaless) {
     return <table>
       <thead>
-        { props.columns.map((key) => <td>{ key }</td>) }
+        <tr>
+          { props.columns.map((key) => <th style={ style.th }>{ key }</th>) }
+        </tr>
       </thead>
       <tbody>
         { makeRows(props.result, props.columns, props.limit || 20) }
@@ -40,7 +38,9 @@ function RowList(props) {
   } else {
     return <table>
       <thead>
-        { props.columns.map((key) => <td>{ key }</td>) }
+        <tr>
+          { props.columns.map((key) => <th style={ style.th }>{ key }</th>) }
+        </tr>
       </thead>
       <tbody>
         { makeRows(props.result, props.columns, props.limit || 20) }
@@ -50,14 +50,14 @@ function RowList(props) {
 };
 
 function makeRows(rows, columns, limit) {
-  const trStub = <tr><td colspan={ limit }>&nbsp;</td></tr>;
+  const tdStub = <td colSpan={ limit }>&nbsp;</td>;
 
-  rows = rows.map((row) => {
-    return <tr>
+  rows = rows.map((row, i) => {
+    return <tr key={ i }>
       {
         columns.map((columnName) => {
           if (columnName in row) {
-            return <td style={ style.td }><ValueViewer value={ row[columnName] }/></td>;
+            return <td key={ columnName } style={ style.td }><ValueViewer value={ row[columnName] }/></td>;
           } else {
             return stub.td;
           }
@@ -68,7 +68,7 @@ function makeRows(rows, columns, limit) {
 
   if (rows.length < limit) {
     for (let i = rows.length; i < limit; i += 1) {
-      rows.push(trStub);
+      rows.push(<tr key={ i }>{ tdStub }</tr>);
     }
   }
 

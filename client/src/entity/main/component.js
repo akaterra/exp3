@@ -1,14 +1,32 @@
 import { Arr } from 'invary';
 import React from 'react';
+import { readError } from '../action';
 import { default as Auth } from '../auth';
 import { default as Connection } from '../connection';
 import { Source } from '../../atom';
 
 const style = {
-  main: {
+  container: {
     paddingTop: '25px',
   },
+  errors: {
+    bottom: '1rem',
+    position: 'fixed',
+    right: '1rem',
+    width: '300px',
+    zIndex: 1000,
+  }
 };
+
+function Errors(props) {
+  if (!props.errors) {
+    return null;
+  }
+
+  return <div style={ style.errors }>{
+    props.errors.map((error, i) => <div key={ i } className='alert failure'>{ error }</div>)
+  }</div>;
+}
 
 function Tabs(props) {
   if (!props.tabs) {
@@ -37,7 +55,7 @@ function Tabs(props) {
     setTabs(tabs);
   }, [props.tabs]);
 
-  return <div className='row' style={ style.main }>
+  return <div className='row' style={ style.container }>
     <div className='c20'>
       <div className='tabs'>
         <div className='tabs-bar'>
@@ -70,5 +88,20 @@ function Tabs(props) {
 export default (props) => {
   const { flow } = props;
 
-  return <Source source={ flow.tabs } prop='tabs' component={ Tabs }/>;
+  let [errors, setErrors] = React.useState(Arr([]));
+
+  React.useEffect(_ => {
+    readError(flow).subscribe(({ action, data }) => {
+      setErrors(errors.push(data)[0]);
+    });
+
+    setInterval(_ => {
+      setErrors(errors.shift()[0]);
+    }, 10000);
+  }, [true]);
+
+  return [
+    <Source source={ flow.tabs } prop='tabs' component={ Tabs }/>,
+    <Errors errors={ errors }/>,
+  ];
 };

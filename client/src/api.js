@@ -31,13 +31,35 @@ class Connection extends Streamable {
 
   }
 
+  selectDb(dbName, refresh) {
+    const stream = this.getStream(`db/${dbName}`);
+
+    return wrapToStream(
+      this.execGet(`/connection/${this._session.name}/db/${dbName}`),
+      stream,
+      'db:list',
+      refresh,
+    );
+  }
+
   selectDbs(refresh) {
     const stream = this.getStream('db');
 
     return wrapToStream(
       this.execGet(`/connection/${this._session.name}/db`),
       stream,
-      'db:list',
+      'db',
+      refresh,
+    );
+  }
+
+  selectSchema(dbName, schemaName, refresh) {
+    const stream = this.getStream(`db/${dbName}/schema/${schemaName}`);
+
+    return wrapToStream(
+      this.execGet(`/connection/${this._session.name}/db/${dbName}/schema/${schemaName}`),
+      stream,
+      'schema:list',
       refresh,
     );
   }
@@ -48,7 +70,18 @@ class Connection extends Streamable {
     return wrapToStream(
       this.execGet(`/connection/${this._session.name}/db/${dbName}/schema`),
       stream,
-      'schema:list',
+      'schema',
+      refresh,
+    );
+  }
+
+  selectSource(dbName, schemaName, sourceName, refresh) {
+    const stream = this.getStream(`db/${dbName}/schema/${schemaName}/source/${sourceName}`);
+
+    return wrapToStream(
+      this.execGet(`/connection/${this._session.name}/db/${dbName}/schema/${schemaName}/source/${sourceName}`),
+      stream,
+      'source:list',
       refresh,
     );
   }
@@ -59,16 +92,27 @@ class Connection extends Streamable {
     return wrapToStream(
       this.execGet(`/connection/${this._session.name}/db/${dbName}/schema/${schemaName}/source`),
       stream,
-      'source:list',
+      'source',
       refresh,
     );
   }
 
-  sourceSelect(dbName, schemaName, sourceName, query, refresh) {
-    const stream = this.getStream(`db/${dbName}/schema/${schemaName}/source/${sourceName}`);
+  sourceQuery(dbName, schemaName, sourceName, query, refresh) {
+    const stream = this.getStream(`db/${dbName}/schema/${schemaName}/source/${sourceName}/query`);
 
     return wrapToStream(
-      this.execPost(`/connection/${this._session.name}/db/${dbName}/schema/${schemaName}/source/${sourceName}`, query),
+      this.execPost(`/connection/${this._session.name}/db/${dbName}/schema/${schemaName}/source/${sourceName}/query`, query),
+      stream,
+      'source:select',
+      refresh,
+    );
+  }
+
+  sourceSelect(dbName, schemaName, sourceName, filter, refresh) {
+    const stream = this.getStream(`db/${dbName}/schema/${schemaName}/source/${sourceName}/select`);
+
+    return wrapToStream(
+      this.execPost(`/connection/${this._session.name}/db/${dbName}/schema/${schemaName}/source/${sourceName}/select`, filter),
       stream,
       'source:select',
       refresh,

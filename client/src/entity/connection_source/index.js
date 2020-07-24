@@ -18,7 +18,7 @@ export default class ConnectionSourceFlow extends Flow {
   }
 
   async onRunInit(...args) {
-
+    this.emitAction('source', this._source);
   }
 
   async onRunIterAction(action, data) {
@@ -26,6 +26,16 @@ export default class ConnectionSourceFlow extends Flow {
       default:
         return false;
     }
+  }
+
+  // current source
+
+  select(query) {
+    getFirst(this._api.selectSource(this._db, this._schema, this._source, query)).subscribe((data) => {
+      this.data = data;
+    });
+
+    return this.data;
   }
 }
 

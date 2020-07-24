@@ -90,7 +90,7 @@ class Source extends _.Source {
     return ColumnManager;
   }
 
-  get features() {
+  get feature() {
     return {};
   }
 

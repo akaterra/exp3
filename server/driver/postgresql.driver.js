@@ -127,9 +127,9 @@ class Source extends _.Source {
     return ColumnManager;
   }
 
-  get features() {
+  get feature() {
     return {
-      ...super.features,
+      ...super.feature,
       extraType: [
         'point',
         'polygon',

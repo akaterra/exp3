@@ -17,7 +17,7 @@ export default class AuthFlow extends Flow {
     this._api = api;
   }
 
-  async run() {
+  async run1() {
     await this.selectCurrentDrivers().toPromise();
 
     this.emitAction(_.MODE, 'auth:credentials');
@@ -35,6 +35,23 @@ export default class AuthFlow extends Flow {
 
           break;
       }
+    }
+  }
+
+  async onRunInit(...args) {
+    await this.selectCurrentDrivers().toPromise();
+
+    this.emitAction(_.MODE, 'auth:credentials');
+  }
+
+  async onRunIterAction(action, data) {
+    switch (action) {
+      case _.CONNECT:
+        const connection = await this.connect(data);
+
+        this.emitAction(_.CONNECTION_OPEN, connection);
+
+        break;
     }
   }
 

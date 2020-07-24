@@ -72,11 +72,11 @@ export default (props) => {
       </Source>
     </div>
     <div className='flex-1' style={ style.main }>
+      <ConnectionSource.Component flow={ flow } view='source'/>
       <Source source={ flow.mode } prop='view'>
         <ViewSelector className='c20' ignoreUnknown>
           <div view='db'></div>
           <div view='schema'></div>
-          <ConnectionSource.Component flow={ flow } view='source'/>
           <ConnectionSourceSelect.Component flow={ flow } view='source'/>
         </ViewSelector>
       </Source>

@@ -16,11 +16,11 @@ export default class MainFlow extends Flow {
     this._api = api;
   }
 
-  async run() {
+  async onRunInit(...args) {
     this.emitAction(_.MODE, null);
 
-    const authFlow = new AuthFlow(this._api);
-    this.toIncomingPull(authFlow);
+    const authFlow = new AuthFlow(this._api).outgoingPushTo(this);
+
     authFlow.run();
 
     this.tabs.next({
@@ -54,32 +54,32 @@ export default class MainFlow extends Flow {
         return tabs;
       }),
     });
+  }
 
-    while (true) {
-      let { action, data } = await this.wait();
+  async onRunIterAction(action, data) {
+    switch (action) {
+      case 'error':
+        this.emitAction('error', data);
 
-      console.log({ action, data }, 'main');
+        break;
+      case AuthFlow._.CONNECTION_OPEN:
+        const connectionFlow = new ConnectionFlow(data);
+        this.toIncomingPull(connectionFlow);
+        connectionFlow.run();
 
-      switch (action) {
-        case AuthFlow._.CONNECTION_OPEN:
-          const connectionFlow = new ConnectionFlow(data);
-          this.toIncomingPull(connectionFlow);
-          connectionFlow.run();
+        const tabs = this.tabs.data.insertIndex(this.tabs.data.length - 1, {
+          type: 'connection',
+          id: data.session.name,
+          name: data.session.name,
+          flow: connectionFlow,
+        });
 
-          const tabs = this.tabs.data.insertIndex(this.tabs.data.length - 1, {
-            type: 'connection',
-            id: data.session.name,
-            name: data.session.name,
-            flow: connectionFlow,
-          });
+        this.tabs.next({
+          action: 'tab:list',
+          data: tabs,
+        });
 
-          this.tabs.next({
-            action: 'tab:list',
-            data: tabs,
-          });
-
-          break;
-      }
+        break;
     }
   }
 }

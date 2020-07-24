@@ -6,7 +6,7 @@ class Source extends manager.WithDescriptor {
     return this._parent.client;
   }
 
-  get features() {
+  get feature() {
     return {
       index: {
 
@@ -79,7 +79,7 @@ class Source extends manager.WithDescriptor {
     return {
       columns: Object.fromEntries(this.columnManager.entities),
       descriptor: this._descriptor,
-      features: this.features,
+      feature: this.feature,
       indexes: Object.fromEntries(this.indexManager.entities),
       name: this.name,
     };

@@ -1,7 +1,23 @@
 import { filterAction } from '../flow';
 
+export function readDb(flow) {
+    return filterAction(flow, 'db');
+}
+
+export function readError(flow) {
+    return filterAction(flow, 'error');
+}
+
 export function readMode(flow) {
     return flow.getStream('mode');
+}
+
+export function readSchema(flow) {
+    return filterAction(flow, 'schema');
+}
+
+export function readSource(flow) {
+    return filterAction(flow, 'source');
 }
 
 export function readSourceSelectData(flow) {

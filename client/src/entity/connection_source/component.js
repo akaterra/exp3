@@ -1,16 +1,27 @@
 import React from 'react';
 import { ActionList, Source, Select, ViewSelector } from '../../atom';
-import { readMode } from '../action';
+import { readMode, readSource } from '../action';
 
 export default (props) => {
   const { flow } = props;
 
-  return <Source source={ readMode(flow) } prop='view'>
+  return <Source props={ [
+    [readMode(flow), 'view'],
+    [readSource(flow), '...', (data) => ({
+      switchers: {
+        'source:details': 'Details',
+        'source:select': 'Select data',
+        'source:insert': 'Insert data',
+        'source:structure': 'Structure',
+        'source:indexes': 'Indexes',
+      },
+    })],
+  ] }>
     <ViewSelector switchers={{
-      'source:Details': 'Details',
-      'source': 'Select data',
+      'source:details': 'Details',
+      'source:select': 'Select data',
       'source:insert': 'Insert data',
-      'source:alter': 'Structure',
+      'source:structure': 'Structure',
       'source:indexes': 'Indexes',
     }}>
       <div view='source:statistic'></div>

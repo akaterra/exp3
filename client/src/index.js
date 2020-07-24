@@ -2,7 +2,6 @@ import '@babel/polyfill';
 import { applyIsArrayPatch } from 'invary';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Layout } from './organism';
 import './mini.css';
 import './json-inspector.css';
 import './index.css';

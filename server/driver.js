@@ -3,7 +3,7 @@ class Driver {
     this.name;
   }
 
-  static get features() {
+  static get feature() {
     return {};
   }
 
@@ -51,7 +51,7 @@ class Driver {
       descriptor: this._descriptor,
       driver: {
         displayName: Object.getPrototypeOf(this).constructor.displayName,
-        features: Object.getPrototypeOf(this).constructor.features,
+        feature: Object.getPrototypeOf(this).constructor.feature,
         name: Object.getPrototypeOf(this).constructor.name,
       },
       name: this._descriptor.connectionName,

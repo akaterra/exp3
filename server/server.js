@@ -41,12 +41,28 @@ function run(port) {
     return await dbManager.select();
   }));
 
+  app.get('/connection/:connectionName/db/:dbName', error(async (req, res) => {
+    const dbManager = cm
+      .get(req.params.connectionName)
+      .dbManager;
+
+    return (await dbManager.select())[req.params.dbName] || null;
+  }));
+
   app.get('/connection/:connectionName/db/:dbName/schema', error(async (req, res) => {
     const schemaManager = cm
       .get(req.params.connectionName)
       .getNested(req.params.dbName).schemaManager;
 
     return await schemaManager.select();
+  }));
+
+  app.get('/connection/:connectionName/db/:dbName/schema/:schemaName', error(async (req, res) => {
+    const schemaManager = cm
+      .get(req.params.connectionName)
+      .getNested(req.params.dbName).schemaManager;
+
+    return (await schemaManager.select())[req.params.schemaName] || null;
   }));
 
   app.get('/connection/:connectionName/db/:dbName/schema/:schemaName/source', error(async (req, res) => {
@@ -57,7 +73,15 @@ function run(port) {
     return await sourceManager.select();
   }));
 
-  app.post('/connection/:connectionName/db/:dbName/schema/:schemaName/source/:sourceName', error(async (req, res) => {
+  app.get('/connection/:connectionName/db/:dbName/schema/:schemaName/source/:sourceName', error(async (req, res) => {
+    const sourceManager = cm
+      .get(req.params.connectionName)
+      .getNested(req.params.dbName, req.params.schemaName).sourceManager;
+
+    return (await sourceManager.select())[req.params.sourceName] || null;
+  }));
+
+  app.post('/connection/:connectionName/db/:dbName/schema/:schemaName/source/:sourceName/select', error(async (req, res) => {
     const sourceManager = cm
       .get(req.params.connectionName)
       .getNested(req.params.dbName, req.params.schemaName, req.params.sourceName);
