@@ -114,7 +114,7 @@ export default class ConnectionFlow extends Flow {
             this._api,
             this.currentDb.data,
             this.currentSchema.data,
-            this.currentSources.data[data],
+            this.currentSource.data,
           );
           // const connectionSourceSelectFlow = new ConnectionSourceSelectFlow(
           //   this._api,

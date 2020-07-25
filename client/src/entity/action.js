@@ -9,7 +9,7 @@ export function readError(flow) {
 }
 
 export function readMode(flow) {
-    return flow.getStream('mode');
+    return filterAction(flow, 'mode');
 }
 
 export function readSchema(flow) {

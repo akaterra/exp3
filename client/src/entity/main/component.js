@@ -19,12 +19,12 @@ const style = {
 };
 
 function Errors(props) {
-  if (!props.errors) {
+  if (!props.errors || !props.errors.length) {
     return null;
   }
 
-  return <div style={ style.errors }>{
-    props.errors.map((error, i) => <div key={ i } className='alert failure'>{ error }</div>)
+  return <div className='row' style={ style.errors }>{
+    props.errors.map((error, i) => <div className='c20' key={ i }><div className='alert failure'>{ `${error[0].status}: ${JSON.stringify(error[0].error)}` }</div></div>)
   }</div>;
 }
 
@@ -92,12 +92,18 @@ export default (props) => {
 
   React.useEffect(_ => {
     readError(flow).subscribe(({ action, data }) => {
-      setErrors(errors.push(data)[0]);
+      console.error(data);
+      errors.push([data, Date.now() + 10 * 1000])[0];
+
+      setErrors(errors);
     });
 
     setInterval(_ => {
-      setErrors(errors.shift()[0]);
-    }, 10000);
+      const now = Date.now();
+      errors = errors.filter((error) => error[1] >= now);
+
+      setErrors(errors);
+    }, 500);
   }, [true]);
 
   return [

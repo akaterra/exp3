@@ -1,18 +1,19 @@
 import React from 'react';
 import { Source, Select, ViewSelector } from '../../atom';
 import { ActionList } from '../../molecule';
+import { readMode } from '../action';
 import { default as ConnectionSource } from '../connection_source';
 import { default as ConnectionSourceSelect } from '../connection_source_select';
 
 const style = {
+  content: {
+    overflowX: 'auto',
+  },
   menu: {
     width: '300px',
   },
   menuList: {
     overflowY: 'auto',
-  },
-  main: {
-    overflowX: 'auto',
   },
 };
 
@@ -39,7 +40,7 @@ export default (props) => {
       } }>
         <Select.WithLabel className='c20' label='Source:' onChange={ (name) => flow.sendSelectCurrentSourceAction(name) } />
       </Source>
-      <Source source={ flow.mode } prop='view'>
+      <Source source={ readMode(flow) } prop='view'>
         <ViewSelector ignoreUnknown>
           <Source
             props={ {
@@ -71,13 +72,12 @@ export default (props) => {
         </ViewSelector>
       </Source>
     </div>
-    <div className='flex-1' style={ style.main }>
-      <ConnectionSource.Component flow={ flow } view='source'/>
-      <Source source={ flow.mode } prop='view'>
+    <div className='flex-1' style={ style.content }>
+      <Source source={ readMode(flow) } prop='view'>
         <ViewSelector className='c20' ignoreUnknown>
+          <ConnectionSource.Component flow={ flow } view='source'/>
           <div view='db'></div>
           <div view='schema'></div>
-          <ConnectionSourceSelect.Component flow={ flow } view='source'/>
         </ViewSelector>
       </Source>
       </div>

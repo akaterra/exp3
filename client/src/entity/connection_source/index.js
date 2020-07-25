@@ -4,8 +4,12 @@ import { default as _ } from './const';
 import { Flow, getFirst, filterAction } from '../../flow';
 
 export default class ConnectionSourceFlow extends Flow {
-  get mode() {
-    return filterAction(this._outgoing, _.MODE);
+  get data() {
+    return this.getStream('source:data');
+  }
+
+  set data(data) {
+    this.emitAction('source:data', data.data);
   }
 
   constructor(api, db, schema, source) {
@@ -18,7 +22,9 @@ export default class ConnectionSourceFlow extends Flow {
   }
 
   async onRunInit(...args) {
-    this.emitAction('source', this._source);
+    await this.select().toPromise();
+
+    this.emitAction(_.MODE, 'source');
   }
 
   async onRunIterAction(action, data) {
@@ -31,7 +37,7 @@ export default class ConnectionSourceFlow extends Flow {
   // current source
 
   select(query) {
-    getFirst(this._api.selectSource(this._db, this._schema, this._source, query)).subscribe((data) => {
+    getFirst(this._api.selectSource(this._db, this._schema, this._source)).subscribe((data) => {
       this.data = data;
     });
 

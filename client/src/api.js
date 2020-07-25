@@ -120,23 +120,23 @@ class Connection extends Streamable {
   }
 
   execGet(path) {
-    return fetch(`http://127.0.0.1:9009${path}`, {
+    return json(fetch(`http://127.0.0.1:9009${path}`, {
       method: 'GET',
       // body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json'
       },
-    }).then((res) => res.status >= 200 && res.status < 300 ? res.json() : Promise.reject(res.status));
+    }));
   }
 
   execPost(path, data) {
-    return fetch(`http://127.0.0.1:9009${path}`, {
+    return json(fetch(`http://127.0.0.1:9009${path}`, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json'
       },
-    }).then((res) => res.status >= 200 && res.status < 300 ? res.json() : Promise.reject(res.status));
+    }));
   }
 }
 
@@ -202,14 +202,18 @@ class ConnectionManager extends Streamable {
   }
 
   execGet(path) {
-    return fetch(`http://127.0.0.1:9009${path}`, {
+    return json(fetch(`http://127.0.0.1:9009${path}`, {
       method: 'GET',
       // body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json'
       },
-    }).then((res) => res.status >= 200 && res.status < 300 ? res.json() : Promise.reject(res.status));
+    }));
   }
+}
+
+function json(promise) {
+  return promise.then(async (res) => res.status >= 200 && res.status < 300 ? res.json() : Promise.reject({ status: res.status, error: await res.json() }));
 }
 
 function wrapToStream(promise, stream, action) {

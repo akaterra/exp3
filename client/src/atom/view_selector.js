@@ -33,7 +33,7 @@ export default (props) => {
       if (child.props.view === view) {
         return <div key={ index }>{ child }</div>;
       } else {
-        return <div key={ index }className='hidden'>{ child }</div>;
+        return <div key={ index } className='hidden'>{ child }</div>;
       }
     });
 

@@ -109,7 +109,7 @@ export class Flow extends Streamable {
           break;
         }
       } catch (error) {
-        this.emitAction('error', error);
+        this.emitAction('error', { status: 0, error });
       }
     }
 
