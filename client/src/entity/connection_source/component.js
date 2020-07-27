@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActionList, Source, Select, ViewSelector } from '../../atom';
 import { readMode, readSource } from '../action';
+import { default as ConnectionSourceSelect } from '../connection_source_select';
 
 export default (props) => {
   const { flow } = props;
@@ -25,8 +26,8 @@ export default (props) => {
       'source:indexes': 'Indexes',
     }}>
       <div view='source:statistic'></div>
-      <div view='source:select'></div>
-      <div view='source:alter'></div>
+      <ConnectionSourceSelect.Component view='source:select' flow={ flow }/>
+      <div view='source:structure'></div>
     </ViewSelector>
   </Source>;
 };

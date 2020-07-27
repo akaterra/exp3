@@ -3,7 +3,6 @@ import { Source, Select, ViewSelector } from '../../atom';
 import { ActionList } from '../../molecule';
 import { readMode } from '../action';
 import { default as ConnectionSource } from '../connection_source';
-import { default as ConnectionSourceSelect } from '../connection_source_select';
 
 const style = {
   content: {

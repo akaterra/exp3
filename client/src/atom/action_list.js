@@ -17,7 +17,11 @@ export default (props) => {
           key={ i }
           className={ props.value === name ? 'link primary text-shadow' : 'link default' }
           style={ { display: 'block' } }
-          onClick={ props.onSubmit && (() => props.onSubmit(action)) }
+          onClick={ _ => {
+            if (props.onSubmit) {
+              props.onSubmit(action);
+            }
+          } }
         >
           { name }
         </a>;

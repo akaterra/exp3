@@ -40,10 +40,15 @@ export default (props) => {
     if (props.switchers) {
       children.unshift(<div className='c20'>
         {
-          Object.entries(props.switchers).map(([key, val]) => <a
+          Object.entries(props.switchers).map(([key, val], i) => <a
+            key={ i }
             className={ key === props.view ? 'link primary text-shadow' : 'link default' }
             style={ style.item }
-            onClick={ _ => setView(key) }
+            onClick={ _ => {
+              if (props.onChange) {
+                props.onChange(key);
+              }
+            } }
           >
             { val }
           </a>)

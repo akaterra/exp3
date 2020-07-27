@@ -61,8 +61,8 @@ function Tabs(props) {
         <div className='tabs-bar'>
           {
             tabs.map((tab, i) => <button
-              className={ i === currentTabIndex ? `tab ${ props.tabs[i].type === 'auth' ? 'primary' : ''} active` : `tab ${ props.tabs[i].type === 'auth' ? 'primary' : ''}` }
               key={ i }
+              className={ i === currentTabIndex ? `tab ${ props.tabs[i].type === 'auth' ? 'primary' : ''} active` : `tab ${ props.tabs[i].type === 'auth' ? 'primary' : ''}` }
               onClick={ () => setCurrentTabIndex(i) }
             >
               { tab.props.name }
@@ -72,9 +72,9 @@ function Tabs(props) {
         <div className='tabs-content underlined'></div>
         <div className='c20'>
           { 
-            tabs.map((tab, ind) => <div
-              className={ ind === currentTabIndex ? '' : 'hidden' }
-              key={ ind }
+            tabs.map((tab, i) => <div
+              key={ i }
+              className={ i === currentTabIndex ? '' : 'hidden' }
             >
               { tab }
             </div>)
