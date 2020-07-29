@@ -2,6 +2,7 @@ import { Subject, merge } from 'rxjs';
 import { filter, first, skip } from 'rxjs/operators';
 import { Streamable } from './streamable';
 import { SubjectWithCache } from './subject_with_cache';
+import { debug } from './debug';
 
 export class FlowSubscription {
   constructor(...subscriptions) {
@@ -148,20 +149,28 @@ export class Flow extends Streamable {
   }
 
   redirectToAndRun(flow, ...args) {
+    debug.add(flow, this);
+
     const flowSubscription = new FlowSubscription(this._incoming.subscribe(flow), flow.subscribe(this._outgoing));
 
     return flow.run(...args).then((result) => {
       flowSubscription.unsubscribe();
+      
+      debug.remove(flow);
 
       return result;
     }).catch((err) => {
       flowSubscription.unsubscribe();
+
+      debug.remove(flow);
 
       throw err;
     })
   }
 
   sleep(ms) {
+    debug.setMode(this, 'sleep');
+
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
@@ -170,6 +179,8 @@ export class Flow extends Streamable {
   }
 
   wait(...mixed) {
+    debug.setMode(this, 'wait');
+
     return !mixed.length ? toPromise(this._incoming) : toPromise(filterAction(this._incoming, ...mixed));
   }
 }
