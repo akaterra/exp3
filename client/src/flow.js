@@ -181,7 +181,17 @@ export class Flow extends Streamable {
   wait(...mixed) {
     debug.setMode(this, 'wait');
 
-    return !mixed.length ? toPromise(this._incoming) : toPromise(filterAction(this._incoming, ...mixed));
+    return (!mixed.length
+      ? toPromise(this._incoming)
+      : toPromise(filterAction(this._incoming, ...mixed))).then((res) => {
+        debug.setMode(this, undefined);
+
+        return res;
+      }).catch((e) => {
+        debug.setMode(this, undefined);
+
+        return Promise.reject(e);
+      });
   }
 }
 

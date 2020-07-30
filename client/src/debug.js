@@ -4,13 +4,13 @@ export class Debug extends SubjectWithCache {
   constructor() {
     super();
 
-    this._flowNodes = new Map();
-    this._root = new DebugNode();
+    this._flows = new Map();
+    this._roots = new Map();
   }
 
   setMode(flow, mode) {
-    if (this._flowNodes.has(flow)) {
-      this._flowNodes.get(flow).setMode(mode);
+    if (this._flows.has(flow)) {
+      this._flows.get(flow).setMode(mode);
 
       this.next({ action: null, data: this.toJSON() });
     }
@@ -18,21 +18,21 @@ export class Debug extends SubjectWithCache {
     return this;
   }
 
-  add(flow, parent) {
-    let rootNode = !parent ? this._root : this._flowNodes.get(parent);
+  add(flow, parentFlow) {
+    let rootNode = this._flows.get(parentFlow);
 
     if (!rootNode) {
-      this._root = rootNode = new DebugNode(parent);
+      rootNode = new DebugNode(parentFlow);
 
-      this._flowNodes.set(parent, rootNode);
+      this._roots.set(parentFlow, this._flows.set(parentFlow, rootNode).get(parentFlow));
 
       this.next({ action: null, data: this.toJSON() });
     }
 
     if (!rootNode.has(flow)) {
-      let flowNode = new DebugNode(flow);
+      let flowNode = this._flows.set(flow, new DebugNode(flow)).get(flow);
 
-      rootNode.add(flowNode);
+      rootNode.add(flow, flowNode);
 
       this.next({ action: null, data: this.toJSON() });
     }
@@ -41,8 +41,8 @@ export class Debug extends SubjectWithCache {
   }
 
   remove(flow) {
-    if (this._flowNodes.has(flow)) {
-      this._flowNodes.delete(this._flowNodes.get(flow).clear());
+    if (this._flows.has(flow)) {
+      this._flows.delete(this._flows.get(flow).clear());
 
       this.next({ action: null, data: this.toJSON() });
     }
@@ -51,8 +51,14 @@ export class Debug extends SubjectWithCache {
   }
 
   toJSON() {
+    const flows = {};
+
+    for (const flow of this._roots.entries()) {
+      flows[Object.getPrototypeOf(flow[0]).constructor.name] = flow[1].toJSON();
+    }
+
     return {
-      root: this._root.toJSON(),
+      flows,
     };
   }
 }
@@ -60,7 +66,7 @@ export class Debug extends SubjectWithCache {
 export class DebugNode {
   constructor(flow) {
     this._flow = flow;
-    this._nodes = new Set();
+    this._flows = new Map();
   }
 
   setMode(mode) {
@@ -68,37 +74,37 @@ export class DebugNode {
   }
 
   clear() {
-    for (const node of this._nodes) {
+    for (const node of this._flows) {
       node.clear();
     }
 
-    this._flow = this._nodes.clear();
+    this._flow = this._flows.clear();
 
     return this;
   }
 
   has(flow) {
-    return this._nodes.has(flow);
+    return this._flows.has(flow);
   }
 
-  add(flow) {
-    this._nodes.add(flow);
+  add(flow, flowNode) {
+    this._flows.set(flow, flowNode);
   }
 
   remove(flow) {
-    this._nodes.delete(flow);
+    this._flows.delete(flow);
   }
 
   toJSON() {
-    const nodes = {};
+    const flows = {};
 
-    for (const node of this._nodes.entries()) {
-      nodes[Object.getPrototypeOf(node[0]._flow).constructor.name] = node[1].toJSON();
+    for (const flow of this._flows.entries()) {
+      flows[Object.getPrototypeOf(flow[0]).constructor.name] = flow[1].toJSON();
     }
 
     return {
       mode: this._mode,
-      nodes,
+      flows,
     };
   }
 }
