@@ -2,6 +2,7 @@ import { filter, map } from 'rxjs/operators';
 import { default as Component } from './component';
 import { default as _ } from './const';
 import { Flow, getFirst, filterAction } from '../../flow';
+import { default as ConnectionSourceSelectFlow} from '../connection_source_select';
 
 export default class ConnectionSourceFlow extends Flow {
   get data() {
@@ -29,6 +30,20 @@ export default class ConnectionSourceFlow extends Flow {
 
   async onRunIterAction(action, data) {
     switch (action) {
+      case 'mode:select':
+        switch (data) {
+          case 'source:select':
+            const connectionSourceFlow = new ConnectionSourceSelectFlow(
+              this._api,
+              this._db,
+              this._schema,
+              this._source,
+            );
+    
+            return await this.redirectToAndRun(connectionSourceFlow);
+        }
+
+        break;
       default:
         return false;
     }

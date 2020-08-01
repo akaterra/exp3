@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActionList, Source, Select, ViewSelector } from '../../atom';
-import { readMode, readSource } from '../action';
+import { readMode, readSource, sendModeSelect } from '../action';
 import { default as ConnectionSourceSelect } from '../connection_source_select';
 
 export default (props) => {
@@ -18,13 +18,16 @@ export default (props) => {
       },
     })],
   ] }>
-    <ViewSelector switchers={{
-      'source:details': 'Details',
-      'source:select': 'Select data',
-      'source:insert': 'Insert data',
-      'source:structure': 'Structure',
-      'source:indexes': 'Indexes',
-    }}>
+    <ViewSelector
+      switchers={ {
+        'source:details': 'Details',
+        'source:select': 'Select data',
+        'source:insert': 'Insert data',
+        'source:structure': 'Structure',
+        'source:indexes': 'Indexes',
+      } }
+      onChange={ sendModeSelect.bind(null, flow) }
+    >
       <div view='source:statistic'></div>
       <ConnectionSourceSelect.Component view='source:select' flow={ flow }/>
       <div view='source:structure'></div>

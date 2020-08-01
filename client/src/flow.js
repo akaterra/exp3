@@ -96,7 +96,7 @@ export class Flow extends Streamable {
 
     while (true) {
       try {
-        ({ action, data } = await this.wait());
+        ({ action, data } = await this.onRunIterWait());
 
         console.log('>>>>>', name, 'action', { action, data });
 
@@ -132,6 +132,10 @@ export class Flow extends Streamable {
     
   }
 
+  async onRunIterWait() {
+    return this.wait();
+  }
+
   outgoingPushTo(flow) {
     this._outgoing.subscribe(flow);
 
@@ -150,26 +154,29 @@ export class Flow extends Streamable {
 
   redirectToAndRun(flow, ...args) {
     debug.add(flow, this);
+    debug.setOp(this, `redirectToAndRun : ${Object.getPrototypeOf(flow).constructor.name}`);
 
     const flowSubscription = new FlowSubscription(this._incoming.subscribe(flow), flow.subscribe(this._outgoing));
 
     return flow.run(...args).then((result) => {
       flowSubscription.unsubscribe();
       
-      debug.remove(flow);
+      debug.remove(flow, this);
+      debug.setOp(this, null);
 
       return result;
     }).catch((err) => {
       flowSubscription.unsubscribe();
 
-      debug.remove(flow);
+      debug.remove(flow, this);
+      debug.setOp(this, null);
 
-      throw err;
+      return Promise.reject(err);
     })
   }
 
   sleep(ms) {
-    debug.setMode(this, 'sleep');
+    debug.setOp(this, 'sleep');
 
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
@@ -179,17 +186,17 @@ export class Flow extends Streamable {
   }
 
   wait(...mixed) {
-    debug.setMode(this, 'wait');
+    debug.setOp(this, `wait : ${mixed.map((m) => m instanceof Subject ? Object.getPrototypeOf(m).constructor.name : m).join(',')}`);
 
     return (!mixed.length
       ? toPromise(this._incoming)
       : toPromise(filterAction(this._incoming, ...mixed))
     ).then((res) => {
-      debug.setMode(this, undefined);
+      debug.setOp(this, undefined);
 
       return res;
     }).catch((e) => {
-      debug.setMode(this, undefined);
+      debug.setOp(this, undefined);
 
       return Promise.reject(e);
     });

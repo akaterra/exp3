@@ -15,11 +15,12 @@ applyIsArrayPatch();
 
 const style = {
   overlap: {
-    backgroundColor: '#ff000010',
+    backgroundColor: '#0000ff10',
+    fontSize: '0.25rem',
     position: 'fixed',
     right: 0,
     top: 0,
-    width: '300px',
+    width: '500px',
     zIndex: 2000,
   },
 }

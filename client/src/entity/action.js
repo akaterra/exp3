@@ -28,6 +28,14 @@ export function readSourceSelectFilter(flow) {
     return filterAction(flow, 'source:select:filter');
 }
 
+export function sendMode(flow, mode) {
+    flow.next({ action: 'mode', data: mode });
+}
+
+export function sendModeSelect(flow, mode) {
+    flow.next({ action: 'mode:select', data: mode });
+}
+
 export function sendSourceSelectFilterOffsetAction(flow, index, value) {
     flow.next({ action: 'source:select:filter', data: { offset: value } });
 }

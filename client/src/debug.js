@@ -8,9 +8,9 @@ export class Debug extends SubjectWithCache {
     this._roots = new Map();
   }
 
-  setMode(flow, mode) {
+  setOp(flow, op) {
     if (this._flows.has(flow)) {
-      this._flows.get(flow).setMode(mode);
+      this._flows.get(flow).setOp(op);
 
       this.next({ action: null, data: this.toJSON() });
     }
@@ -40,7 +40,13 @@ export class Debug extends SubjectWithCache {
     return this;
   }
 
-  remove(flow) {
+  remove(flow, parentFlow) {
+    if (this._flows.has(parentFlow)) {
+      this._flows.get(parentFlow).remove(flow);
+
+      this.next({ action: null, data: this.toJSON() });
+    }
+
     if (this._flows.has(flow)) {
       this._flows.delete(this._flows.get(flow).clear());
 
@@ -69,8 +75,8 @@ export class DebugNode {
     this._flows = new Map();
   }
 
-  setMode(mode) {
-    this._mode = mode;
+  setOp(op) {
+    this._mode = op;
   }
 
   clear() {
@@ -103,8 +109,8 @@ export class DebugNode {
     }
 
     return {
-      mode: this._mode,
       flows,
+      op: this._mode || null,
     };
   }
 }

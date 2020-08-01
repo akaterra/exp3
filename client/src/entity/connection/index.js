@@ -3,7 +3,6 @@ import { default as Component } from './component';
 import { default as _ } from './const';
 import { Flow, getFirst, filterAction, toPromise } from '../../flow';
 import { default as ConnectionSourceFlow} from '../connection_source';
-import { default as ConnectionSourceSelectFlow} from '../connection_source_select';
 
 export default class ConnectionFlow extends Flow {
   get currentDb() {
@@ -82,7 +81,7 @@ export default class ConnectionFlow extends Flow {
         if (this.currentDb.data === _.ROOT) {
           await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
 
-          this.emitAction(_.MODE, _.DB_LIST);
+          this.emitAction(_.MODE, 'details').emitAction(_.MODE, _.DB_LIST);
         } else {
           await toPromise(this.selectCurrentSchemasFor(this.currentDb.data));
 

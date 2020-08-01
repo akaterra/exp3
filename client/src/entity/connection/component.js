@@ -74,6 +74,7 @@ export default (props) => {
     <div className='flex-1' style={ style.content }>
       <Source source={ readMode(flow) } prop='view'>
         <ViewSelector className='c20' ignoreUnknown>
+          <div view='details'></div>
           <ConnectionSource.Component flow={ flow } view='source'/>
           <div view='db'></div>
           <div view='schema'></div>

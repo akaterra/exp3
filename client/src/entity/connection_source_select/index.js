@@ -7,10 +7,6 @@ export default class ConnectionSourceSelectFlow extends Flow {
     return this.getStream('source:select:data');
   }
 
-  get mode() {
-    return filterAction(this._outgoing, _.MODE);
-  }
-
   set data(data) {
     this.emitAction('source:select:data', data.data);
   }
@@ -28,8 +24,7 @@ export default class ConnectionSourceSelectFlow extends Flow {
   async onRunInit() {
     await this.selectRowsSet(this._query).toPromise();
 
-    this.emit({ data: null });
-    this.emitAction('source:select:filter', this._query);
+    this.emitAction(_.MODE, 'source:select').emitAction('source:select:filter', this._query);
   }
 
   async onRunIterAction(action, data) {
