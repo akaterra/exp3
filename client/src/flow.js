@@ -103,7 +103,9 @@ export class Flow extends Streamable {
         let result = await this.onRunIterAction(action, data);
 
         while (typeof result === 'object') {
-          result = await this.onRunIterAction(result.action, result.data);
+          action = result.action;
+          data = result.data;
+          result = await this.onRunIterAction(action, data);
         }
 
         if (result === false) {
@@ -119,7 +121,7 @@ export class Flow extends Streamable {
 
     this.complete();
 
-    console.log('>>>>>', name, 'complete');
+    console.log('>>>>>', name, 'complete', { action, data });
 
     return { action, data };
   }

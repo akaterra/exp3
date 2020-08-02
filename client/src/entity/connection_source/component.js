@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActionList, Source, Select, ViewSelector } from '../../atom';
-import { readMode, readSource, sendModeSelect } from '../action';
+import { readMode, readSource, sendMode } from '../action';
 import { default as ConnectionSourceSelect } from '../connection_source_select';
 
 export default (props) => {
@@ -26,7 +26,7 @@ export default (props) => {
         'source:structure': 'Structure',
         'source:indexes': 'Indexes',
       } }
-      onChange={ sendModeSelect.bind(null, flow) }
+      onChange={ sendMode.bind(null, flow) }
     >
       <div view='source:statistic'></div>
       <ConnectionSourceSelect.Component view='source:select' flow={ flow }/>

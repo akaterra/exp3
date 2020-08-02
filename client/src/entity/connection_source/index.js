@@ -30,7 +30,7 @@ export default class ConnectionSourceFlow extends Flow {
 
   async onRunIterAction(action, data) {
     switch (action) {
-      case 'mode:select':
+      case 'mode':
         switch (data) {
           case 'source:select':
             const connectionSourceFlow = new ConnectionSourceSelectFlow(
