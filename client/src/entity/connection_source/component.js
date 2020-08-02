@@ -10,21 +10,19 @@ export default (props) => {
     [readMode(flow), 'view'],
     [readSource(flow), '...', (data) => ({
       switchers: {
-        'source:details': 'Details',
+        'source:status': 'Status',
         'source:select': 'Select data',
         'source:insert': 'Insert data',
         'source:structure': 'Structure',
-        'source:indexes': 'Indexes',
       },
     })],
   ] }>
     <ViewSelector
       switchers={ {
-        'source:details': 'Details',
+        'source:status': 'Status',
         'source:select': 'Select data',
         'source:insert': 'Insert data',
         'source:structure': 'Structure',
-        'source:indexes': 'Indexes',
       } }
       onChange={ sendMode.bind(null, flow) }
     >

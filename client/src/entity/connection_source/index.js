@@ -30,8 +30,14 @@ export default class ConnectionSourceFlow extends Flow {
 
   async onRunIterAction(action, data) {
     switch (action) {
-      case 'mode':
+      case _.MODE:
         switch (data) {
+          case 'source:insert':
+          case 'source:status':
+          case 'source:structure':
+            this.emitAction(_.MODE, data);
+
+            break;
           case 'source:select':
             const connectionSourceFlow = new ConnectionSourceSelectFlow(
               this._api,

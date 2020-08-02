@@ -7,8 +7,8 @@ import './json-inspector.css';
 import './index.css';
 import './index.sass';
 import { connectionManager } from './api';
+import { Source, ValueViewer } from './atom';
 import { debug } from './debug';
-import { Source } from './atom';
 import { default as MainFlow } from './entity/main';
 
 applyIsArrayPatch();

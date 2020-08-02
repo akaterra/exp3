@@ -8,6 +8,26 @@ export class Debug extends SubjectWithCache {
     this._roots = new Map();
   }
 
+  setLastIncoming(flow, payload) {
+    if (this._flows.has(flow)) {
+      this._flows.get(flow).setLastIncoming(payload);
+
+      this.next({ action: null, data: this.toJSON() });
+    }
+
+    return this;
+  }
+
+  setLastOutgoing(flow, payload) {
+    if (this._flows.has(flow)) {
+      this._flows.get(flow).setLastOutgoing(payload);
+
+      this.next({ action: null, data: this.toJSON() });
+    }
+
+    return this;
+  }
+
   setOp(flow, op) {
     if (this._flows.has(flow)) {
       this._flows.get(flow).setOp(op);
@@ -75,8 +95,22 @@ export class DebugNode {
     this._flows = new Map();
   }
 
+  setLastIncoming(payload) {
+    this._lastIncoming = payload;
+
+    return this;
+  }
+
+  setLastOutgoing(payload) {
+    this._lastOutgoing = payload;
+
+    return this;
+  }
+
   setOp(op) {
     this._mode = op;
+
+    return this;
   }
 
   clear() {
@@ -110,6 +144,8 @@ export class DebugNode {
 
     return {
       flows,
+      lastIncoming: this._lastIncoming || null,
+      lastOutgoing: this._lastOutgoing || null,
       op: this._mode || null,
     };
   }

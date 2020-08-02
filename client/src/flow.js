@@ -31,11 +31,15 @@ export class Flow extends Streamable {
   next(data) {
     this._incoming.next(data);
 
+    debug.setLastIncoming(this, data);
+
     return this;
   }
 
   nextAction(action, data) {
     this._incoming.next({ action, data });
+
+    debug.setLastIncoming(this, { action, data });
 
     return this;
   }
@@ -57,6 +61,8 @@ export class Flow extends Streamable {
   emit(data) {
     this._outgoing.next(data);
 
+    debug.setLastOutgoing(this, data);
+
     return this;
   }
 
@@ -66,6 +72,8 @@ export class Flow extends Streamable {
 
     this._outgoing
       .next({ action, data });
+
+    debug.setLastOutgoing(this, { action, data });
 
     return this;
   }
