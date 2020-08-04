@@ -10,6 +10,10 @@ const stub = {
   td: <td/>,
 };
 const style = {
+  content: {
+    overflowX: 'scroll',
+    width: '100%',
+  },
   th: {
     textAlign: 'left',
   },
@@ -25,27 +29,31 @@ function RowList(props) {
   }
 
   if (props.schemaless) {
-    return <table>
-      <thead>
-        <tr>
-          { props.columns.map((key) => <th style={ style.th }>{ key }</th>) }
-        </tr>
-      </thead>
-      <tbody>
-        { makeRows(props.result, props.columns, props.limit || 20) }
-      </tbody>
-    </table>;
+    return <div style={ style.content }>
+      <table>
+        <thead>
+          <tr>
+            { props.columns.map((key) => <th style={ style.th }>{ key }</th>) }
+          </tr>
+        </thead>
+        <tbody>
+          { makeRows(props.result, props.columns, props.limit || 20) }
+        </tbody>
+      </table>
+    </div>;
   } else {
-    return <table>
-      <thead>
-        <tr>
-          { props.columns.map((key) => <th style={ style.th }>{ key }</th>) }
-        </tr>
-      </thead>
-      <tbody>
-        { makeRows(props.result, props.columns, props.limit || 20) }
-      </tbody>
-    </table>;
+    return <div style={ style.content }>
+      <table>
+        <thead>
+          <tr>
+            { props.columns.map((key) => <th style={ style.th }>{ key }</th>) }
+          </tr>
+        </thead>
+        <tbody>
+          { makeRows(props.result, props.columns, props.limit || 20) }
+        </tbody>
+      </table>
+    </div>;
   }
 };
 

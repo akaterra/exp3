@@ -6,9 +6,10 @@ import { default as ConnectionSource } from '../connection_source';
 
 const style = {
   content: {
-    overflowX: 'auto',
+    width: '100%',
   },
   menu: {
+    minWidth: '300px',
     width: '300px',
   },
   menuList: {

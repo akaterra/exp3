@@ -52,8 +52,6 @@ const ValueViewerComponent = (props) => {
 
     if (value === null) {
       children = <span className='success-dark-20' style={ style.null }>{ keyName }{ 'Null' }</span>;
-    } else if (value instanceof Date) {
-      children = <span className='success-dark-20' style={ style.date }>{ keyName }{ value.replace(/-/g, '&#8209;') }</span>;
     } else {
       switch (typeof value) {
         case 'boolean':
