@@ -6,7 +6,8 @@ import { default as ConnectionSource } from '../connection_source';
 
 const style = {
   content: {
-    width: '100%',
+    flex: 1,
+    width: '1px',
   },
   menu: {
     minWidth: '300px',
@@ -72,9 +73,9 @@ export default (props) => {
         </ViewSelector>
       </Source>
     </div>
-    <div className='flex-1' style={ style.content }>
+    <div style={ style.content }>
       <Source source={ readMode(flow) } prop='view'>
-        <ViewSelector className='c20' ignoreUnknown>
+        <ViewSelector ignoreUnknown>
           <div view='details'></div>
           <ConnectionSource.Component flow={ flow } view='source'/>
           <div view='db'></div>

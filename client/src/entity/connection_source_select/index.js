@@ -29,6 +29,13 @@ export default class ConnectionSourceSelectFlow extends Flow {
 
   async onRunIterAction(action, data) {
     switch (action) {
+      case 'source:current:select':
+        await this.setSource(data).selectRowsSet(this._query).toPromise();
+        this.emitAction('source:current:select', data);
+
+        this.selectRowsSet(this._query);
+
+        break;
       case 'source:select:filter':
         Object.assign(this._query, data);
         this.emitAction('source:select:filter', this._query);
@@ -39,6 +46,12 @@ export default class ConnectionSourceSelectFlow extends Flow {
       default:
         return false;
     }
+  }
+
+  setSource(source) {
+    this._source = source;
+
+    return this;
   }
 
   // current source

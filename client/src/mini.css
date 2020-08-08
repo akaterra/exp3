@@ -736,21 +736,21 @@
   min-height: 5px;
 }
 .mini .sml .children-gap > *:not(:first-child) {
-  margin-top: 5px;
+  margin-top: 2.5px;
 }
 .mini .med .gap {
   height: 10px;
   min-height: 10px;
 }
 .mini .med .children-gap > *:not(:first-child) {
-  margin-top: 10px;
+  margin-top: 5px;
 }
 .mini .lrg .gap {
   height: 15px;
   min-height: 15px;
 }
 .mini .lrg .children-gap > *:not(:first-child) {
-  margin-top: 15px;
+  margin-top: 7.5px;
 }
 .mini .gap.gap-sml {
   height: 5px;
@@ -2249,9 +2249,6 @@
 .mini .fine > .fine-gap:last-child {
   padding-bottom: 15px;
 }
-.mini .fine > .paragraph:not(:last-child) {
-  padding-bottom: 0;
-}
 .mini .fine > .splitter:last-child {
   display: none;
 }
@@ -3744,7 +3741,7 @@
 .mini .sml .c20, .mini .sml .f20 {
   padding: 2.5px 5px;
 }
-.mini .sml .ccc {
+.mini .sml .cel {
   padding: 2.5px 5px;
 }
 .mini .med .c-1, .mini .med .f-1 {
@@ -3807,7 +3804,7 @@
 .mini .med .c20, .mini .med .f20 {
   padding: 5px 10px;
 }
-.mini .med .ccc {
+.mini .med .cel {
   padding: 5px 10px;
 }
 .mini .lrg .c-1, .mini .lrg .f-1 {
@@ -3870,8 +3867,68 @@
 .mini .lrg .c20, .mini .lrg .f20 {
   padding: 7.5px 15px;
 }
-.mini .lrg .ccc {
-  padding: 7.5px 15px;
+.mini .lrg .cel {
+  padding: 0px 15px;
+}
+.mini .c-1 > :first-child.row, .mini .f-1 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c-2 > :first-child.row, .mini .f-2 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c-3 > :first-child.row, .mini .f-3 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c-4 > :first-child.row, .mini .f-4 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c-5 > :first-child.row, .mini .f-5 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c-6 > :first-child.row, .mini .f-6 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c-7 > :first-child.row, .mini .f-7 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c-8 > :first-child.row, .mini .f-8 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c-9 > :first-child.row, .mini .f-9 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c10 > :first-child.row, .mini .f10 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c11 > :first-child.row, .mini .f11 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c12 > :first-child.row, .mini .f12 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c13 > :first-child.row, .mini .f13 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c14 > :first-child.row, .mini .f14 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c15 > :first-child.row, .mini .f15 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c16 > :first-child.row, .mini .f16 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c17 > :first-child.row, .mini .f17 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c18 > :first-child.row, .mini .f18 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c19 > :first-child.row, .mini .f19 > :first-child.row {
+  margin-top: -5px;
+}
+.mini .c20 > :first-child.row, .mini .f20 > :first-child.row {
+  margin-top: -5px;
 }
 .mini .sml .row {
   margin-left: -5px;
