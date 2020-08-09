@@ -1,7 +1,7 @@
 import { Arr } from 'invary';
 import { default as Component } from './component';
 import { default as _ } from './const';
-import { default as AuthFlow } from '../auth';
+import { default as ConnectFlow } from '../connect';
 import { default as ConnectionFlow } from '../connection';
 import { Flow } from '../../flow';
 
@@ -19,17 +19,17 @@ export default class MainFlow extends Flow {
   async onRunInit(...args) {
     this.emitAction(_.MODE, null);
 
-    const authFlow = new AuthFlow(this._api).outgoingPushTo(this);
+    const connectFlow = new ConnectFlow(this._api).outgoingPushTo(this);
 
-    authFlow.run();
+    connectFlow.run();
 
     this.tabs.next({
       action: 'tab:list',
       data: Arr([{
-        type: 'auth',
-        id: 'auth',
-        name: 'Auth',
-        flow: authFlow,
+        type: 'connect',
+        id: 'connect',
+        name: 'Connect',
+        flow: connectFlow,
       }]),
     });
 
@@ -62,7 +62,7 @@ export default class MainFlow extends Flow {
         this.emitAction('error', data);
 
         break;
-      case AuthFlow._.CONNECTION_OPEN:
+      case ConnectFlow._.CONNECTION_OPEN:
         const connectionFlow = new ConnectionFlow(data);
         this.toIncomingPull(connectionFlow);
         connectionFlow.run();

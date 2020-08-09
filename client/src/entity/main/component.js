@@ -1,7 +1,7 @@
 import { Arr } from 'invary';
 import React from 'react';
 import { readError } from '../action';
-import { default as Auth } from '../auth';
+import { default as Connect } from '../connect';
 import { default as Connection } from '../connection';
 import { Source } from '../../atom';
 
@@ -42,8 +42,8 @@ function Tabs(props) {
 
       if (!childTabComponent) {
         switch (tab.type) {
-          case 'auth':
-            return <Auth.Component key={ tab.id } { ...tab }/>;
+          case 'connect':
+            return <Connect.Component key={ tab.id } { ...tab }/>;
           case 'connection':
             return <Connection.Component key={ tab.id } { ...tab }/>;
         }
@@ -55,31 +55,29 @@ function Tabs(props) {
     setTabs(tabs);
   }, [props.tabs]);
 
-  return <div className='row' style={ style.container }>
-    <div className='c20'>
-      <div className='tabs'>
-        <div className='tabs-bar'>
-          {
-            tabs.map((tab, i) => <button
-              key={ i }
-              className={ i === currentTabIndex ? `tab ${ props.tabs[i].type === 'auth' ? 'primary' : ''} active` : `tab ${ props.tabs[i].type === 'auth' ? 'primary' : ''}` }
-              onClick={ () => setCurrentTabIndex(i) }
-            >
-              { tab.props.name }
-            </button>)
-          }
-        </div>
-        <div className='tabs-content underlined'></div>
-        <div className='c20'>
-          { 
-            tabs.map((tab, i) => <div
-              key={ i }
-              className={ i === currentTabIndex ? '' : 'hidden' }
-            >
-              { tab }
-            </div>)
-          }
-        </div>
+  return <div style={ style.container }>
+    <div className='cel tabs'>
+      <div className='tabs-bar'>
+        {
+          tabs.map((tab, i) => <button
+            key={ i }
+            className={ i === currentTabIndex ? `tab ${ props.tabs[i].type === 'connect' ? 'primary' : ''} active` : `tab ${ props.tabs[i].type === 'connect' ? 'primary' : ''}` }
+            onClick={ () => setCurrentTabIndex(i) }
+          >
+            { tab.props.name }
+          </button>)
+        }
+      </div>
+      <div className='tabs-content underlined'></div>
+      <div className='c20'>
+        { 
+          tabs.map((tab, i) => <div
+            key={ i }
+            className={ i === currentTabIndex ? '' : 'hidden' }
+          >
+            { tab }
+          </div>)
+        }
       </div>
     </div>
   </div>;

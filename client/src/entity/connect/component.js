@@ -12,7 +12,7 @@ export default (props) => {
 
   return <div className='row flex flex-center'>
     <Form
-      className='ccc'
+      className='cel'
       style={ style }
       state={ {
         driver: 'mongodb',

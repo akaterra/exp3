@@ -74,14 +74,16 @@ export default (props) => {
       </Source>
     </div>
     <div style={ style.content }>
-      <Source source={ readMode(flow) } prop='view'>
-        <ViewSelector ignoreUnknown>
-          <div view='details'></div>
-          <ConnectionSource.Component flow={ flow } view='source'/>
-          <div view='db'></div>
-          <div view='schema'></div>
-        </ViewSelector>
-      </Source>
+      <div className='cel'>
+        <Source source={ readMode(flow) } prop='view'>
+          <ViewSelector ignoreUnknown>
+            <div view='details'></div>
+            <ConnectionSource.Component flow={ flow } view='source'/>
+            <div view='db'></div>
+            <div view='schema'></div>
+          </ViewSelector>
+        </Source>
       </div>
+    </div>
   </div>;
 };

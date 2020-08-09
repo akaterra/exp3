@@ -38,7 +38,7 @@ export default (props) => {
     });
 
     if (props.switchers) {
-      children.unshift(<div className='c20'>
+      children.unshift(<div>
         {
           Object.entries(props.switchers).map(([key, val], i) => <a
             key={ i }

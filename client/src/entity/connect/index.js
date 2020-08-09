@@ -2,7 +2,7 @@ import { default as Component } from './component';
 import { default as _ } from './const';
 import { Flow, getFirst } from '../../flow';
 
-export default class AuthFlow extends Flow {
+export default class ConnectFlow extends Flow {
   get currentDrivers() {
     return this.getStream('driver:list');
   }
@@ -72,5 +72,5 @@ export default class AuthFlow extends Flow {
   }
 }
 
-AuthFlow._ = _;
-AuthFlow.Component = Component;
+ConnectFlow._ = _;
+ConnectFlow.Component = Component;
