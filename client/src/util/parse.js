@@ -1,4 +1,5 @@
-const stopSymbols = ' =,%&|()';
+const stopSymbols1 = ' =!&|';
+const stopSymbols2 = ' ,%()';
 
 function parse(str) {
   let ops = [];
@@ -11,8 +12,8 @@ function parse(str) {
 function split(str) {
   let cur = '';
   let tok = [];
-  let ixQ = 0;
   let isQ = false;
+  let stQ = 0;
 
   for (let i = 0, l = str.length, sym = str[0]; i < l; i += 1, sym = str[i]) {
     if (sym === '"') {
@@ -24,9 +25,9 @@ function split(str) {
         }
 
         if (isQ) {
-          tok.push([str.substring(ixQ, i).replace(/\\"/g, '"'), 's']);
+          tok.push([str.substring(stQ, i).replace(/\\"/g, '"'), 'q']);
         } else {
-          ixQ = i + 1;
+          stQ = i + 1;
         }
 
         isQ = !isQ;
@@ -36,7 +37,10 @@ function split(str) {
         continue;
       }
 
-      if (stopSymbols.indexOf(sym) === -1) {
+      const isStopSymbol1 = stopSymbols1.indexOf(sym) !== -1;
+      const isStopSymbol2 = stopSymbols2.indexOf(sym) !== -1;
+
+      if (!isStopSymbol1 && !isStopSymbol2) {
         cur += sym;
       } else {
         if (cur) {
@@ -48,7 +52,11 @@ function split(str) {
         if (sym === ' ') {
           continue;
         } else {
-          tok.push([sym, 'c']);
+          if (isStopSymbol1 && tok.length && tok[tok.length - 1][1] === 'c') {
+            tok[tok.length - 1][0] += sym;
+          } else {
+            tok.push([sym, 'c']);
+          }
         }
       }
     }
@@ -63,4 +71,4 @@ module.exports = {
 };
 
 
-console.log(split('"     " a & n = 7 & (j="7 =^&\\"hhgd")'));
+console.log(split('"     " a & ngf ! = 7 & (j="7 =^&\\"hhgd")'));
