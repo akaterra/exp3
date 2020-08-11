@@ -35,12 +35,22 @@ function parseLexVal(lex) {
     return null;
   }
 
-  return parseFloat(lex[0]);
+  const num = parseFloat(lex[0]);
+
+  if (Number.isNaN(num)) {
+    throw 'invalid syntax';
+  }
+
+  return num;
 }
 
-function parse(str, ops) {
+function parse(str, ops, lev) {
   if (!ops) {
     ops = [];
+  }
+
+  if (!lev) {
+    lev = 0;
   }
 
   ops.push({});
@@ -50,7 +60,14 @@ function parse(str, ops) {
 
   while (lex = nxt(), lex !== undefined) {
     if (isC(lex)) {
-      return ops; // unexpected control char
+      switch (lex[0]) {
+        case '|':
+          ops.push({});
+        case '&':
+          continue;
+        default:
+          throw 'invalid syntax';
+      }
     }
 
     let key = lex[0];
@@ -71,6 +88,7 @@ function parse(str, ops) {
           }
 
           ops[ops.length - 1][key].gt = parseLexVal(lex);
+
           break;
         case '<':
           lex = nxt();
@@ -80,6 +98,7 @@ function parse(str, ops) {
           }
 
           ops[ops.length - 1][key].lt = parseLexVal(lex);
+
           break;
         case '>=':
           lex = nxt();
@@ -89,6 +108,7 @@ function parse(str, ops) {
           }
 
           ops[ops.length - 1][key].gte = parseLexVal(lex);
+
           break;
         case '<=':
           lex = nxt();
@@ -98,6 +118,7 @@ function parse(str, ops) {
           }
 
           ops[ops.length - 1][key].lte = parseLexVal(lex);
+
           break;
         case '=':
           lex = nxt();
@@ -107,6 +128,7 @@ function parse(str, ops) {
           }
 
           ops[ops.length - 1][key].eq = parseLexVal(lex);
+
           break;
         case '!=':
           lex = nxt();
@@ -116,13 +138,18 @@ function parse(str, ops) {
           }
 
           ops[ops.length - 1][key].ne = parseLexVal(lex);
+
           break;
         case '&':
           ops[ops.length - 1][key].eq = true;
+
           break;
         case '|':
-          ops.push({});
+          nxt(-2);
+
           break;
+        case '(':
+          
       }
     } else {
       ops[ops.length - 1][key].eq = true;
@@ -220,4 +247,4 @@ module.exports = {
 
 
 // console.log(split('"     " a & ngf ! = 7 & (j="7 =^&\\"hhgd")'));
-console.log(parse('x a & c >= "bcvbxvcbx  f" & d & e'));
+console.log(parse('x a & c >= "bcvbxvcbx  f" & d   & e < 1.76   & e | h  & j = null'));
