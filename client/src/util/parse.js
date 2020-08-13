@@ -44,38 +44,39 @@ function parseLexVal(lex) {
   return num;
 }
 
-function parse(str, ops, lev) {
+function parse(str, ops) {
+  return parseInternal(fetch(split(str)), ops);
+}
+
+function parseInternal(nxt, ops) {
   if (!ops) {
     ops = [];
   }
 
-  if (!lev) {
-    lev = 0;
-  }
+  ops.push([]);
 
-  ops.push({});
-
+  let key;
   let lex;
-  let nxt = fetch(split(str));
 
   while (lex = nxt(), lex !== undefined) {
     if (isC(lex)) {
       switch (lex[0]) {
         case '|':
-          ops.push({});
+          ops.push([]);
         case '&':
           continue;
+        case '(':
+          ops[ops.length - 1].push(parseInternal(nxt));
+
+          continue;
+        case ')':
+          return ops;
         default:
           throw 'invalid syntax';
       }
     }
 
-    let key = lex[0];
-
-    if (!ops[ops.length - 1][key]) {
-      ops[ops.length - 1][key] = {};
-    }
-
+    key = lex[0];
     lex = nxt();
 
     if (isC(lex)) {
@@ -87,7 +88,7 @@ function parse(str, ops, lev) {
             return ops;
           }
 
-          ops[ops.length - 1][key].gt = parseLexVal(lex);
+          ops[ops.length - 1].push([key, 'gt', parseLexVal(lex)]);
 
           break;
         case '<':
@@ -97,7 +98,7 @@ function parse(str, ops, lev) {
             return ops;
           }
 
-          ops[ops.length - 1][key].lt = parseLexVal(lex);
+          ops[ops.length - 1].push([key, 'lt', parseLexVal(lex)]);
 
           break;
         case '>=':
@@ -107,7 +108,7 @@ function parse(str, ops, lev) {
             return ops;
           }
 
-          ops[ops.length - 1][key].gte = parseLexVal(lex);
+          ops[ops.length - 1].push([key, 'gte', parseLexVal(lex)]);
 
           break;
         case '<=':
@@ -117,7 +118,7 @@ function parse(str, ops, lev) {
             return ops;
           }
 
-          ops[ops.length - 1][key].lte = parseLexVal(lex);
+          ops[ops.length - 1].push([key, 'lte', parseLexVal(lex)]);
 
           break;
         case '=':
@@ -127,7 +128,7 @@ function parse(str, ops, lev) {
             return ops;
           }
 
-          ops[ops.length - 1][key].eq = parseLexVal(lex);
+          ops[ops.length - 1].push([key, 'eq', parseLexVal(lex)]);
 
           break;
         case '!=':
@@ -137,11 +138,11 @@ function parse(str, ops, lev) {
             return ops;
           }
 
-          ops[ops.length - 1][key].ne = parseLexVal(lex);
+          ops[ops.length - 1].push([key, 'ne', parseLexVal(lex)]);
 
           break;
         case '&':
-          ops[ops.length - 1][key].eq = true;
+          ops[ops.length - 1].push([key, 'eq', true]);
 
           break;
         case '|':
@@ -149,10 +150,14 @@ function parse(str, ops, lev) {
 
           break;
         case '(':
-          
+          ops[ops.length - 1].push(parseInternal(nxt));
+
+          break;
+        case ')':
+          return ops;
       }
     } else {
-      ops[ops.length - 1][key].eq = true;
+      ops[ops.length - 1].push([key, 'eq', true]);
 
       nxt(-2);
     }
@@ -247,4 +252,5 @@ module.exports = {
 
 
 // console.log(split('"     " a & ngf ! = 7 & (j="7 =^&\\"hhgd")'));
-console.log(parse('x a & c >= "bcvbxvcbx  f" & d   & e < 1.76   & e | h  & j = null'));
+// console.log(parse('x a & c >= "bcvbxvcbx  f" & d   & e < 1.76   & e | h  & j = null a & (b)'));
+console.log(JSON.stringify(parse('a & (b = 6 & u | c = 7)')));
