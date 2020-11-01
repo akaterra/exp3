@@ -252,5 +252,5 @@ module.exports = {
 
 
 // console.log(split('"     " a & ngf ! = 7 & (j="7 =^&\\"hhgd")'));
-// console.log(parse('x a & c >= "bcvbxvcbx  f" & d   & e < 1.76   & e | h  & j = null a & (b)'));
-console.log(JSON.stringify(parse('a & (b = 6 & u | c = 7)')));
+console.log(parse('x a & c >= "bcvbxvcbx  f" & d   & e < 1.76   & e | h  & j = null a & (b)'));
+// console.log(JSON.stringify(parse('a & (b = 6 & u | c = 7)')));
