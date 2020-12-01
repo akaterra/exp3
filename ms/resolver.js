@@ -1,5 +1,8 @@
+const { Arr } = require('invary');
 const _ = require('lodash');
 const { ObjectId } = require('mongodb');
+const BELONGS = 0;
+const HAS = 1;
 const Empty = require('./const').Empty;
 
 class Relation {
@@ -20,6 +23,14 @@ class Relation {
     this.next = null;
   }
 
+  getSource(source) {
+    if (this._sources.has(source)) {
+      return this._sources.get(source);
+    }
+
+    throw new Error(`Source not registered "${source}"`);
+  }
+
   addRelaton(sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
     this.next = this.resolver.addRelaton(
       this.target,
@@ -31,6 +42,14 @@ class Relation {
 
     return this.next;
   }
+
+  addBelongsRelation(sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
+    return this.addRelaton(sourceFieldOrMapper, target, targetFieldOrMapper, { ...opts, direction: BELONGS });
+  }
+
+  addHasRelation(sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
+    return this.addRelaton(sourceFieldOrMapper, target, targetFieldOrMapper, { ...opts, direction: HAS });
+  }
 }
 
 class Resolver {
@@ -40,6 +59,14 @@ class Resolver {
   }
 
   addRelaton(source, sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
+    if (Array.isArray(source)) {
+      source = (source[0] instanceof Source ? source : this.getSource(source)).asSource(source[1]);
+    }
+
+    if (Array.isArray(target)) {
+      target = (target[0] instanceof Source ? target : this.getSource(target)).asSource(target[1]);
+    }
+
     const sourceRelation = new Relation(
       this,
       source,
@@ -75,6 +102,14 @@ class Resolver {
     return sourceRelation;
   }
 
+  addBelongsRelation(source, sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
+    return this.addRelaton(source, sourceFieldOrMapper, target, targetFieldOrMapper, { ...opts, direction: BELONGS });
+  }
+
+  addHasRelation(source, sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
+    return this.addRelaton(source, sourceFieldOrMapper, target, targetFieldOrMapper, { ...opts, direction: HAS });
+  }
+
   addSource(source) {
     if (!this._sources.has(source.name)) {
       this._sources.set(source.name, source);
@@ -83,42 +118,47 @@ class Resolver {
     return this;
   }
 
-  async query(source, query, ...relations) {
+  async select(source, query, opts, ...relations) {
     if (!this._sources.has(source)) {
       return [];
     }
 
-    const items = await this._sources.get(source).query(query);
+    const items = await this._sources.get(source).select(query);
     const related = {};
 
     if (relations.length) {
       for (let relation of relations) {
         const sourceRelations = this._relations.get(source);
-        let currentRelation = sourceRelations.get(relation);
 
-        if (!relation) {
-          throw new Error(`Unknown subrelation source ${subrelation}`)
+        if (!sourceRelations) {
+          throw new Error(`Unknown source ${source}`);
         }
+  
+        let sourceItems = items;
+        let sourceRelation = sourceRelations.get(Array.isArray(relation) ? relation[0] : relation);
+        let sourceRelationIndex = 0;
 
-        related[relation] = {};
+        while (sourceRelation) {
+          if (!opts.graph && !related[sourceRelation.target.name]) {
+            related[sourceRelation.target.name] = {};
+          }
 
-        while (currentRelation) {
           let sourceFields = [];
 
-          if (typeof currentRelation.sourceFieldOrMapper === 'string') {
-            sourceFields = items.map((r, index) => {
-              let queryFieldVal = _.get(r, currentRelation.sourceFieldOrMapper);
+          if (typeof sourceRelation.sourceFieldOrMapper === 'string') {
+            sourceFields = sourceItems.map((r, index) => {
+              let queryFieldVal = _.get(r, sourceRelation.sourceFieldOrMapper);
 
-              if (currentRelation.opts?.targetPk) {
-                queryFieldVal = currentRelation.target.map('pk', currentRelation.opts.targetPk, queryFieldVal);
+              if (sourceRelation.opts?.targetPk) {
+                queryFieldVal = sourceRelation.target.map('pk', sourceRelation.opts.targetPk, queryFieldVal);
               }
 
               const sourceField = {
-                id: _.get(r, currentRelation.sourceFieldOrMapper),
+                id: _.get(r, sourceRelation.sourceFieldOrMapper),
                 index: r.$$_ind !== undefined ? r.$$_ind : index,
                 query: queryFieldVal === undefined ? undefined : {
                   filter: {
-                    [currentRelation.targetFieldOrMapper]: queryFieldVal,
+                    [sourceRelation.targetFieldOrMapper]: queryFieldVal,
                   },
                 },
               };
@@ -129,67 +169,88 @@ class Resolver {
 
               return sourceField;
             });
-          } else if (typeof currentRelation.sourceFieldOrMapper === 'function') {
-            sourceFields = await currentRelation.sourceFieldOrMapper(currentRelation.source, items, currentRelation.opts);
+          } else if (typeof sourceRelation.sourceFieldOrMapper === 'function') {
+            sourceFields = await sourceRelation.sourceFieldOrMapper(sourceRelation.source, items, sourceRelation.opts);
           } else {
             throw new Error('Unsupported type of source field mapper');
           }
 
-          if (typeof currentRelation.targetFieldOrMapper === 'string') {
-            for (const sourceField of sourceFields) {
-              if (!items[sourceField.index].$$_rel) {
-                items[sourceField.index].$$_rel = {};
-              }
+          const prevSourceItems = sourceItems;
+          sourceItems = [];
 
-              if (!items[sourceField.index].$$_rel[relation]) {
-                items[sourceField.index].$$_rel[relation] = [];
-              }
+          let select;
 
-              if (sourceField.query !== undefined) {
-                const relatedTargets = await currentRelation.target.query(sourceField.query);
-                related[relation][sourceField.id] = relatedTargets;
-
-                for (const relatedTarget of relatedTargets) {
-                  relatedTarget.$$_ind = sourceField.index;
-                }
-
-                items[sourceField.index].$$_rel[relation].push(String(sourceField.id));
-              }
-            }
-          } else if (typeof currentRelation.targetFieldOrMapper === 'function') {
-            for (const sourceField of sourceFields) {
-              if (!items[sourceField.index].$$_rel) {
-                items[sourceField.index].$$_rel = {};
-              }
-
-              if (!items[sourceField.index].$$_rel[relation]) {
-                items[sourceField.index].$$_rel[relation] = [];
-              }
-
-              if (sourceField.query !== undefined) {
-                const relatedTargets = await currentRelation.targetFieldOrMapper(currentRelation.target, sourceField.query);
-                related[relation][sourceField.id] = relatedTargets;
-
-                for (const relatedTarget of relatedTargets) {
-                  relatedTarget.$$_ind = sourceField.index;
-                }
-
-                items[sourceField.index].$$_rel[relation].push(String(sourceField.id));
-              }
-            }
+          if (typeof sourceRelation.targetFieldOrMapper === 'string') {
+            select = sourceRelation.target.select.bind(sourceRelation.target);
+          } else if (typeof sourceRelation.targetFieldOrMapper === 'function') {
+            select = sourceRelation.targetFieldOrMapper.bind(sourceRelation.targetFieldOrMapper);
           } else {
             throw new Error('Unsupported type of target field mapper');
           }
 
-          currentRelation = currentRelation.next;
+          for (let i = 0, l = sourceFields.length; i < l; i += 1) {
+            const sourceField = sourceFields[i];
+
+            if (opts?.graph) {
+              if (!prevSourceItems[sourceField.index][sourceRelation.target.name]) {
+                prevSourceItems[sourceField.index][sourceRelation.target.name] = [];
+              }
+            } else {
+              if (!items[sourceField.index].$$_rel) {
+                items[sourceField.index].$$_rel = {};
+              }
+
+              if (!items[sourceField.index].$$_rel[sourceRelation.target.name]) {
+                items[sourceField.index].$$_rel[sourceRelation.target.name] = [];
+              }
+            }
+
+            if (sourceField.query !== undefined) {
+              const relatedTargets = await select(sourceField.query);
+
+              if (!opts?.graph) {
+                related[sourceRelation.target.name][sourceField.id] = relatedTargets;
+              }
+
+              for (const relatedTarget of relatedTargets) {
+                relatedTarget.$$_ind = opts?.graph ? i : sourceField.index;
+              }
+
+              if (opts?.graph) {
+                prevSourceItems[sourceField.index][sourceRelation.target.name] = relatedTargets;
+              } else {
+                items[sourceField.index].$$_rel[sourceRelation.target.name].push(String(sourceField.id));
+              }
+
+              sourceItems.splice(sourceItems.length, 0, ...relatedTargets);
+            }
+          }
+
+          const targetRelations = this._relations.get(sourceRelation.target.name);
+
+          if (!targetRelations) {
+            sourceRelation = null;
+          } else {
+            sourceRelation = Array.isArray(relation) ? targetRelations.get(relation[sourceRelationIndex += 1]) : sourceRelation.next;
+          }
         }
       }
     }
 
     return { items, related };
   }
+
+  async selectGraph(source, query, ...relations) {
+    return this.select(source, query, { graph: true }, ...relations);
+  }
+
+  async upsertGraph(source, graph) {
+
+  }
 }
 
 module.exports = {
   Resolver,
+  BELONGS,
+  HAS,
 };

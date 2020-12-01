@@ -1,7 +1,7 @@
 const BaseSource = require('../source').Source;
 
 class Source extends BaseSource {
-  async query(query) {
+  async select(query) {
     await this.connect();
 
     return (await this._client.query({ text: this.prepareQuery(query) })).rows;
@@ -20,9 +20,59 @@ class Source extends BaseSource {
       let params = [];
 
       for (const [key, val] of Object.entries(query.filter)) {
-        clause += '%I = %L AND ';
-        params.push(key);
-        params.push(val);
+        if (val && typeof val === 'object') {
+          if (val.hasOwnProperty('$gt')) {
+            clause += '%I > %L AND ';
+            params.push(key);
+            params.push(val.$gt);
+          }
+
+          if (val.hasOwnProperty('$gte')) {
+            clause += '%I >= %L AND ';
+            params.push(key);
+            params.push(val.$gte);
+          }
+
+          if (val.hasOwnProperty('$lt')) {
+            clause += '%I < %L AND ';
+            params.push(key);
+            params.push(val.$lt);
+          }
+
+          if (val.hasOwnProperty('$lte')) {
+            clause += '%I <= %L AND ';
+            params.push(key);
+            params.push(val.$lte);
+          }
+
+          if (val.$in && val.$in?.length) {
+            clause += '%I IN (' + '%L,'.repeat(val.$in.length - 1) + '%L' + ') AND ';
+            params.push(key);
+            params.splice(params.length, 0, ...val.$in);
+          }
+
+          if (val.$nin && val.$nin?.length) {
+            clause += '%I NOT IN (' + '%L,'.repeat(val.$nin.length - 1) + '%L' + ') AND ';
+            params.push(key);
+            params.splice(params.length, 0, ...val.$nin);
+          }
+
+          if (val.hasOwnProperty('$is')) {
+            clause += '%I IS %L AND ';
+            params.push(key);
+            params.push(val.$is);
+          }
+
+          if (val.hasOwnProperty('$isNot')) {
+            clause += '%I IS NOT %L AND ';
+            params.push(key);
+            params.push(val.$isNot);
+          }
+        } else {
+          clause += '%I = %L AND ';
+          params.push(key);
+          params.push(val);
+        }
       }
 
       sql += ` WHERE ${format(clause + 'TRUE', ...params)}`;

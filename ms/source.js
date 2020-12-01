@@ -7,13 +7,20 @@ class Source {
     this._connectionOpts = connectionOpts;
     this._isConnected = false;
     this._name = name;
+    this._sources = new Map();
   }
 
   asSource(source, customName) {
-    return new (Object.getPrototypeOf(this).constructor)(
-      `${this._name}.${customName || source}`,
-      { ...this._connectionOpts, source },
-    )
+    const key = `${this._name}.${customName || source}`;
+
+    if (!this._sources.has(key)) {
+      this._sources.set(key, new (Object.getPrototypeOf(this).constructor)(
+        `${this._name}.${customName || source}`,
+        { ...this._connectionOpts, source },
+      ));
+    }
+    
+    return this._sources.get(key);
   }
 
   async connect() {
@@ -28,8 +35,12 @@ class Source {
     return this;
   }
 
-  async query(query) {
+  async select(query) {
     return [];
+  }
+
+  async selectIn(key, ids) {
+    return this.select({ filter: { [key]: { $in: ids } } });
   }
 
   map(typ, val) {

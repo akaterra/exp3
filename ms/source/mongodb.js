@@ -1,7 +1,7 @@
 const BaseSource = require('../source').Source;
 
 class Source extends BaseSource {
-  async query(query) {
+  async select(query) {
     await this.connect();
 
     return await this.prepareQuery(
