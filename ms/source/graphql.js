@@ -1,19 +1,12 @@
 const BaseSource = require('../source').Source;
 
-const DEFAULT_PK = [
-  '_id',
-];
-const DEFAULT_SCHEMA = {
-  _id: (val) => typeof val === 'string' && val.length === 24 ? new (require('mongodb').ObjectId)(val) : val,
-};
-
 class Source extends BaseSource {
   get pk() {
-    return this._pk ?? DEFAULT_PK;
+    return this._pk ?? ['_id'];
   }
 
   get schema() {
-    return this._schema ?? DEFAULT_SCHEMA;
+    return this._schema ?? { _id: (val) => typeof val === 'string' && val.length === 24 ? new (require('mongodb').ObjectId)(val) : val };
   }
 
   async select(query) {
@@ -31,15 +24,20 @@ class Source extends BaseSource {
     ).toArray();
   }
 
+  map(typ, mod, val) {
+    switch (mod) {
+      case 'objectId':
+        return typeof val === 'string' && val.length === 24 ? new (require('mongodb').ObjectId)(val) : val;
+    }
+
+    return val;
+  }
+
   prepareQuery(cursor, query) {
     if (query?.filter) {
       const filter = {};
 
-      for (let [key, val] of Object.entries(query.filter)) {
-        if (this.schema && key in this.schema) {
-          val = this.schema[key](val);
-        }
-
+      for (const [key, val] of Object.entries(query.filter)) {
         if (val && typeof val === 'object') {
           filter[key] = {};
 
