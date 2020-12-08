@@ -1,5 +1,6 @@
 module.exports = {
-  GraphQL: require('./graphql').Source,
+  Graphql: require('./graphql').Source,
   Mongodb: require('./mongodb').Source,
+  Mysql: require('./mysql').Source,
   Postgresql: require('./postgresql').Source,
 };

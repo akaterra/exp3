@@ -43,7 +43,7 @@ class Source extends BaseSource {
       console.debug({ query });
     }
 
-    return await this.prepareQuery(
+    return await this._prepareQuery(
       this._client
         .db(this._connectionOpts?.credentials.db)
         .collection(this._connectionOpts?.source).find(),
@@ -55,7 +55,7 @@ class Source extends BaseSource {
     return [].concat(...await Promise.all(array.map((r) => this.select({ filter: r }))));
   }
 
-  prepareQuery(cursor, query) {
+  _prepareQuery(cursor, query) {
     if (query?.filter) {
       const filter = {};
 
@@ -169,6 +169,8 @@ class Source extends BaseSource {
     this._client = client;
   }
 }
+
+Source.ID = '_id';
 
 module.exports = {
   Source,

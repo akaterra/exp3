@@ -15,7 +15,7 @@ class Source extends BaseSource {
   }
 
   get type() {
-    return 'postgresql';
+    return 'mysql';
   }
 
   async select(query) {
@@ -30,36 +30,35 @@ class Source extends BaseSource {
       console.debug({ query: sql });
     }
 
-    return (await this._client.query({ text: sql })).rows;
+    return this._performQuery(sql);
   }
 
   async selectIn(array) {
     await this.connect();
 
-    const format = require('../format').format;
+    const { escape, escapeId } = require('mysql');
     const keys = Object.keys(array[0]);
     const sql = `
     SELECT * FROM ${this._connectionOpts.source ?? this._name}
-    JOIN (VALUES ${format('%L', array)})
-    AS t (${TmpFieldsAsStr.substr(0, keys.length * 8 - 1)})
-    ON ${keys.map((k, i) => format('%I = %I', k, TmpFields[i])).join(' AND ')}
+    WHERE (${escapeId(keys)})
+    IN (${escape(array.map((r) => Object.values(r)))})
     `;
 
     if (process?.env?.DEBUG) {
       console.debug({ query: sql });
     }
 
-    return (await this._client.query({ text: sql })).rows;
+    return this._performQuery(sql);
   }
 
   async insert(value, opts) {
     await this.connect();
 
-    const format = require('pg-format');
+    const format = require('mysql').format;
     const params = Object.keys(value).concat(Object.values(value));
     const sql = `
-    INSERT INTO ${this._connectionOpts.source ?? this._name} (${'%I,'.repeat(params.length / 2 - 1) + '%I'})
-    VALUES (${'%L,'.repeat(params.length / 2 - 1) + '%L'})
+    INSERT INTO ${this._connectionOpts.source ?? this._name} (${'??,'.repeat(params.length / 2 - 1) + '??'})
+    VALUES (${'?,'.repeat(params.length / 2 - 1) + '?'})
     RETURNING *
     `;
     const text = format(sql, ...params);
@@ -68,16 +67,16 @@ class Source extends BaseSource {
       console.debug({ query: text });
     }
 
-    return (await this._client.query({ text })).rows;
+    return this._performQuery(sql);
   }
 
   async update(query, value) {
     await this.connect();
 
-    const format = require('pg-format');
+    const format = require('mysql').format;
     const params = Object.entries(value).flat();
     const sql = `
-    UPDATE ${this._connectionOpts.source ?? this._name} SET ${'%I = %L,'.repeat(params.length / 2 - 1) + '%I = %L'}
+    UPDATE ${this._connectionOpts.source ?? this._name} SET ${'?? = ?,'.repeat(params.length / 2 - 1) + '?? = ?'}
     ${this._prepareQuery(query)}
     RETURNING *
     `;
@@ -87,11 +86,19 @@ class Source extends BaseSource {
       console.debug({ query: text });
     }
 
-    return (await this._client.query({ text })).rows;
+    return this._performQuery(text);
+  }
+
+  _performQuery(query) {
+    return new Promise((resolve, reject) => {
+      this._client.query(query, (error, results, fields) => {
+        return error ? reject(error) : resolve(results);
+      });
+    });
   }
 
   _prepareQuery(query, sql, params) {
-    const format = require('../format').format;
+    const format = require('mysql').format;
 
     if (query?.filter) {
       let clause = '';
@@ -111,68 +118,68 @@ class Source extends BaseSource {
 
         if (val && typeof val === 'object') {
           if (val.hasOwnProperty('$gt')) {
-            clause += '%I > %L AND ';
+            clause += '?? > ? AND ';
             params.push(key);
             params.push(assertWhereClauseValue(val.$gt));
           }
 
           if (val.hasOwnProperty('$gte')) {
-            clause += '%I >= %L AND ';
+            clause += '?? >= ? AND ';
             params.push(key);
             params.push(assertWhereClauseValue(val.$gte));
           }
 
           if (val.hasOwnProperty('$lt')) {
-            clause += '%I < %L AND ';
+            clause += '?? < ? AND ';
             params.push(key);
             params.push(assertWhereClauseValue(val.$lt));
           }
 
           if (val.hasOwnProperty('$lte')) {
-            clause += '%I <= %L AND ';
+            clause += '?? <= ? AND ';
             params.push(key);
             params.push(assertWhereClauseValue(val.$lte));
           }
 
           if (val.$in && val.$in?.length) {
-            clause += '%I IN (' + '%L,'.repeat(val.$in.length - 1) + '%L' + ') AND ';
+            clause += '?? IN ? AND ';
             params.push(key);
             params.splice(params.length, 0, ...assertWhereClauseValue(val.$in));
           }
 
           if (val.$nin && val.$nin?.length) {
-            clause += '%I NOT IN (' + '%L,'.repeat(val.$nin.length - 1) + '%L' + ') AND ';
+            clause += '?? NOT IN ? AND ';
             params.push(key);
             params.splice(params.length, 0, ...assertWhereClauseValue(val.$nin));
           }
 
           if (val.hasOwnProperty('$is')) {
-            clause += '%I IS %L AND ';
+            clause += '?? IS ? AND ';
             params.push(key);
             params.push(assertWhereClauseValue(val.$is));
           }
 
           if (val.hasOwnProperty('$isNot')) {
-            clause += '%I IS NOT %L AND ';
+            clause += '?? IS NOT ? AND ';
             params.push(key);
             params.push(assertWhereClauseValue(val.$isNot));
           }
         } else {
-          clause += '%I = %L AND ';
+          clause += '?? = ? AND ';
           params.push(key);
           params.push(assertWhereClauseValue(val));
         }
       }
 
-      sql += ` WHERE ${format(clause + 'TRUE', ...params)}`;
+      sql += ` WHERE ${format(clause + '1', params)}`;
     }
 
     if (query?.limit > 0) {
-      sql += ` LIMIT ${format('%L', query.limit)}`;
+      sql += ` LIMIT ${format('?', query.limit)}`;
     }
 
     if (query?.offset > 0) {
-      sql += ` OFFSET ${format('%L', query.offset)}`;
+      sql += ` OFFSET ${format('?', query.offset)}`;
     }
 
     return sql;
@@ -180,14 +187,14 @@ class Source extends BaseSource {
 
   async onConnect() {
     const credentials = this._connectionOpts?.credentials || {};
-    const { Client } = require('pg');
+    const { createConnection } = require('mysql');
 
     if (!credentials.host) {
-      credentials.host = 'postgresql://127.0.0.1:5432';
+      credentials.host = 'mysql://127.0.0.1:3306';
     }
 
-    if (credentials.host.substr(0, 13) !== 'postgresql://') {
-      credentials.host = `postgresql://${credentials.host}`;
+    if (credentials.host.substr(0, 8) !== 'mysql://') {
+      credentials.host = `mysql://${credentials.host}`;
     }
 
     const uri = new URL(credentials.host);
@@ -201,11 +208,11 @@ class Source extends BaseSource {
     }
 
     if (!uri.schema) {
-      uri.schema = 'postgresql://';
+      uri.schema = 'mysql://';
     }
 
     if (!uri.username && (credentials.username || credentials.password)) {
-      uri.username = credentials.username || (credentials.password ? 'postgres' : undefined);
+      uri.user = credentials.username || (credentials.password ? 'root' : undefined);
     }
 
     if (!uri.password && credentials.password) {
@@ -213,14 +220,10 @@ class Source extends BaseSource {
     }
 
     if (!uri.pathname) {
-      uri.pathname = `/${credentials.db || 'postgres'}`;
+      uri.pathname = `/${credentials.db || 'local'}`;
     }
 
-    const client = new Client({
-      connectionString: uri.toString(),
-    });
-
-    await client.connect();
+    const client = await createConnection(uri.toString());
 
     this._client = client;
 

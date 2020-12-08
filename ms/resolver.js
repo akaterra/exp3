@@ -11,66 +11,79 @@ class Relation {
   constructor(
     resolver,
     source,
-    sourceFieldOrMapper,
+    relation,
     target,
-    targetFieldOrMapper,
     opts,
   ) {
-    if (typeof sourceFieldOrMapper === 'function') {
-
-    } else if (Array.isArray(sourceFieldOrMapper)) {
-      for (const field of sourceFieldOrMapper) {
-        if (!(typeof field === 'string')) {
-          throw new Error(`Source "" field must be a function, string or list of strings`);
-        }
-      }
-    } else if (typeof sourceFieldOrMapper === 'string') {
-      sourceFieldOrMapper = [sourceFieldOrMapper];
+    if (typeof relation === 'string') {
+      this.l = [relation];
+      this.r = [relation];
+    } else if (Array.isArray(relation) && relation.length >= 2) {
+      this.l = Array.isArray(relation[0]) ? relation[0] : [relation[0]];
+      this.r = Array.isArray(relation[1]) ? relation[1] : [relation[1]];
+    } else if (relation && typeof relation === 'object') {
+      this.l = Object.keys(relation);
+      this.r = Object.values(relation);
     } else {
-      throw new Error(`Source "" field must be a function, string or list of strings`);
+      throw new Error(`Relation must be string, list of strings/functions or mapping object`);
     }
 
-    if (typeof targetFieldOrMapper === 'function') {
+    if (this.l.length !== this.r.length) {
+      throw new Error(`Left relation length is not same as right`);
+    }
 
-    } else if (Array.isArray(targetFieldOrMapper)) {
-      for (const field of targetFieldOrMapper) {
-        if (!(typeof field === 'string')) {
-          throw new Error(`Target "" field must be a function, string or list of strings`);
-        }
+    for (const mapper of this.l) {
+      if (!(typeof mapper === 'string') && !(typeof mapper === 'function')) {
+        throw new Error(`Left relation mapped must be string or function`);
       }
-    } else if (typeof targetFieldOrMapper === 'string') {
-      targetFieldOrMapper = [targetFieldOrMapper];
-    } else {
-      throw new Error(`Target "" field must be a function, string or list of strings`);
+    }
+
+    for (const mapper of this.r) {
+      if (!(typeof mapper === 'string') && !(typeof mapper === 'function')) {
+        throw new Error(`Right relation mapped must be string or function`);
+      }
     }
 
     this.resolver = resolver;
     this.source = source;
-    this.sourceFieldOrMapper = sourceFieldOrMapper;
     this.target = target;
-    this.targetFieldOrMapper = targetFieldOrMapper;
     this.opts = opts;
     this.next = null;
   }
 
-  addRelaton(sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
+  addRelaton(relation, target, opts) {
     this.next = this.resolver.addRelaton(
       this.target,
-      sourceFieldOrMapper,
+      relation,
       target,
-      targetFieldOrMapper,
       opts,
     );
 
     return this.next;
   }
 
-  addBelongsRelation(sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
-    return this.addRelaton(sourceFieldOrMapper, target, targetFieldOrMapper, { ...opts, direction: BELONGS });
+  addBelongsRelation(relation, target, opts) {
+    return this.addRelaton(relation, target, { ...opts, direction: BELONGS });
   }
 
-  addHasRelation(sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
-    return this.addRelaton(sourceFieldOrMapper, target, targetFieldOrMapper, { ...opts, direction: HAS });
+  addHasRelation(relation, target, opts) {
+    return this.addRelaton(relation, target, { ...opts, direction: HAS });
+  }
+
+  getCombinedKeyOfSource(value) {
+    return this.source.getCombinedKey(this.l, value);
+  }
+
+  getCombinedKeyOfTarget(value) {
+    return this.target.getCombinedKey(this.r, value);
+  }
+
+  getRelationFilterOfSource(value) {
+    return this.source.getRelationFilter(this.l, this.r, value);
+  }
+
+  getRelationFilterOfTarget(value) {
+    return this.target.getRelationFilter(this.r, this.l, value);
   }
 }
 
@@ -98,7 +111,7 @@ class Resolver {
     throw new Error(`Source not registered "${source}"`);
   }
 
-  addRelaton(source, sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
+  addRelaton(source, relation, target, opts) {
     if (Array.isArray(source)) {
       source = (source[0] instanceof Source ? source : this.getSource(source)).asSource(source[1]);
     }
@@ -110,9 +123,8 @@ class Resolver {
     const sourceRelation = new Relation(
       this,
       source,
-      sourceFieldOrMapper,
+      relation,
       target,
-      targetFieldOrMapper,
       opts,
     );
 
@@ -122,32 +134,17 @@ class Resolver {
 
     this._relations.get(source.name).set(target.name, sourceRelation);
 
-    // const targetRelation = new Relation(
-    //   this,
-    //   target,
-    //   targetFieldOrMapper,
-    //   source,
-    //   sourceFieldOrMapper,
-    //   opts,
-    // );
-
-    // if (!this._relations.has(target.name)) {
-    //   this._relations.set(target.name, new Map());
-    // }
-
-    // this._relations.get(target.name).set(source.name, targetRelation);
-
     this.addSource(source).addSource(target);
 
     return sourceRelation;
   }
 
-  addBelongsRelation(source, sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
-    return this.addRelaton(source, sourceFieldOrMapper, target, targetFieldOrMapper, { ...opts, direction: BELONGS });
+  addBelongsRelation(source, relation, target, opts) {
+    return this.addRelaton(source, relation, target, { ...opts, direction: BELONGS });
   }
 
-  addHasRelation(source, sourceFieldOrMapper, target, targetFieldOrMapper, opts) {
-    return this.addRelaton(source, sourceFieldOrMapper, target, targetFieldOrMapper, { ...opts, direction: HAS });
+  addHasRelation(source, relation, target, opts) {
+    return this.addRelaton(source, relation, target, { ...opts, direction: HAS });
   }
 
   addSource(source) {
@@ -174,8 +171,12 @@ class Resolver {
     const related = {};
 
     if (relations.length) {
-      if (opts?.parallel) {
-        await Promise.all(relations.map((relation) => select.call(this, items, related, currentSource, relation, null, query, opts)));
+      if (this._parallel) {
+        this._parallel = false;
+
+        await Promise.all(
+          relations.map((relation) => select.call(this, items, related, currentSource, relation, null, query, opts)),
+        );
       } else {
         const relatedTargets = new Map();
 
@@ -193,7 +194,7 @@ class Resolver {
   }
   
   async selectGraph(source, query, ...relations) {
-    return this.select(source, query, { graph: true, parallel: this._parallel }, ...relations);
+    return this.select(source, query, { graph: true }, ...relations);
   }
 
   async upsertGraph(source, graph, opts) {
@@ -291,34 +292,28 @@ async function select(items, related, currentSource, relation, relatedTargets, q
 
     let sourceFields = [];
 
-    if (typeof sourceRelation.sourceFieldOrMapper === 'function') {
-      sourceFields = await sourceRelation.sourceFieldOrMapper(sourceRelations, items);
-    } else {
-      sourceFields = sourceItems.map((r, index) => {
-        const filter = typeof sourceRelation.targetFieldOrMapper === 'function'
-          ? sourceRelation.targetFieldOrMapper(sourceRelations, r)
-          : sourceRelation.source.getRelationFilter(sourceRelation.targetFieldOrMapper, sourceRelation.sourceFieldOrMapper, r);
+    sourceFields = sourceItems.map((r, index) => {
+      const filter = sourceRelation.getRelationFilterOfTarget(r);
 
-        if (query?.$$_rel?.[relation]?.filter) {
-          Object.assign(filter, query.$$_rel[relation].filter);
-        }
+      if (query?.$$_rel?.[relation]?.filter) {
+        Object.assign(filter, query.$$_rel[relation].filter);
+      }
 
-        const sourceField = {
-          idKey: sourceRelation.source.getCombinedKey(sourceRelation.source.pk, r),
-          index: r.$$_ind !== undefined ? r.$$_ind : index,
-          query: { filter },
-          rfKey: sourceRelation.source.getCombinedKey(sourceRelation.sourceFieldOrMapper, r),
-        };
+      const sourceField = {
+        idKey: sourceRelation.source.getCombinedKey(sourceRelation.source.pk, r),
+        index: r.$$_ind !== undefined ? r.$$_ind : index,
+        query: { filter },
+        rfKey: sourceRelation.getCombinedKeyOfSource(r),
+      };
 
-        return sourceField;
-      });
-    }
+      return sourceField;
+    });
 
     const prevSourceItems = sourceItems;
     sourceItems = [];
 
     for (const relatedTarget of await sourceRelation.target.selectIn(sourceFields.map((f) => f.query.filter))) {
-      const relatedTargetKey = sourceRelation.target.getCombinedKey(sourceRelation.targetFieldOrMapper, relatedTarget);
+      const relatedTargetKey = sourceRelation.getCombinedKeyOfTarget(relatedTarget);
 
       if (!relatedTargets.has(relatedTargetKey)) {
         relatedTargets.set(relatedTargetKey, []);
