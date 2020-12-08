@@ -75,6 +75,12 @@ class Relation {
 }
 
 class Resolver {
+  get parallel() {
+    this._parallel = true;
+
+    return this;
+  }
+
   constructor() {
     this._relations = new Map();
     this._sources = new Map();
@@ -168,101 +174,13 @@ class Resolver {
     const related = {};
 
     if (relations.length) {
-      for (let relation of relations) {
-        const sourceRelations = this._relations.get(currentSource.name);
+      if (opts?.parallel) {
+        await Promise.all(relations.map((relation) => select.call(this, items, related, currentSource, relation, null, query, opts)));
+      } else {
+        const relatedTargets = new Map();
 
-        if (!sourceRelations) {
-          throw new Error(`Unknown source ${source}`);
-        }
-  
-        let sourceItems = items;
-        let sourceRelation = sourceRelations.get(Array.isArray(relation) ? relation[0] : relation);
-        let sourceRelationIndex = 0;
-
-        while (sourceRelation) {
-          if (!opts.graph && !related[sourceRelation.target.name]) {
-            related[sourceRelation.target.name] = {};
-          }
-
-          let sourceFields = [];
-
-          if (typeof sourceRelation.sourceFieldOrMapper === 'function') {
-            sourceFields = await sourceRelation.sourceFieldOrMapper(sourceRelation.source, items, sourceRelation.opts);
-          } else {
-            sourceFields = sourceItems.map((r, index) => {
-              const filter = sourceRelation.source.getRelationFilter(sourceRelation.targetFieldOrMapper, sourceRelation.sourceFieldOrMapper, r);
-
-              if (query?.$$_rel?.[relation]?.filter) {
-                Object.assign(filter, query.$$_rel[relation].filter);
-              }
-
-              const sourceField = {
-                idKey: sourceRelation.source.getCombinedKey(sourceRelation.source.pk, r),
-                index: r.$$_ind !== undefined ? r.$$_ind : index,
-                query: { filter },
-              };
-
-              return sourceField;
-            });
-          }
-
-          const prevSourceItems = sourceItems;
-          sourceItems = [];
-
-          let select;
-
-          if (typeof sourceRelation.targetFieldOrMapper === 'function') {
-            select = sourceRelation.targetFieldOrMapper.bind(sourceRelation.targetFieldOrMapper);
-          } else {
-            select = sourceRelation.target.select.bind(sourceRelation.target);
-          }
-
-          for (let i = 0, l = sourceFields.length; i < l; i += 1) {
-            const sourceField = sourceFields[i];
-
-            if (opts?.graph) {
-              if (!prevSourceItems[sourceField.index][sourceRelation.target.name]) {
-                prevSourceItems[sourceField.index][sourceRelation.target.name] = [];
-              }
-            } else {
-              if (!items[sourceField.index].$$_rel) {
-                items[sourceField.index].$$_rel = {};
-              }
-
-              if (!items[sourceField.index].$$_rel[sourceRelation.target.name]) {
-                items[sourceField.index].$$_rel[sourceRelation.target.name] = [];
-              }
-            }
-
-            if (sourceField.query !== undefined) {
-              const relatedTargets = await select(sourceField.query);
-
-              if (!opts?.graph) {
-                related[sourceRelation.target.name][sourceField.idKey] = relatedTargets;
-              }
-
-              for (const relatedTarget of relatedTargets) {
-                relatedTarget.$$_ind = opts?.graph ? i : sourceField.index;
-                relatedTarget.$$_drt = false;
-              }
-
-              if (opts?.graph) {
-                prevSourceItems[sourceField.index][sourceRelation.target.name] = relatedTargets;
-              } else {
-                items[sourceField.index].$$_rel[sourceRelation.target.name].push(sourceField.idKey);
-              }
-
-              sourceItems.splice(sourceItems.length, 0, ...relatedTargets);
-            }
-          }
-
-          const targetRelations = this._relations.get(sourceRelation.target.name);
-
-          if (!targetRelations) {
-            sourceRelation = null;
-          } else {
-            sourceRelation = Array.isArray(relation) ? targetRelations.get(relation[sourceRelationIndex += 1]) : sourceRelation.next;
-          }
+        for (let relation of relations) {
+          await select.call(this, items, related, currentSource, relation, relatedTargets, query, opts);
         }
       }
     }
@@ -275,7 +193,7 @@ class Resolver {
   }
   
   async selectGraph(source, query, ...relations) {
-    return this.select(source, query, { graph: true }, ...relations);
+    return this.select(source, query, { graph: true, parallel: this._parallel }, ...relations);
   }
 
   async upsertGraph(source, graph, opts) {
@@ -346,6 +264,113 @@ class Resolver {
     }
 
     return graph;
+  }
+}
+
+async function select(items, related, currentSource, relation, relatedTargets, query, opts) {
+  if (!relatedTargets) {
+    relatedTargets = new Map();
+  }
+
+  const sourceRelations = this._relations.get(currentSource.name);
+
+  if (!sourceRelations) {
+    throw new Error(`Unknown source ${source}`);
+  }
+
+  let sourceItems = items;
+  let sourceRelation = sourceRelations.get(Array.isArray(relation) ? relation[0] : relation);
+  let sourceRelationIndex = 0;
+
+  while (sourceRelation) {
+    relatedTargets.clear();
+
+    if (!opts.graph && !related[sourceRelation.target.name]) {
+      related[sourceRelation.target.name] = {};
+    }
+
+    let sourceFields = [];
+
+    if (typeof sourceRelation.sourceFieldOrMapper === 'function') {
+      sourceFields = await sourceRelation.sourceFieldOrMapper(sourceRelations, items);
+    } else {
+      sourceFields = sourceItems.map((r, index) => {
+        const filter = typeof sourceRelation.targetFieldOrMapper === 'function'
+          ? sourceRelation.targetFieldOrMapper(sourceRelations, r)
+          : sourceRelation.source.getRelationFilter(sourceRelation.targetFieldOrMapper, sourceRelation.sourceFieldOrMapper, r);
+
+        if (query?.$$_rel?.[relation]?.filter) {
+          Object.assign(filter, query.$$_rel[relation].filter);
+        }
+
+        const sourceField = {
+          idKey: sourceRelation.source.getCombinedKey(sourceRelation.source.pk, r),
+          index: r.$$_ind !== undefined ? r.$$_ind : index,
+          query: { filter },
+          rfKey: sourceRelation.source.getCombinedKey(sourceRelation.sourceFieldOrMapper, r),
+        };
+
+        return sourceField;
+      });
+    }
+
+    const prevSourceItems = sourceItems;
+    sourceItems = [];
+
+    for (const relatedTarget of await sourceRelation.target.selectIn(sourceFields.map((f) => f.query.filter))) {
+      const relatedTargetKey = sourceRelation.target.getCombinedKey(sourceRelation.targetFieldOrMapper, relatedTarget);
+
+      if (!relatedTargets.has(relatedTargetKey)) {
+        relatedTargets.set(relatedTargetKey, []);
+      }
+
+      relatedTargets.get(relatedTargetKey).push(relatedTarget);
+    }
+
+    for (let i = 0, l = sourceFields.length; i < l; i += 1) {
+      const sourceField = sourceFields[i];
+
+      if (opts?.graph) {
+        if (!prevSourceItems[sourceField.index][sourceRelation.target.name]) {
+          prevSourceItems[sourceField.index][sourceRelation.target.name] = [];
+        }
+      } else {
+        if (!items[sourceField.index].$$_rel) {
+          items[sourceField.index].$$_rel = {};
+        }
+
+        if (!items[sourceField.index].$$_rel[sourceRelation.target.name]) {
+          items[sourceField.index].$$_rel[sourceRelation.target.name] = [];
+        }
+      }
+
+      if (relatedTargets.get(sourceField.rfKey)) {
+        if (!opts?.graph) {
+          related[sourceRelation.target.name][sourceField.idKey] = relatedTargets.get(sourceField.rfKey);
+        }
+
+        for (const relatedTarget of relatedTargets.get(sourceField.rfKey)) {
+          relatedTarget.$$_ind = opts?.graph ? i : sourceField.index;
+          relatedTarget.$$_drt = false;
+        }
+
+        if (opts?.graph) {
+          prevSourceItems[sourceField.index][sourceRelation.target.name] = relatedTargets.get(sourceField.rfKey);
+        } else {
+          items[sourceField.index].$$_rel[sourceRelation.target.name].push(sourceField.idKey);
+        }
+
+        sourceItems.splice(sourceItems.length, 0, ...relatedTargets.get(sourceField.rfKey));
+      }
+    }
+
+    const targetRelations = this._relations.get(sourceRelation.target.name);
+
+    if (!targetRelations) {
+      sourceRelation = null;
+    } else {
+      sourceRelation = Array.isArray(relation) ? targetRelations.get(relation[sourceRelationIndex += 1]) : sourceRelation.next;
+    }
   }
 }
 

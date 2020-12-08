@@ -1,3 +1,4 @@
+const { TmpFields, TmpFieldsAsStr } = require('../const');
 const assertWhereClauseValue = require('../source').assertWhereClauseValue;
 const BaseSource = require('../source').Source;
 
@@ -13,6 +14,10 @@ class Source extends BaseSource {
     return this._pk ?? DEFAULT_PK;
   }
 
+  get type() {
+    return 'postgresql';
+  }
+
   async select(query) {
     await this.connect();
 
@@ -26,6 +31,25 @@ class Source extends BaseSource {
     }
 
     return (await this._client.query({ text })).rows;
+  }
+
+  async selectIn(array) {
+    await this.connect();
+
+    const format = require('../format').format;
+    const keys = Object.keys(array[0]);
+    const sql = `
+    SELECT * FROM ${this._connectionOpts.source ?? this._name}
+    JOIN (VALUES ${format('%L', array)})
+    AS t (${TmpFieldsAsStr.substr(0, keys.length * 8 - 1)})
+    ON ${keys.map((k, i) => format('%I = %I', k, TmpFields[i])).join(' AND ')}
+    `;
+
+    if (process?.env?.DEBUG) {
+      console.debug({ query: sql });
+    }
+
+    return (await this._client.query({ text: sql })).rows;
   }
 
   async insert(value, opts) {
@@ -67,7 +91,7 @@ class Source extends BaseSource {
   }
 
   prepareQuery(query, sql, params) {
-    const format = require('pg-format');
+    const format = require('../format').format;
 
     if (query?.filter) {
       let clause = '';

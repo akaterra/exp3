@@ -1,3 +1,5 @@
+const { TmpFields } = require('../const');
+const assertWhereClauseValue = require('../source').assertWhereClauseValue;
 const BaseSource = require('../source').Source;
 
 const DEFAULT_PK = [
@@ -16,6 +18,24 @@ class Source extends BaseSource {
     return this._schema ?? DEFAULT_SCHEMA;
   }
 
+  get type() {
+    return 'mongodb';
+  }
+
+  getCombinedKey(keys, value) {
+    if (keys.length === 1) {
+      return String(value[keys[0]]);
+    }
+    
+    if (keys.length === 2) {
+      return `${value[keys[0]]}\$$${value[keys[1]]}`;
+    }
+
+    return keys.reduce((a, k, i) => {
+      return i ? a + '$$' + value[k] : value[k];
+    }, '');
+  }
+
   async select(query) {
     await this.connect();
 
@@ -31,6 +51,10 @@ class Source extends BaseSource {
     ).toArray();
   }
 
+  async selectIn(array) {
+    return [].concat(...await Promise.all(array.map((r) => this.select({ filter: r }))));
+  }
+
   prepareQuery(cursor, query) {
     if (query?.filter) {
       const filter = {};
@@ -40,7 +64,7 @@ class Source extends BaseSource {
           val = this.schema[key](val);
         }
 
-        if (val && typeof val === 'object') {
+        if (val && typeof val === 'object' && !val._bsontype) {
           filter[key] = {};
 
           if (val.hasOwnProperty('$gt')) {

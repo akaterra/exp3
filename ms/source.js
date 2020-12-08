@@ -13,6 +13,10 @@ class Source {
     return this._schema;
   }
 
+  get type() {
+    return 'none';
+  }
+
   constructor(name, connectionOpts) {
     this._connectionOpts = connectionOpts;
     this._isConnected = false;
@@ -22,7 +26,7 @@ class Source {
 
   getCombinedKey(keys, value) {
     if (keys.length === 1) {
-      return value[keys];
+      return value[keys[0]];
     }
     
     if (keys.length === 2) {
@@ -117,8 +121,8 @@ class Source {
     return [];
   }
 
-  async selectIn(key, ids) {
-    return this.select({ filter: { [key]: { $in: ids } } });
+  async selectIn(array) {
+    throw new Error('Not implemented');
   }
 
   async insert(value, opts) {
