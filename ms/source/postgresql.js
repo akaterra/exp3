@@ -9,6 +9,24 @@ const DEFAULT_SCHEMA = {
 
 };
 
+class Transaction {
+  constructor(client) {
+    this.client = client;
+  }
+
+  begin(isolationLevel) {
+    return this.client.query('BEGIN');
+  }
+
+  commit() {
+    return this.client.query('COMMIT');
+  }
+
+  rollback() {
+    return this.client.query('ROLLBACK');
+  }
+}
+
 class Source extends BaseSource {
   get pk() {
     return this._pk ?? DEFAULT_PK;
@@ -18,8 +36,26 @@ class Source extends BaseSource {
     return 'postgresql';
   }
 
-  async select(query) {
-    await this.connect();
+  async connect(context) {
+    await super.connect();
+
+    if (context?.transaction) {
+      if (!context.transaction[this._name]) {
+        const transaction = new Transaction(await this._client.connect());
+
+        await transaction.begin();
+
+        context.transaction[this._name] = transaction;
+      }
+
+      return context.transaction[this._name].client;
+    }
+
+    return this._client;
+  }
+
+  async select(query, context) {
+    const client = await this.connect(context);
 
     const sql = this._prepareQuery(
       query,
@@ -30,11 +66,11 @@ class Source extends BaseSource {
       console.debug({ query: sql });
     }
 
-    return (await this._client.query({ text: sql })).rows;
+    return (await client.query({ text: sql })).rows;
   }
 
-  async selectIn(array) {
-    await this.connect();
+  async selectIn(array, context) {
+    const client = await this.connect(context);
 
     const format = require('../format').format;
     const keys = Object.keys(array[0]);
@@ -49,11 +85,11 @@ class Source extends BaseSource {
       console.debug({ query: sql });
     }
 
-    return (await this._client.query({ text: sql })).rows;
+    return (await client.query({ text: sql })).rows;
   }
 
-  async insert(value, opts) {
-    await this.connect();
+  async insert(value, opts, context) {
+    const client = await this.connect(context);
 
     const format = require('pg-format');
     const params = Object.keys(value).concat(Object.values(value));
@@ -68,11 +104,11 @@ class Source extends BaseSource {
       console.debug({ query: text });
     }
 
-    return (await this._client.query({ text })).rows;
+    return (await client.query({ text })).rows;
   }
 
-  async update(query, value) {
-    await this.connect();
+  async update(query, value, opts, context) {
+    const client = await this.connect(context);
 
     const format = require('pg-format');
     const params = Object.entries(value).flat();
@@ -87,7 +123,7 @@ class Source extends BaseSource {
       console.debug({ query: text });
     }
 
-    return (await this._client.query({ text })).rows;
+    return (await client.query({ text })).rows;
   }
 
   _prepareQuery(query, sql, params) {
@@ -180,7 +216,7 @@ class Source extends BaseSource {
 
   async onConnect() {
     const credentials = this._connectionOpts?.credentials || {};
-    const { Client } = require('pg');
+    const { Pool } = require('pg');
 
     if (!credentials.host) {
       credentials.host = 'postgresql://127.0.0.1:5432';
@@ -216,7 +252,7 @@ class Source extends BaseSource {
       uri.pathname = `/${credentials.db || 'postgres'}`;
     }
 
-    const client = new Client({
+    const client = new Pool({
       connectionString: uri.toString(),
     });
 

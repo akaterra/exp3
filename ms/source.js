@@ -105,7 +105,7 @@ class Source {
     return this._sources.get(key);
   }
 
-  async connect() {
+  async connect(context) {
     if (this._isConnected) {
       return this;
     }
@@ -114,34 +114,34 @@ class Source {
 
     this._isConnected = true;
 
-    return this;
+    return this._client;
   }
 
-  async select(query) {
+  async select(query, context) {
     return [];
   }
 
-  async selectIn(array) {
+  async selectIn(array, context) {
     throw new Error('Not implemented');
   }
 
-  async insert(value, opts) {
+  async insert(value, opts, context) {
     throw new Error('Not implemented');
   }
 
-  async update(query, value, opts) {
+  async update(query, value, opts, context) {
     throw new Error('Not implemented');
   }
 
-  async upsert(value, opts) {
+  async upsert(value, opts, context) {
     const pkFilter = this.getFullPkFilter(value);
     const data = pkFilter
-      ? await this.update({ filter: pkFilter }, value)
-      : await this.insert(value);
+      ? await this.update({ filter: pkFilter }, value, opts, context)
+      : await this.insert(value, opts, context);
   
     if (pkFilter && !data?.length) {
       if (opts?.insertMissing) {
-        return this.insert(value);
+        return this.insert(value, opts, context);
       } else {
         throw new Error('"insertMissing: true" option must be used to insert entity with predefined primary key(s)');
       }

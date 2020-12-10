@@ -94,6 +94,12 @@ class Resolver {
     return this;
   }
 
+  get transactional() {
+    this._transactional = true;
+
+    return this;
+  }
+
   constructor() {
     this._relations = new Map();
     this._sources = new Map();
@@ -189,82 +195,116 @@ class Resolver {
     return { items, related };
   }
 
-  async insertGraph(source, graph, opts) {
-    return this.upsertGraph(source, graph, { ...opts, insert: true });
+  async insertGraph(source, graph, opts, context) {
+    return this.upsertGraph(source, graph, { ...opts, insert: true }, context);
   }
   
   async selectGraph(source, query, ...relations) {
     return this.select(source, query, { graph: true }, ...relations);
   }
 
-  async upsertGraph(source, graph, opts) {
-    const currentSource = this.getSource(source);
+  async upsertGraph(source, graph, opts, context) {
+    const internalContext = this._transactional
+      ? context ?? { transaction: {} }
+      : null;
 
-    if (!currentSource) {
-      throw new Error(`Unknown source "${source}"`);
-    }
+    this._transactional = false;
 
-    const sourceRelations = this._relations.get(currentSource.name);
-    const items = graph.items;
+    try {
+      const currentSource = this.getSource(source);
 
-    for (const item of items) {
-      const related = { belongs: {}, has: {} };
+      if (!currentSource) {
+        throw new Error(`Unknown source "${source}"`);
+      }
 
-      if (sourceRelations) {
-        for (const relationKey of sourceRelations.keys()) {
-          if (relationKey in item) {
-            if (sourceRelations.get(relationKey).opts?.direction === BELONGS) {
-              related.belongs[relationKey] = item[relationKey];
-            } else {
-              related.has[relationKey] = item[relationKey];
+      const sourceRelations = this._relations.get(currentSource.name);
+      const items = Array.isArray(graph.items) ? graph.items : [graph.items];
+
+      for (const item of items) {
+        const related = { belongs: {}, has: {} };
+
+        if (sourceRelations) {
+          for (const relationKey of sourceRelations.keys()) {
+            if (relationKey in item) {
+              if (sourceRelations.get(relationKey).opts?.direction === BELONGS) {
+                related.belongs[relationKey] = item[relationKey];
+              } else {
+                related.has[relationKey] = item[relationKey];
+              }
+
+              delete item[relationKey];
             }
+          }
+        }
 
-            delete item[relationKey];
+        if (sourceRelations) {
+          for (const [relationKey, relation] of Object.entries(related.belongs)) {
+            const currentSourceRelation = sourceRelations.get(relationKey);
+
+            if (relation?.length) {
+              await this.upsertGraph(currentSourceRelation.target.name, { items: relation }, opts, internalContext);
+
+              if (Array.isArray(relation)) {
+                for (const rel of relation) {
+                  Object.assign(item, currentSourceRelation.getRelationFilterOfSource(rel));
+                }
+              } else {
+                Object.assign(item, currentSourceRelation.getRelationFilterOfSource(relation));
+              }
+            }
+          }
+        }
+
+        Object.assign(
+          item,
+          opts?.insert
+            ? (await this._sources.get(source).insert(item, opts, internalContext))?.[0]
+            : (await this._sources.get(source).upsert(item, opts, internalContext))?.[0],
+        );
+
+        if (sourceRelations) {
+          for (const [relationKey, relation] of Object.entries(related.has)) {
+            const currentSourceRelation = sourceRelations.get(relationKey);
+
+            if (relation?.length) {
+              if (Array.isArray(relation)) {
+                for (const rel of relation) {
+                  Object.assign(rel, currentSourceRelation.getRelationFilterOfTarget(item));
+                }
+              } else {
+                Object.assign(relation, currentSourceRelation.getRelationFilterOfTarget(item));
+              }
+
+              await this.upsertGraph(currentSourceRelation.target.name, { items: relation }, opts, internalContext);
+            }
+          }
+
+          for (const [relationKey, relation] of Object.entries(related.belongs)) {
+            item[relationKey] = relation;
+          }
+
+          for (const [relationKey, relation] of Object.entries(related.has)) {
+            item[relationKey] = relation;
           }
         }
       }
 
-      if (sourceRelations) {
-        for (const [relationKey, relation] of Object.entries(related.belongs)) {
-          const currentSourceRelation = sourceRelations.get(relationKey);
-
-          if (relation?.length) {
-            await this.upsertGraph(currentSourceRelation.target.name, { items: relation }, opts);
-
-            item[currentSourceRelation.sourceFieldOrMapper] = relation[0][currentSourceRelation.targetFieldOrMapper];
-          }
+      if (!context && internalContext) {
+        for (const [key, val] of Object.entries(internalContext.transaction)) {
+          val.commit();
         }
       }
 
-      Object.assign(
-        item,
-        opts?.insert
-          ? (await this._sources.get(source).insert(item, opts))?.[0]
-          : (await this._sources.get(source).upsert(item, opts))?.[0],
-      );
-
-      if (sourceRelations) {
-        for (const [relationKey, relation] of Object.entries(related.has)) {
-          const currentSourceRelation = sourceRelations.get(relationKey);
-
-          if (relation?.length) {
-            relation[0][currentSourceRelation.targetFieldOrMapper] = item[currentSourceRelation.sourceFieldOrMapper];
-
-            await this.upsertGraph(currentSourceRelation.target.name, { items: relation }, opts);
-          }
-        }
-
-        for (const [relationKey, relation] of Object.entries(related.belongs)) {
-          item[relationKey] = relation;
-        }
-
-        for (const [relationKey, relation] of Object.entries(related.has)) {
-          item[relationKey] = relation;
+      return graph;
+    } catch (e) {
+      if (!context && internalContext) {
+        for (const [key, val] of Object.entries(internalContext.transaction)) {
+          val.rollback();
         }
       }
+
+      throw e;
     }
-
-    return graph;
   }
 }
 
