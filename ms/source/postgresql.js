@@ -1,4 +1,5 @@
 const { TmpFields, TmpFieldsAsStr } = require('../const');
+const context = require('../context');
 const assertWhereClauseValue = require('../source').assertWhereClauseValue;
 const BaseSource = require('../source').Source;
 
@@ -10,19 +11,32 @@ const DEFAULT_SCHEMA = {
 };
 
 class Transaction {
-  constructor(client) {
+  constructor(client, context) {
     this.client = client;
+    this.context = context;
   }
 
-  begin(isolationLevel) {
+  begin() {
+    if (process?.env?.DEBUG) {
+      console.debug('transaction begin', { id: this.context?.operationId, name: this.context?.operationName });
+    }
+
     return this.client.query('BEGIN');
   }
 
   commit() {
+    if (process?.env?.DEBUG) {
+      console.debug('transaction commit', { id: this.context?.operationId, name: this.context?.operationName });
+    }
+
     return this.client.query('COMMIT');
   }
 
   rollback() {
+    if (process?.env?.DEBUG) {
+      console.debug('transaction rollback', { id: this.context?.operationId, name: this.context?.operationName });
+    }
+
     return this.client.query('ROLLBACK');
   }
 }
@@ -32,26 +46,12 @@ class Source extends BaseSource {
     return this._pk ?? DEFAULT_PK;
   }
 
-  get type() {
-    return 'postgresql';
+  get transactionClass() {
+    return Transaction;
   }
 
-  async connect(context) {
-    await super.connect();
-
-    if (context?.transaction) {
-      if (!context.transaction[this._name]) {
-        const transaction = new Transaction(await this._client.connect());
-
-        await transaction.begin();
-
-        context.transaction[this._name] = transaction;
-      }
-
-      return context.transaction[this._name].client;
-    }
-
-    return this._client;
+  get type() {
+    return 'postgresql';
   }
 
   async select(query, context) {
@@ -261,6 +261,10 @@ class Source extends BaseSource {
     this._client = client;
 
     return this;
+  }
+
+  async onTransactionCreate(context) {
+    return new Transaction(await this._client.connect(), context);
   }
 }
 

@@ -13,8 +13,16 @@ class Source {
     return this._schema;
   }
 
+  get transactionClass() {
+    return null;
+  }
+
   get type() {
     return 'none';
+  }
+
+  get uniqueIdKey() {
+    return this._uniqueIdKey;
   }
 
   constructor(name, connectionOpts) {
@@ -92,6 +100,12 @@ class Source {
     return this;
   }
 
+  setUniqueIdKey(uniqueIdKey) {
+    this._uniqueIdKey = uniqueIdKey;
+
+    return this;
+  }
+
   asSource(source, customName) {
     const key = `${this._name}.${customName || source}`;
 
@@ -106,13 +120,23 @@ class Source {
   }
 
   async connect(context) {
-    if (this._isConnected) {
-      return this;
+    if (!this._isConnected) {
+      await this.onConnect();
+
+      this._isConnected = true;
     }
 
-    await this.onConnect();
+    if (context && this.transactionClass) {
+      if (!context.hasTransaction(this)) {
+        const transaction = await this.onTransactionCreate(context);
 
-    this._isConnected = true;
+        await transaction.begin();
+
+        context.setTransaction(this, transaction);
+      }
+
+      return context.getTransaction(this).client;
+    }
 
     return this._client;
   }
@@ -155,6 +179,10 @@ class Source {
   }
 
   async onConnect() {
+    
+  }
+
+  async onTransactionCreate() {
     
   }
 }

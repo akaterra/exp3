@@ -1,11 +1,10 @@
-const { Arr } = require('invary');
 const _ = require('lodash');
-const { ObjectId } = require('mongodb');
-const { type } = require('os');
 const BELONGS = 0;
 const HAS = 1;
 const Empty = require('./const').Empty;
+const Context = require('./context').Context;
 const Source = require('./source').Source;
+const Transaction = require('./transaction').Transaction;
 
 class Relation {
   constructor(
@@ -88,16 +87,16 @@ class Relation {
 }
 
 class Resolver {
-  get parallel() {
-    this._parallel = true;
+  get context() {
+    return this._context ?? new Context();
+  }
 
-    return this;
+  get parallel() {
+    return this.setParallel();
   }
 
   get transactional() {
-    this._transactional = true;
-
-    return this;
+    return this.setTransactional();
   }
 
   constructor() {
@@ -115,6 +114,18 @@ class Resolver {
     }
 
     throw new Error(`Source not registered "${source}"`);
+  }
+
+  setParallel() {
+    this._parallel = true;
+
+    return this;
+  }
+
+  setTransactional(context) {
+    this._context = context ?? this._context ?? new Context();
+
+    return this;
   }
 
   addRelaton(source, relation, target, opts) {
@@ -195,20 +206,44 @@ class Resolver {
     return { items, related };
   }
 
+  async transaction(fn, opts) {
+    const transaction = new Transaction(this, new Context());
+
+    try {
+      const result = fn(transaction);
+
+      if (result instanceof Promise) {
+        return result.then(async (res) => {
+          await transaction.commit();
+
+          return res;
+        }).catch(async (err) => {
+          await transaction.rollback();
+
+          return Promise.reject(err);
+        });
+      }
+      
+      await transaction.commit();
+
+      return result;
+    } catch (err) {
+      await transaction.rollback();
+
+      return Promise.reject(err);
+    }
+  }
+
   async insertGraph(source, graph, opts, context) {
     return this.upsertGraph(source, graph, { ...opts, insert: true }, context);
   }
-  
+
   async selectGraph(source, query, ...relations) {
     return this.select(source, query, { graph: true }, ...relations);
   }
 
   async upsertGraph(source, graph, opts, context) {
-    const internalContext = this._transactional
-      ? context ?? { transaction: {} }
-      : null;
-
-    this._transactional = false;
+    const internalContext = context ?? this._isContext();
 
     try {
       const currentSource = this.getSource(source);
@@ -290,21 +325,31 @@ class Resolver {
       }
 
       if (!context && internalContext) {
-        for (const [key, val] of Object.entries(internalContext.transaction)) {
-          val.commit();
-        }
+        await internalContext.commit();
       }
 
       return graph;
-    } catch (e) {
+    } catch (err) {
       if (!context && internalContext) {
-        for (const [key, val] of Object.entries(internalContext.transaction)) {
-          val.rollback();
-        }
+        await internalContext.rollback();
       }
 
-      throw e;
+      return Promise.reject(err);
     }
+  }
+
+  _isContext() {
+    const isContext = this._context;
+    this._context = null;
+
+    return isContext ?? null;
+  }
+
+  _isParallel() {
+    const isParallel = this._parallel;
+    this._parallel = false;
+
+    return isParallel;
   }
 }
 

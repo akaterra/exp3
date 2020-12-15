@@ -9,13 +9,52 @@ const DEFAULT_SCHEMA = {
 
 };
 
+class Transaction {
+  constructor(client, context) {
+    this.client = client;
+    this.context = context;
+  }
+
+  begin() {
+    if (process?.env?.DEBUG) {
+      console.debug('transaction begin', { id: this.onConnectcontext?.operationId, name: this.context?.operationName });
+    }
+
+    return this.client.query('START TRANSACTION');
+  }
+
+  commit() {
+    if (process?.env?.DEBUG) {
+      console.debug('transaction commit', { id: this.context?.operationId, name: this.context?.operationName });
+    }
+
+    return this.client.query('COMMIT');
+  }
+
+  rollback() {
+    if (process?.env?.DEBUG) {
+      console.debug('transaction rollback', { id: this.context?.operationId, name: this.context?.operationName });
+    }
+
+    return this.client.query('ROLLBACK');
+  }
+}
+
 class Source extends BaseSource {
   get pk() {
     return this._pk ?? DEFAULT_PK;
   }
 
+  get transactionClass() {
+    return Transaction;
+  }
+
   get type() {
     return 'mysql';
+  }
+
+  get uniqueIdKey() {
+    return this._uniqueIdKey ?? 'id';
   }
 
   async select(query) {
@@ -34,8 +73,6 @@ class Source extends BaseSource {
   }
 
   async selectIn(array) {
-    await this.connect();
-
     const { escape, escapeId } = require('mysql');
     const keys = Object.keys(array[0]);
     const sql = `
@@ -51,47 +88,45 @@ class Source extends BaseSource {
     return this._performQuery(sql);
   }
 
-  async insert(value, opts) {
-    await this.connect();
-
+  async insert(value, opts, context) {
     const format = require('mysql').format;
     const params = Object.keys(value).concat(Object.values(value));
-    const sql = `
+    const statement = `
     INSERT INTO ${this._connectionOpts.source ?? this._name} (${'??,'.repeat(params.length / 2 - 1) + '??'})
-    VALUES (${'?,'.repeat(params.length / 2 - 1) + '?'})
-    RETURNING *
+    VALUES (${'?,'.repeat(params.length / 2 - 1) + '?'});
     `;
-    const text = format(sql, ...params);
+    const sql = format(statement, params);
 
     if (process?.env?.DEBUG) {
-      console.debug({ query: text });
+      console.debug({ query: sql });
     }
 
-    return this._performQuery(sql);
+    return this._performQuery(sql, context)
+      .then((results) => this._performQuery(`SELECT * FROM ${this._connectionOpts.source ?? this._name} ${this._prepareQuery({ filter: this.getFullPkFilter(value) }) ?? `WHERE ${this.uniqueIdKey} = ${results.insertId};`}`, context));
   }
 
-  async update(query, value) {
-    await this.connect();
-
+  async update(query, value, opts, context) {
     const format = require('mysql').format;
     const params = Object.entries(value).flat();
-    const sql = `
+    const statement = `
     UPDATE ${this._connectionOpts.source ?? this._name} SET ${'?? = ?,'.repeat(params.length / 2 - 1) + '?? = ?'}
     ${this._prepareQuery(query)}
-    RETURNING *
     `;
-    const text = format(sql, ...params);
+    const sql = format(statement, params);
 
     if (process?.env?.DEBUG) {
-      console.debug({ query: text });
+      console.debug({ query: sql });
     }
 
-    return this._performQuery(text);
+    return this._performQuery(sql, context)
+      .then((results) => this._performQuery(`SELECT * FROM ${this._connectionOpts.source ?? this._name} ${this._prepareQuery({ filter: this.getFullPkFilter({ ...query, ...value }) })}`, context));
   }
 
-  _performQuery(query) {
+  async _performQuery(query, context) {
+    const client = await this.connect(context);
+
     return new Promise((resolve, reject) => {
-      this._client.query(query, (error, results, fields) => {
+      client.query(query, (error, results, fields) => {
         return error ? reject(error) : resolve(results);
       });
     });
@@ -165,7 +200,7 @@ class Source extends BaseSource {
             params.push(assertWhereClauseValue(val.$isNot));
           }
         } else {
-          clause += '?? = ? AND ';
+          clause += val === null ? '?? IS ? AND ' : '?? = ? AND ';
           params.push(key);
           params.push(assertWhereClauseValue(val));
         }
@@ -187,7 +222,7 @@ class Source extends BaseSource {
 
   async onConnect() {
     const credentials = this._connectionOpts?.credentials || {};
-    const { createConnection } = require('mysql');
+    const { createPool } = require('mysql');
 
     if (!credentials.host) {
       credentials.host = 'mysql://127.0.0.1:3306';
@@ -223,11 +258,21 @@ class Source extends BaseSource {
       uri.pathname = `/${credentials.db || 'local'}`;
     }
 
-    const client = await createConnection(uri.toString());
+    const client = await createPool(uri.toString());
 
     this._client = client;
 
     return this;
+  }
+
+  async onTransactionCreate(context) {
+    const connection = await new Promise((resolve, reject) => {
+      this._client.getConnection((error, connection) => {
+        return error ? reject(error) : resolve(connection);
+      });
+    });
+
+    return new Transaction(connection, context);
   }
 }
 
