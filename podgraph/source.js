@@ -106,19 +106,6 @@ class Source {
     return this;
   }
 
-  asSource(source, customName) {
-    const key = `${this._name}.${customName || source}`;
-
-    if (!this._sources.has(key)) {
-      this._sources.set(key, new (Object.getPrototypeOf(this).constructor)(
-        `${this._name}.${customName || source}`,
-        { ...this._connectionOpts, source },
-      ).setPk(...this.pk).setSchema(this.schema));
-    }
-    
-    return this._sources.get(key);
-  }
-
   async connect(context) {
     if (!this._isConnected) {
       await this.onConnect();
@@ -139,6 +126,35 @@ class Source {
     }
 
     return this._client;
+  }
+
+  stream(stream, customName) {
+    const key = customName ?? `${this._name}$${stream}`;
+
+    if (!this._sources.has(key)) {
+      this._sources.set(key, new (Object.getPrototypeOf(this).constructor)(
+        key,
+        { ...this._connectionOpts, source: stream },
+      ).setPk(...this.pk).setSchema(this.schema));
+    }
+    
+    return this._sources.get(key);
+  }
+
+  valToLow(key, val) {
+    if (key in this.schema) {
+      return this.schema[key](val);
+    }
+
+    return val;
+  }
+
+  lowToVal(key, val) {
+    if (key in this.schema) {
+      return this.schema[key](val, true);
+    }
+
+    return val;
   }
 
   async select(query, context) {
@@ -189,16 +205,16 @@ class Source {
 
 module.exports = {
   Source,
-  assertWhereClauseValue(value) {
+  assertWhereClauseValue(value, key) {
     if (Array.isArray(value)) {
       for (const val of value) {
         if (val === undefined) {
-          throw new Error('"undefined" list value is not allowed in where clause');
+          throw new Error(`"undefined" list value of "${key}" is not allowed in where clause`);
         }
       }
     } else {
       if (value === undefined) {
-        throw new Error('"undefined" value is not allowed in where clause');
+        throw new Error(`"undefined" value of "${key}" is not allowed in where clause`);
       }
     }
 

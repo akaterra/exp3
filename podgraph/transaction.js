@@ -1,7 +1,7 @@
 class Transaction {
-  constructor(resolver, context) {
-    this._context = context;
+  constructor(resolver, operationContext) {
     this._isFinished = false;
+    this._operationContext = operationContext;
     this._resolver = resolver;
   }
 
@@ -10,7 +10,7 @@ class Transaction {
       throw new Error('Transaction already finished');
     }
 
-    return this._resolver.insertGraph(source, graph, opts, this._context);
+    return this._resolver.insertGraph(source, graph, opts, this._operationContext);
   }
 
   async selectGraph(source, query, ...relations) {
@@ -26,22 +26,27 @@ class Transaction {
       throw new Error('Transaction already finished');
     }
 
-    return this._resolver.upsertGraph(source, graph, opts, this._context);
+    return this._resolver.upsertGraph(source, graph, opts, this._operationContext);
   }
 
   commit() {
     this._isFinished = true;
 
-    return this._context.commit();
+    return this._operationContext.commit();
   }
 
   rollback() {
     this._isFinished = true;
 
-    return this._context.rollback();
+    return this._operationContext.rollback();
   }
 }
 
 module.exports = {
   Transaction,
+  DEFAULT: 'default',
+  READ_COMMITTED: 'readCommitted',
+  READ_UNCOMMITTED: 'readUncommitted',
+  REPEATABLE: 'repeatable',
+  SERIALIZABLE: 'serializable',
 };

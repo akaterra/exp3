@@ -1,5 +1,5 @@
-const { TmpFields, TmpFieldsAsStr } = require('../const');
-const context = require('../context');
+const { IS_DEBUG, TMP_FIELDS: TmpFields, TMP_FIELDS_AS_STR: TmpFieldsAsStr } = require('../const');
+const logger = require('../logger');
 const assertWhereClauseValue = require('../source').assertWhereClauseValue;
 const BaseSource = require('../source').Source;
 
@@ -11,33 +11,67 @@ const DEFAULT_SCHEMA = {
 };
 
 class Transaction {
-  constructor(client, context) {
+  constructor(client, operationContext) {
     this.client = client;
-    this.context = context;
+    this.operationContext = operationContext;
   }
 
   begin() {
-    if (process?.env?.DEBUG) {
-      console.debug('transaction begin', { id: this.context?.operationId, name: this.context?.operationName });
+    if (IS_DEBUG) {
+      logger.debug('transaction begin', { id: this.operationContext?.id, name: this.operationContext?.name });
     }
 
-    return this.client.query('BEGIN');
+    return this._prepareAndExecQueryIsolationLevel();
   }
 
   commit() {
-    if (process?.env?.DEBUG) {
-      console.debug('transaction commit', { id: this.context?.operationId, name: this.context?.operationName });
+    if (IS_DEBUG) {
+      logger.debug('transaction commit', { id: this.operationContext?.id, name: this.operationContext?.name });
     }
 
     return this.client.query('COMMIT');
   }
 
   rollback() {
-    if (process?.env?.DEBUG) {
-      console.debug('transaction rollback', { id: this.context?.operationId, name: this.context?.operationName });
+    if (IS_DEBUG) {
+      logger.debug('transaction rollback', { id: this.operationContext?.id, name: this.operationContext?.name });
     }
 
     return this.client.query('ROLLBACK');
+  }
+
+  _prepareAndExecQueryIsolationLevel() {
+    let sql;
+
+    switch (this.operationContext?.opts?.isolationLevel) {
+      case 'readCommitted':
+        sql = 'BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED';
+
+        break;
+      case 'readUncommitted':
+        sql = 'BEGIN TRANSACTION ISOLATION LEVEL READ UNCOMMITED';
+
+        break;
+      case 'repeatableRead':
+        sql = 'BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ';
+
+        break;
+      case 'serializable':
+        sql = 'BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE';
+
+        break;
+      default:
+        logger.warn(`Unsupported transaction isolation level "${this.operationContext?.opts?.isolationLevel}", default is used`);
+      case 'default':
+      case undefined:
+        sql = 'BEGIN';
+    }
+
+    if (process?.env?.DEBUG) {
+      logger.debug({ query: sql });
+    }
+
+    return this.client.query(sql);
   }
 }
 
@@ -54,8 +88,8 @@ class Source extends BaseSource {
     return 'postgresql';
   }
 
-  async select(query, context) {
-    const client = await this.connect(context);
+  async select(query, operationContext) {
+    const client = await this.connect(operationContext);
 
     const sql = this._prepareQuery(
       query,
@@ -63,14 +97,14 @@ class Source extends BaseSource {
     );
 
     if (process?.env?.DEBUG) {
-      console.debug({ query: sql });
+      logger.debug({ query: sql });
     }
 
     return (await client.query({ text: sql })).rows;
   }
 
-  async selectIn(array, context) {
-    const client = await this.connect(context);
+  async selectIn(array, operationContext) {
+    const client = await this.connect(operationContext);
 
     const format = require('../format').format;
     const keys = Object.keys(array[0]);
@@ -82,14 +116,14 @@ class Source extends BaseSource {
     `;
 
     if (process?.env?.DEBUG) {
-      console.debug({ query: sql });
+      logger.debug({ query: sql });
     }
 
     return (await client.query({ text: sql })).rows;
   }
 
-  async insert(value, opts, context) {
-    const client = await this.connect(context);
+  async insert(value, opts, operationContext) {
+    const client = await this.connect(operationContext);
 
     const format = require('pg-format');
     const params = Object.keys(value).concat(Object.values(value));
@@ -101,14 +135,14 @@ class Source extends BaseSource {
     const text = format(sql, ...params);
 
     if (process?.env?.DEBUG) {
-      console.debug({ query: text });
+      logger.debug({ query: text });
     }
 
     return (await client.query({ text })).rows;
   }
 
-  async update(query, value, opts, context) {
-    const client = await this.connect(context);
+  async update(query, value, opts, operationContext) {
+    const client = await this.connect(operationContext);
 
     const format = require('pg-format');
     const params = Object.entries(value).flat();
@@ -120,7 +154,7 @@ class Source extends BaseSource {
     const text = format(sql, ...params);
 
     if (process?.env?.DEBUG) {
-      console.debug({ query: text });
+      logger.debug({ query: text });
     }
 
     return (await client.query({ text })).rows;
@@ -149,54 +183,54 @@ class Source extends BaseSource {
           if (val.hasOwnProperty('$gt')) {
             clause += '%I > %L AND ';
             params.push(key);
-            params.push(assertWhereClauseValue(val.$gt));
+            params.push(assertWhereClauseValue(val.$gt, key));
           }
 
           if (val.hasOwnProperty('$gte')) {
             clause += '%I >= %L AND ';
             params.push(key);
-            params.push(assertWhereClauseValue(val.$gte));
+            params.push(assertWhereClauseValue(val.$gte, key));
           }
 
           if (val.hasOwnProperty('$lt')) {
             clause += '%I < %L AND ';
             params.push(key);
-            params.push(assertWhereClauseValue(val.$lt));
+            params.push(assertWhereClauseValue(val.$lt, key));
           }
 
           if (val.hasOwnProperty('$lte')) {
             clause += '%I <= %L AND ';
             params.push(key);
-            params.push(assertWhereClauseValue(val.$lte));
+            params.push(assertWhereClauseValue(val.$lte, key));
           }
 
           if (val.$in && val.$in?.length) {
             clause += '%I IN (' + '%L,'.repeat(val.$in.length - 1) + '%L' + ') AND ';
             params.push(key);
-            params.splice(params.length, 0, ...assertWhereClauseValue(val.$in));
+            params.splice(params.length, 0, ...assertWhereClauseValue(val.$in, key));
           }
 
           if (val.$nin && val.$nin?.length) {
             clause += '%I NOT IN (' + '%L,'.repeat(val.$nin.length - 1) + '%L' + ') AND ';
             params.push(key);
-            params.splice(params.length, 0, ...assertWhereClauseValue(val.$nin));
+            params.splice(params.length, 0, ...assertWhereClauseValue(val.$nin, key));
           }
 
           if (val.hasOwnProperty('$is')) {
             clause += '%I IS %L AND ';
             params.push(key);
-            params.push(assertWhereClauseValue(val.$is));
+            params.push(assertWhereClauseValue(val.$is, key));
           }
 
           if (val.hasOwnProperty('$isNot')) {
             clause += '%I IS NOT %L AND ';
             params.push(key);
-            params.push(assertWhereClauseValue(val.$isNot));
+            params.push(assertWhereClauseValue(val.$isNot, key));
           }
         } else {
           clause += '%I = %L AND ';
           params.push(key);
-          params.push(assertWhereClauseValue(val));
+          params.push(assertWhereClauseValue(val, key));
         }
       }
 

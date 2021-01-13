@@ -1,8 +1,9 @@
 const _ = require('lodash');
 const BELONGS = 0;
 const HAS = 1;
-const Empty = require('./const').Empty;
-const Context = require('./context').Context;
+const Empty = require('./const').EMPTY;
+const OperationContext = require('./operation_context').OperationContext;
+const RelatiionParser = require('./relation_parser');
 const Source = require('./source').Source;
 const Transaction = require('./transaction').Transaction;
 
@@ -88,7 +89,7 @@ class Relation {
 
 class Resolver {
   get context() {
-    return this._context ?? new Context();
+    return this._context ?? new OperationContext();
   }
 
   get parallel() {
@@ -123,18 +124,18 @@ class Resolver {
   }
 
   setTransactional(context) {
-    this._context = context ?? this._context ?? new Context();
+    this._context = context ?? this._context ?? new OperationContext();
 
     return this;
   }
 
   addRelaton(source, relation, target, opts) {
     if (Array.isArray(source)) {
-      source = (source[0] instanceof Source ? source : this.getSource(source)).asSource(source[1]);
+      source = (source[0] instanceof Source ? source : this.getSource(source)).stream(source[1]);
     }
 
     if (Array.isArray(target)) {
-      target = (target[0] instanceof Source ? target : this.getSource(target)).asSource(target[1]);
+      target = (target[0] instanceof Source ? target : this.getSource(target)).stream(target[1]);
     }
 
     const sourceRelation = new Relation(
@@ -188,6 +189,16 @@ class Resolver {
     const related = {};
 
     if (relations.length) {
+      relations = relations.reduce((acc, relation) => {
+        if (typeof relation === 'string') {
+          acc.splice(acc.length - 1, 0, ...RelatiionParser.parseAndBuild(relation));
+        } else {
+          acc.push(relation);
+        }
+
+        return acc;
+      }, []);
+
       if (this._parallel) {
         this._parallel = false;
 
@@ -207,7 +218,7 @@ class Resolver {
   }
 
   async transaction(fn, opts) {
-    const transaction = new Transaction(this, new Context());
+    const transaction = new Transaction(this, new OperationContext(opts?.operationName, opts));
 
     try {
       const result = fn(transaction);
@@ -276,15 +287,21 @@ class Resolver {
           for (const [relationKey, relation] of Object.entries(related.belongs)) {
             const currentSourceRelation = sourceRelations.get(relationKey);
 
-            if (relation?.length) {
-              await this.upsertGraph(currentSourceRelation.target.name, { items: relation }, opts, internalContext);
-
-              if (Array.isArray(relation)) {
-                for (const rel of relation) {
-                  Object.assign(item, currentSourceRelation.getRelationFilterOfSource(rel));
-                }
+            if (relation) {
+              if (Array.isArray(opts?.unrelate) && opts.unrelate.includes(relationKey)) {
+                for (const k of currentSourceRelation.l) {
+                  item[k] = null;
+                }  
               } else {
-                Object.assign(item, currentSourceRelation.getRelationFilterOfSource(relation));
+                await this.upsertGraph(currentSourceRelation.target.name, { items: relation }, opts, internalContext);
+
+                if (Array.isArray(relation)) {
+                  for (const rel of relation) {
+                    Object.assign(item, currentSourceRelation.getRelationFilterOfSource(rel));
+                  }
+                } else {
+                  Object.assign(item, currentSourceRelation.getRelationFilterOfSource(relation));
+                }
               }
             }
           }
@@ -301,16 +318,19 @@ class Resolver {
           for (const [relationKey, relation] of Object.entries(related.has)) {
             const currentSourceRelation = sourceRelations.get(relationKey);
 
-            if (relation?.length) {
-              if (Array.isArray(relation)) {
-                for (const rel of relation) {
-                  Object.assign(rel, currentSourceRelation.getRelationFilterOfTarget(item));
-                }
+            if (relation) {
+              if (Array.isArray(opts?.unrelate) && opts.unrelate.includes(relationKey)) {
               } else {
-                Object.assign(relation, currentSourceRelation.getRelationFilterOfTarget(item));
-              }
+                if (Array.isArray(relation)) {
+                  for (const rel of relation) {
+                    Object.assign(rel, currentSourceRelation.getRelationFilterOfTarget(item));
+                  }
+                } else {
+                  Object.assign(relation, currentSourceRelation.getRelationFilterOfTarget(item));
+                }
 
-              await this.upsertGraph(currentSourceRelation.target.name, { items: relation }, opts, internalContext);
+                await this.upsertGraph(currentSourceRelation.target.name, { items: relation }, opts, internalContext);
+              }
             }
           }
 

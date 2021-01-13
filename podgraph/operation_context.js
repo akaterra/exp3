@@ -2,27 +2,35 @@ const nextId = (() => {
   let id = 1000000;
 
   return function () {
-    return id ++;
+    return id += 1;
   };
 })();
 
-class Context {
-  constructor(operationName) {
-    this.operationId = nextId();
-    this.operationName = operationName;
-    this.transactions = new Map();
+class OperationContext {
+  get transactions() {
+    if (!this._transactions) {
+      this._transactions = new Map();
+    }
+
+    return this._transactions;
+  }
+
+  constructor(name, opts) {
+    this.id = nextId();
+    this.name = name;
+    this.opts = opts;
   }
 
   getTransaction(source) {
-    return this.transactions.get(`${source.type}:${this.operationId}`);
+    return this.transactions.get(`${source.type}:${this.id}`);
   }
 
   setTransaction(source, transaction) {
-    this.transactions.set(`${source.type}:${this.operationId}`, transaction);
+    this.transactions.set(`${source.type}:${this.id}`, transaction);
   }
 
   hasTransaction(source) {
-    return this.transactions.has(`${source.type}:${this.operationId}`);
+    return this.transactions.has(`${source.type}:${this.id}`);
   }
 
   commit() {
@@ -43,5 +51,5 @@ class Context {
 }
 
 module.exports = {
-  Context,
+  OperationContext,
 };
