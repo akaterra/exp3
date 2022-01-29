@@ -4,8 +4,8 @@ src/templates/config.js
 .idea/
 .vscode/
 */**/ignore*
+*/**/"remote-profile"
 dist/
 examples/*
 coverage/
 node_modules/
-

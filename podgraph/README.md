@@ -36,8 +36,10 @@ const testStream2 = postgresSource.stream('test_table');
 
 const resolver = new Resolver();
 
-resolver.addHasRelation(testStream1, 'id', testStream2); // mysql.test_db.test_table.id -> postgresql.test_db.test_table.id
-resolver.addBelongsRelation(testStream2, { test_id: Source.Postgresql.ID }, testStream1); // postgresql.test_db.test_table.test_id -> mysql.test_db.test_table.id
+// mysql.test_db.test_table.id -> postgresql.test_db.test_table.id
+resolver.addHasRelation(testStream1, 'id', testStream2);
+// postgresql.test_db.test_table.test_id -> mysql.test_db.test_table.id
+resolver.addBelongsRelation(testStream2, { test_id: Source.Postgresql.ID }, testStream1);
 ```
 
 Select graph:

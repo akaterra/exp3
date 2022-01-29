@@ -8,6 +8,22 @@ const Source = require('./source').Source;
 const Transaction = require('./transaction').Transaction;
 
 class Relation {
+  /**
+   * 
+   * @param {*} resolver 
+   * @param {*} source 
+   * @param {*} relation
+   * string : l=[value], r=[value]
+   * [string|function, string|function] : l=[[0]], r=[[1]]
+   * [string[]|function[], string[]|function[]] : l=[0], r=[1]
+   * object : l=[keys], r=[values]
+   * @param {*} target 
+   * @param {*} opts
+   * {
+   *   includes: string[]|function
+   *   requires: string[]|function
+   * }
+   */
   constructor(
     resolver,
     source,
@@ -28,19 +44,25 @@ class Relation {
       throw new Error(`Relation must be string, list of strings/functions or mapping object`);
     }
 
-    if (this.l.length !== this.r.length) {
-      throw new Error(`Left relation length is not same as right`);
-    }
-
-    for (const mapper of this.l) {
-      if (!(typeof mapper === 'string') && !(typeof mapper === 'function')) {
-        throw new Error(`Left relation mapped must be string or function`);
+    if (Array.isArray(this.l) && Array.isArray(this.r)) {
+      if (this.l.length !== this.r.length) {
+        throw new Error(`Left relation ref key length is not same as right`);
       }
     }
 
-    for (const mapper of this.r) {
-      if (!(typeof mapper === 'string') && !(typeof mapper === 'function')) {
-        throw new Error(`Right relation mapped must be string or function`);
+    if (Array.isArray(this.l)) {
+      for (const mapper of this.l) {
+        if (!(typeof mapper === 'string') && !(typeof mapper === 'function')) {
+          throw new Error(`Left relation mapped must be string or function`);
+        }
+      }
+    }
+
+    if (Array.isArray(this.r)) {
+      for (const mapper of this.r) {
+        if (!(typeof mapper === 'string') && !(typeof mapper === 'function')) {
+          throw new Error(`Right relation mapped must be string or function`);
+        }
       }
     }
 
@@ -214,7 +236,7 @@ class Resolver {
       }
     }
 
-    return { items, related };
+    return opts?.compact ? { items, related } : items;
   }
 
   async transaction(fn, opts) {
@@ -249,11 +271,15 @@ class Resolver {
     return this.upsertGraph(source, graph, { ...opts, insert: true }, context);
   }
 
-  async selectGraph(source, query, ...relations) {
-    return this.select(source, query, { graph: true }, ...relations);
+  async selectCompact(source, query, ...relations) {
+    return this.select(source, query, { compact: true }, ...relations);
   }
 
-  async upsertGraph(source, graph, opts, context) {
+  async selectGraph(source, query, ...relations) {
+    return this.select(source, query, undefined, ...relations);
+  }
+
+  async upsertGraph(source, items, opts, context) {
     const internalContext = context ?? this._isContext();
 
     try {
@@ -264,9 +290,8 @@ class Resolver {
       }
 
       const sourceRelations = this._relations.get(currentSource.name);
-      const items = Array.isArray(graph.items) ? graph.items : [graph.items];
 
-      for (const item of items) {
+      for (const item of Array.isArray(items) ? items : [items.items]) {
         const related = { belongs: {}, has: {} };
 
         if (sourceRelations) {
@@ -348,7 +373,7 @@ class Resolver {
         await internalContext.commit();
       }
 
-      return graph;
+      return items;
     } catch (err) {
       if (!context && internalContext) {
         await internalContext.rollback();
@@ -391,7 +416,7 @@ async function select(items, related, currentSource, relation, relatedTargets, q
   while (sourceRelation) {
     relatedTargets.clear();
 
-    if (!opts.graph && !related[sourceRelation.target.name]) {
+    if (opts?.compact && !related[sourceRelation.target.name]) {
       related[sourceRelation.target.name] = {};
     }
 
@@ -430,7 +455,7 @@ async function select(items, related, currentSource, relation, relatedTargets, q
     for (let i = 0, l = sourceFields.length; i < l; i += 1) {
       const sourceField = sourceFields[i];
 
-      if (opts?.graph) {
+      if (!opts?.compact) {
         if (!prevSourceItems[sourceField.index][sourceRelation.target.name]) {
           prevSourceItems[sourceField.index][sourceRelation.target.name] = [];
         }
@@ -445,16 +470,16 @@ async function select(items, related, currentSource, relation, relatedTargets, q
       }
 
       if (relatedTargets.get(sourceField.rfKey)) {
-        if (!opts?.graph) {
+        if (opts?.compact) {
           related[sourceRelation.target.name][sourceField.idKey] = relatedTargets.get(sourceField.rfKey);
         }
 
         for (const relatedTarget of relatedTargets.get(sourceField.rfKey)) {
-          relatedTarget.$$_ind = opts?.graph ? i : sourceField.index;
+          relatedTarget.$$_ind = !opts?.compact ? i : sourceField.index;
           relatedTarget.$$_drt = false;
         }
 
-        if (opts?.graph) {
+        if (!opts?.compact) {
           prevSourceItems[sourceField.index][sourceRelation.target.name] = relatedTargets.get(sourceField.rfKey);
         } else {
           items[sourceField.index].$$_rel[sourceRelation.target.name].push(sourceField.idKey);

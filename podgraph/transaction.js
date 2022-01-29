@@ -13,6 +13,14 @@ class Transaction {
     return this._resolver.insertGraph(source, graph, opts, this._operationContext);
   }
 
+  async selectCompact(source, query, ...relations) {
+    if (this._isFinished) {
+      throw new Error('Transaction already finished');
+    }
+
+    return this._resolver.selectCompact(source, query, ...relations);
+  }
+
   async selectGraph(source, query, ...relations) {
     if (this._isFinished) {
       throw new Error('Transaction already finished');
